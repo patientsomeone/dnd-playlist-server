@@ -1,3 +1,6 @@
+# Ignore Package Lock file
+package-lock.json
+
 # Ignore any file or folder by .i flag
 *.i.*
 
