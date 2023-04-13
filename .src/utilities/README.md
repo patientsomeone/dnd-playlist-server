@@ -1,4 +1,4 @@
 # Utilities
-    Non-contextual executions
+    Common Non-contextual executions
     Single input -> Single output
     Generally static

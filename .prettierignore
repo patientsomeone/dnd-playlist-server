@@ -1,7 +1,11 @@
-# Ignore Package Lock file
-
 # Ignore any file or folder by .i flag
 *.i.*
+
+# Ignore any file or folder by .i flag
+*_i_*
+
+# Ignore Typescript compled files
+**/.dist/*.js
 
 # Ignore node modules
 **/node_modules/*
