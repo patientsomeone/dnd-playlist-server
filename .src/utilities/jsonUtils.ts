@@ -7,7 +7,7 @@ import {srcPath} from "../utilities/srcPath";
 import {dateStamp} from "../utilities/dateStamp";
 
 /* Import MODULES */
-import * as jsonFile from "edit-json-file";
+import jsonFile from "edit-json-file";
 import {anyObject, anyStandard} from "../.types";
 
 // TODO: Refactor jsonUtils to try/catch

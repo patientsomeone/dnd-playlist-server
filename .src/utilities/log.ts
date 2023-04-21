@@ -1,4 +1,4 @@
-import * as debug from "debug";
+import debug from "debug";
 import {dBug} from "../utilities/dBug";
 
 export const log = debug("logger*");

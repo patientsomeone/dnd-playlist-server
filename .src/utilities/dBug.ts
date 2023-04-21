@@ -1,4 +1,4 @@
-import * as debug from "debug";
+import debug from "debug";
 import {anyStandard} from "../.types";
 
 export const debLine = (title?: string): string => {

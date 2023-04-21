@@ -1,5 +1,5 @@
-import * as async from "async";
-import * as debug from "debug";
+import async from "async";
+import debug from "debug";
 
 
 import { log, logLine } from "../utilities/log";
