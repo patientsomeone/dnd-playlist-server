@@ -1,329 +1,98 @@
-import * as async from "async";
-import * as parseCsv from "csv-parse";
-import * as debug from "debug";
-import * as fs from "fs";
-import * as performance from "performance";
-import { CoreOptions, get, Headers } from "request";
-import { dBug } from "./dBug";
-import { Secrets } from "./fetchSecrets";
-import { srcPath } from "./srcPath";
-import { UrlConstructor } from "./urlConstructor";
+/* Import UTILITIES */
+import {dBug, debLine} from "../utilities/dBug";
+import {log, logLine} from "../utilities/log";
+import {FsUtils} from "../utilities/fsUtils";
+import {srcPath} from "../utilities/srcPath";
+import {dateStamp} from "../utilities/dateStamp";
+import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosResponseHeaders} from "axios";
+import {wrapper} from "axios-cookiejar-support";
+import {CookieJar} from "tough-cookie";
+import {IDebugger} from "debug";
 
-import {log, logLine} from "./log";
+const dBugger = new dBug("utilities:urlLoader");
+const testModule = true;
 
-const deUrl = debug("url:get");
-
-    /*-- Define input file --*/
-const input = srcPath("./input.csv");
-    /*-- Define output file --*/
-const output = srcPath("./output.csv");
-    /*-- Define Column to check against --*/
-const urlColumn = 4;
-    /*-- Define callback --*/
-const eachCallback = (response) => {
-    log(response);
-};
-
-/*-- TODO: Write CSV Baseline processor --*/
-export class LoadUrl {
-    public static single(url: string): Promise<{error, response, body}> {
-        const loader = new LoadUrl(false);
-        return loader.get(url);
-    }
-
-    private deb = new dBug("utilities:urlLoader:LoadUrl");
-
-    private useToken: boolean = false;
-
-    private header = {
-        reconstruct: (headerObject: { [key: string]: string }) => {
-            const headersArray = [];
-            for (const key in headerObject) {
-                if (headerObject.hasOwnProperty(key)) {
-                    headersArray.push(`${key}=${headerObject[key]}`);
-                }
-            }
-
-            return Promise.resolve(headersArray);
-        },
-
-        check: (header: Headers) => {
-            const debug = this.deb.set("cookie:checkHeader");
-            // const headersObject: Headers = {};
-
-            debug("Generating Headers Object");
-
-            // header.map((data) => {
-            //     debug(`Deconstructing Key: ${data.name}`);
-            //     headersObject[data.name] = data.value;
-            // });
-
-            // for (const key in header) {
-            //     headersObject[key] = header[key];
-            // }
-
-            debug("----- Header Object ------");
-            debug(header);
-
-            if (header.hasOwnProperty("Cookie")) {
-                return this.cookie.deconstruct(header.Cookie)
-                    .then((reconstructedCookie) => {
-                        header.Cookie = reconstructedCookie;
-                        return Promise.resolve(header);
-                    })
-                    .then(this.header.reconstruct);
-            } else {
-                header.Cookie = this.cookie.token;
-                return this.header.reconstruct(header);
-            }
-        }
-    };
-
-    private secrets: string = void 0;
-
-    private cookie = {
-        token: void 0,
-        reconstruct: (deconstructedCookies: {[key: string]: string}) => {
-            const debug = this.deb.set("cookie:reconstruct");
-            const reconstructedCookie = [];
-
-            debug("Reconstructing Cookies");
-            for (const key in deconstructedCookies) {
-                if (deconstructedCookies.hasOwnProperty(key)) {
-                    debug(`Reconstructing ${key}`);
-                    reconstructedCookie.push(`${key}=${deconstructedCookies[key]}`);
-                }
-            }
-
-            return Promise.resolve(reconstructedCookie.join("; "));
-        },
-        deconstruct: (cookie: string) => {
-            const debug = this.deb.set("cookie:deconstruct");
-            const objectifiedCookie: {[key: string]: string} = {};
-
-            debug ("Processing Cookies");
-            const cookieProcessing = cookie.split("; ").map((current) => {
-                const debug = this.deb.set("cookie:deconstruct:map");
-                const keyVal = current.split("=");
-                debug(`Processing Cookie: ${keyVal[0]}`);
-                objectifiedCookie[keyVal[0]] = keyVal[1];
-            });
-
-            if (objectifiedCookie.hasOwnProperty("Cookie")) {
-                objectifiedCookie.Cookie += this.cookie.token;
-                debug(`Added Token to existing Objectified Cookie ${objectifiedCookie.Cookie}`);
-            } else {
-                objectifiedCookie.Cookie = this.cookie.token;
-                debug(`Added fresh Token to Objectified Cookie ${objectifiedCookie.Cookie}`);
-            }
-
-            return this.cookie.reconstruct(objectifiedCookie);
-        },
-
-        
-        check: (options: CoreOptions): Promise<CoreOptions> => {
-            const debug = this.deb.set("cookie:check");
-            const hasHeaders = options.hasOwnProperty("headers");
-
-            if (hasHeaders) {
-                debug("Merging Token Cookie with existing");
-                return this.header.check(options.headers)
-                    .then((newOptions) => {
-                        // options.headers = { Name: "Cookie", Value: newCookie };
-                        return Promise.resolve(options);
-                    });
-            } else {
-                debug("Creating Token Cookie from Scratch");
-                options.headers = {Cookie: this.cookie.token};
-                return Promise.resolve(options);
-            }
-        },
-        set: () => {
-            const debug = this.deb.set("cookie:set");
-            const defaultCookie = "---- INSERT TOKEN HERE ----";
-            
-            const secrets = new Secrets({tokenCookie: defaultCookie});
-            
-            return secrets.fetch()
-                .then((secretData) => {
-                    if (secretData.tokenCookie === defaultCookie) {
-                        logLine("Incorrect or missing token. Please add your token to the created secrets.i.json file");
-                        debug(secretData);
-                        return Promise.reject("Invalid Access Token");
-                    } else {
-                        this.cookie.token = secretData.tokenCookie;
-                        return Promise.resolve();
-                    }
-                });
-        },
-        get: (options: CoreOptions) => {
-            const debug = this.deb.set("cookie:get");
-            if (!this.cookie.token) {
-                return this.cookie.set()
-                    .then(() => {
-                        return this.cookie.check(options);
-                    })
-                    .catch((err) => {
-                        return Promise.reject(err);
-                    });
-            } else {
-                return this.cookie.check(options);
-            }
-        },
-        isNeeded: (options: CoreOptions) => {
-            const setOptions = options || {};
-
-            if (this.useToken) {
-                return this.cookie.get(setOptions)
-                    .catch((err) => {
-                        return Promise.reject(err);
-                    });
-            } else {
-                return Promise.resolve(options);
-            }
-        }
-    };
-
-    constructor(useToken?: boolean) {
-        if (!!useToken) {
-            this.useToken = true;
-        }
-    }
-
-    // TODO: Add method for GET with Cookie from Properties
-
-    
-    public get = async (url: string, options?: CoreOptions) => {
-        const deb = this.deb.set("get");
-        // const newOptions = this.generateOptions(url, options);
-
-        try {
-            const response = await this.getUrl(url, options);
-            deb(`Response Received:`);
-            deb(response);
-            return response;
-        } catch (error) {
-            deb(`Failed to receive response:`);
-            deb(error);
-            return {
-                error,
-                response: void 0,
-                body: void 0
-            };
-        }
-    }
-
-    private getUrl = async (url, options?: CoreOptions) => {
-        const deb = this.deb.set("getUrl");
-        deb(`URL Promise beginning |  ${url}`);
-        const theseOptions = await this.cookie.isNeeded(options);
-        const data = {
-            error: void 0,
-            response: void 0,
-            body: void 0,
-        };
-
-        return new Promise((urlResolve, urlReject) => {
-            deb(`URL Promise beginning |  ${url}`);
-
-            // TODO Troubleshoot and remove as any
-            get(url, theseOptions, (error, response, body) => {
-                data.error = error;
-                data.response = response;
-                data.body = body;
-
-                deb(`Loading URL ${url}`);
-                if (!!error) {
-                    deb("ERROR ENCOUNTERED");
-                    deb(data);
-
-                    return urlReject(data);
-                } else {
-                    if (!body) {
-                        deb("EMPTY RESPONSE");
-                        deb(data);
-
-                        return urlReject(data);
-                    } else {
-                        deb("RESPONSE RECEIVED");
-                        deb(data);
-
-                        return urlResolve(data);
-                    }
-                }
-            });
-        }) as Promise <typeof data>;
-    }
-
-    // private checkOptions = (options: CoreOptions) => {
-    //     const debug = this.deb.set("checkOptions");
-    //     debug(`Generating Options for URL`);
-        
-    //     return this.cookie.get(options);
-    // }
-
-
-    // private generateOptions = (options?: CoreOptions) => {
-    //     const debug = this.deb.set("generateOptions");
-    //     debug(`Generating Options for URL`);
-    //     if (!options) {
-    //         debug(`No Options Provided: Generating Fresh Options`);
-    //         return this.cookie.isNeeded();
-    //     } else {
-    //         debug(`Options Provided: Checking Options`);
-    //         return this.checkOptions(options);
-    //     }
-    // }
+interface urlResponse {
+    data: string;
+    status: number;
+    headers: AxiosResponseHeaders;
 }
 
-const testSingle = () => {
-    logLine(" Testing Single URL ");
-    return LoadUrl.single("https://media-cf.assets-cdk.com/teams/repository/export/e39/f15e0949c100588110050568b5709/e39f15e0949c100588110050568b5709.js")
-        .then((response) => {
-            log(`Body Received: ${!!response.body}`);
+interface axiosJar extends AxiosRequestConfig {
+    jar?: CookieJar;
+}
+
+export class LoadUrl {
+    constructor(useToken?: boolean) {
+        this.deb = dBugger.append("LoadUrl");
+        this.useToken = !!useToken;
+
+        this.jar = new CookieJar();
+        const jar = this.jar;
+
+        this.axios = wrapper(axios.create({jar}));
+        
+    }
+    public static single = async (url: string): Promise<AxiosResponse> => {
+        const loader = new LoadUrl();
+        const config = {
+            url,
+            method: "get"
+        };
+
+        try {
+            return await loader.getUrl(config);
+        } catch (err) {
+            console.error(err);
+        };
+    };
+    private initialized = false;
+    private axios: AxiosInstance;
+    private jar: CookieJar;
+
+    private deb: dBug;
+    private useToken = false;
+
+    public getUrl = async (config: axiosJar): Promise<AxiosResponse> => {
+        const deb = this.deb.append();
+        deb.call(`Attempting to get data from ${config.url}`);
+
+        try {
+            const response = await this.axios(config);
+            deb.call("Retrieved data from URL");
+            return response;
+        } catch (err) {
+            throw(err);
+        };
+
+
+    };
+}
+
+const test = () => {
+    const deb = dBugger.set();
+    deb("Initializing URL Loader Test");
+
+    LoadUrl.single("https://hydra-services.prod-cfp-pdx.sincrod.com/hydra-graph/route/base-graph/content/integrations?UID=bbaa20cf-532e-4b36-a3e0-9c6af84dc79b&configCtx={%22webId%22:%22gmps-lee-johnson%22,%22locale%22:%22en_US%22,%22version%22:%22LIVE%22,%22page%22:%22HomePage%22,%22secureSiteId%22:null}")
+        .then((data) => {
+            deb("Response received from LoadUrl.single");
+            deb(data.data[0].title);
+        })
+        .catch((err) => {
+            deb("No response received from LoadUrl.single");
         });
+
+    // LoadUrl.single("https://www.google.com")
+    //     .then((data) => {
+    //         deb("Response received from LoadUrl.single");
+    //         deb(data.data);
+    //     })
+    //     .catch((err) => {
+    //         deb("No response received from LoadUrl.single");
+    //     });
+
 };
 
-const testGet = (toTest: "oos"|"partners") => {
-    logLine("Testing Get Specific URL");
-
-    const construct = new UrlConstructor("dit");
-    const loader = new LoadUrl(true);
-    const partnerDataUrl = construct.getSpecific({ partnerPortal: ["partners"] }).partnerPortal.partners;
-    const oosDataUrl = construct.getSpecific({ oos: ["orders"] }).oos.orders;
-
-    if (toTest === "oos") {
-        loader.get(oosDataUrl)
-            .then(() => {
-                log(`Partner Data URL Defined ${oosDataUrl}`);
-            });
-    }
-
-    
-    if (toTest === "partners") {
-        loader.get(partnerDataUrl)
-            .then(() => {
-                log(`Partner Data URL Defined ${oosDataUrl}`);
-            });
-    }
-};
-
-// testSingle();
-// testGet("oos");
-
-
-// const request = require('request');
-
-// const options = {
-//     method: 'GET',
-//     url: 'https://api-dit.sincrotools.com/partner-portal-api/api/v1/partners',
-//     headers: {
-//         Cookie: 'ID_TOKEN=eyJraWQiOiJ3bHQ1LUI0b3dPbDhBUS1HY1ZRMGZTZ2pwdlJRNUxWdXdBV3NRTlI1SGlRIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULlg2TXhHTTRiZzhPYU9MZnpVNzluVHdlV2ZuNnpVaF81U1hfdDA4WkJ2U0EiLCJpc3MiOiJodHRwczovL2xvZ2luLWRpdC5zaW5jcm90b29scy5jb20vb2F1dGgyL2RlZmF1bHQiLCJhdWQiOiJhcGk6Ly9kZWZhdWx0IiwiaWF0IjoxNjMxMjk5MzU3LCJleHAiOjE2MzEzMjgxNTcsImNpZCI6IjBvYWFtNGQ1V01NcmpmejRFMWQ1IiwidWlkIjoiMDB1ODR3aGc0NDJpbHBreTgxZDYiLCJzY3AiOlsib3BlbmlkIl0sInNpbmNyb0lkIjoiSm9zaHVhLlJvYmluc29uQHNpbmNyb2RpZ2l0YWwuY29tIiwic3ViIjoiSm9zaHVhLlJvYmluc29uQHNpbmNyb2RpZ2l0YWwuY29tIiwidXNlciI6Ikpvc2h1YS5Sb2JpbnNvbkBzaW5jcm9kaWdpdGFsLmNvbSJ9.F39QvwLhSt9BfO9wrW0sqTk1X8_mNvzA0-JrI_hHKXjkFRu8Y1TM2mrIvjQHtHQbqKnS2Cux5B1epv9gJjJGkPi4-gntOf7kzGa_V8TNcJBLtqIT-dCILD5U1YHjM58YcY7a2zXSar-pCIolkDtbZFFwa9QpqkbTCbn4UeDFBMW3kX8Miiohka5U3qZZYwTCch-VbXbSw7CplK_qrdwNEk8Cs-ohFwgfZ1exrrbqpshID_cwA4slArOqn4Ld_-zn9UPOrmVA49XB-Fx1en7mERefL2m58qpgop_jE6T4aVXy-Oj-QkM4OfRp0Ss2Iam3fFfFzw7rTiO5dofL3Avhcw; _bztag=ZWEwMTU2MmYzYTAyMTRiYTg0NzA4MjFjMTY5YWNkZGIyNThlMzYyNzk4MGM3NDZkZWZiZDUxMTI3NDkzZjAxOEAxNjMxMzAyMzc5MDQ5'
-//     }
-// };
-
-// request(options, function (error, response, body) {
-//     if (error) throw new Error(error);
-
-//     console.log(body);
-// });
+if (testModule) {
+    test();
+}

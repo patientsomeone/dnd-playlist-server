@@ -17,6 +17,13 @@ module.exports = {
             tsconfigRootDir: __dirname
         },
         rules: {
+            "@typescript-eslint/no-unsafe-argument": "off",
+            "@typescript-eslint/no-unsafe-assignment": "off",
+            "@typescript-eslint/no-unsafe-return": "off",
+            "@typescript-eslint/no-floating-promises": {
+                "ignoreVoid": "true",
+                "ignoreIIFE": "true"
+            },
             "@typescript-eslint/array-type": [
                 "error",
                 {
@@ -48,7 +55,7 @@ module.exports = {
                 }
             ],
             "@typescript-eslint/no-unsafe-member-access": "off",
-            "@typescript-eslint/no-unsafe-call": "warn",
+            "@typescript-eslint/no-unsafe-call": "off",
             "@typescript-eslint/no-unused-expressions": "error",
             "@typescript-eslint/no-unused-vars": "off" /* ["warn", { vars: "local" }] */ ,
             "@typescript-eslint/no-use-before-define": "error",
@@ -80,15 +87,16 @@ module.exports = {
         ],
         "id-match": "error",
         "max-classes-per-file": ["error", 1],
-        "max-len": ["error", { code: 120 }],
+        "max-len": ["warn", { code: 320 }],
         "new-parens": "error",
         "no-bitwise": "error",
         "no-caller": "error",
         "no-cond-assign": "error",
         "no-console": [
-            "error",
+            "warn",
             {
                 allow: [
+                    "info",
                     "warn",
                     "dir",
                     "timeLog",

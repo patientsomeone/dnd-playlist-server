@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dip's TESTING Playlists</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6CR6NWLDCB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-6CR6NWLDCB');
+    </script>
+    <script type="module" src="/dndPlaylists/createList.js"></script>
+    <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
+    <style>
+        html {
+            color-scheme: light dark;
+        }
+        
+        body {
+            width: 100%;
+            margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+        
+        dl dt {
+            padding: .2rem;
+        }
+        
+        #listOrganizer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #listOrganizer div {
+            padding: 2rem;
+        }
+        
+        #listOrganizer #frameParent {
+            min-width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <h1>Dip's D&D Playlists Automated</h1> -->
+    <div id="listOrganizer">
+        <div id="listParent"> </div>
+        <div id="frameParent">
+            <h2>Player</h2>
+            <div id="shufflerFrame"></div>
+        </div>
+    </div>
+
+
+    <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLYorr1JfrVWDr5_cJoXExBOehqTyGsVbd&autoplay=1&index=random_number" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; random_number"
+        allowfullscreen></iframe> -->
+
+</body>
+
+</html>

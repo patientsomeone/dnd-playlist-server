@@ -6,16 +6,20 @@
     "compilerOptions": {
         "resolveJsonModule": true,
         "target": "es6",
+        "jsx": "preserve",
         "module": "commonjs",
-        "outDir": "dist",
-        "sourceMap": true
+        "outDir": "./.dist",
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "types": ["youtube"]
     },
     "include": [
-        "src/**/*.ts"
+        ".src/**/*.ts"
     ],
     "exclude": [
+        "client",
+        ".dist",
         "node_modules",
-        "**/*.spec.ts",
-        "**.*.i.*"
+        "**/*.spec.ts"
     ]
 }
