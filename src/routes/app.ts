@@ -5,6 +5,11 @@ import cors from "cors";
 import {jsonUtils} from "../utilities/jsonUtils"
 import listCount from "../../json/listCount.json";
 import {log} from "../utilities/log";
+// import React from "react";
+import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
+import {reactResponse} from "../views/index";
+import {HelloWorld} from "../views/helloWorld"
+import {reactRoutes} from "./reactRoutes";
 
 config();
 
@@ -19,14 +24,24 @@ app.use((err, req: Request, res: Response, next) => {
 });
 
 app.use("/", (req: Request, res: Response, next) => {
-    console.log(`Sending Response for ${req.path}?${req.query}`);
+    const hasQuery = Object.keys(req.query).length > 0;
+    console.log(`Sending Response for ${req.path}${!hasQuery ? "" : `?${req.query}`}`);
     next();
 })
 
 const respond = (res, data) => res.status(200).send(data);
 
-app.get("/", (request: Request, response: Response) => {
-    response.send("Hello World from the DND React Server!");
+app.get("/", async (request: Request, response: Response) => {
+    const res = await reactResponse(HelloWorld, request);
+
+    respond(response, res);
+    // response.send("Hello World from the DND React Server!");
+    // response.send(
+    //     reactResponse(request)
+    //         .catch((err) => {
+    //             console.log(`Direct Catch: ${err}`);
+    //         })
+    // );
 });
 
 app.get("/listCount", async (request: Request, response: Response, next) => {
@@ -34,7 +49,7 @@ app.get("/listCount", async (request: Request, response: Response, next) => {
         const getJson = new jsonUtils("./json/listCount.json");
         const res = await getJson.read();
     
-        console.log("Returning Response");
+        console.log("Returning Response: Query Parameter to follow");
         console.log(request.query);
     
         respond(response, res);
@@ -46,6 +61,21 @@ app.get("/listCount", async (request: Request, response: Response, next) => {
 app.get("/testJson", async (request: Request, response: Response) => {
     response.send(listCount)
 });
+
+// app.get("/testReact", async (request: Request, response: Response) => {
+//     const res = await reactResponse(HelloWorld, request);
+
+//     respond(response, res);
+//     // response.send(res);
+// });
+
+for (const key in reactRoutes) {
+    app.get(`/${key}`, async (request: Request, response: Response) => {
+        const res = await reactResponse(reactRoutes[key], request);
+
+        respond(response, res);
+    })
+}
 
 const port = process.env.PORT || 8000;
 

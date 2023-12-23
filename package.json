@@ -4,7 +4,7 @@
     "description": "Typescript and Git Boilerplate",
     "scripts": {
         "build": "echo 'Cleaning Dist' && rimraf ./dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success=first) && echo 'Complete'",
-        "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/routes/app.ts",
+        "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "start": "node dist/routes/app.js",
         "urlCheck": "node dist/agents/loadUrl",
         "push": "echo 'Cleaning Dist' && rimraf ./dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success = first) && echo 'Pushing to GitLab' && git push origin master && echo 'Complete'",
@@ -77,7 +77,9 @@
         "gulp-replace": "^1.1.4",
         "jest": "^29.5.0",
         "mocha": "^10.2.0",
-        "nodemon": "^2.0.22",
+        "nodemon": "^3.0.2",
+        "sequelize": "^6.35.2",
+        "sqlite3": "^5.1.6",
         "ts-node": "^10.9.1",
         "typedoc": "^0.24.1"
     }

@@ -4,9 +4,9 @@
         "class-name": true
     },
     "compilerOptions": {
-        "resolveJsonModule": false,
+        "resolveJsonModule": true,
         "target": "es6",
-        "jsx": "preserve",
+        "jsx": "react",
         "module": "commonjs",
         "outDir": "dist",
         "esModuleInterop": true,

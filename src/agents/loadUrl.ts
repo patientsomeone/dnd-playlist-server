@@ -9,5 +9,3 @@ LoadUrl.single(url)
     .then((urlData) => {
         log(urlData);
     });
-
-// Additional Line
