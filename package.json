@@ -3,16 +3,17 @@
     "version": "1.0.0",
     "description": "Typescript and Git Boilerplate",
     "scripts": {
-        "build": "echo 'Cleaning Dist' && rimraf ./.dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success=first) && echo 'Complete'",
-        "dev": "concurrently \"tsc --watch\" \"nodemon -q ./.dist/routes/index.ts\"",
-        "start": "node .dist/routes/index.js",
+        "build": "echo 'Cleaning Dist' && rimraf ./dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success=first) && echo 'Complete'",
+        "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/routes/app.ts",
+        "start": "node dist/routes/app.js",
         "urlCheck": "node dist/agents/loadUrl",
-        "push": "echo 'Cleaning Dist' && rimraf ./.dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success = first) && echo 'Pushing to GitLab' && git push origin master && echo 'Complete'",
-        "lint": "eslint --ext .ts ./.src",
+        "push": "echo 'Cleaning Dist' && rimraf ./dist/* -r && echo 'Building' && (tsc || echo 'TSC build failed' --success = first) && echo 'Pushing to GitLab' && git push origin master && echo 'Complete'",
+        "lint": "eslint --ext .ts ./src",
         "newBranch": "gulp createBranch",
         "pullRequest": "gulp createPullRequest",
         "update": "gulp pullMaster",
-        "prune": "gulp prune"
+        "prune": "gulp prune",
+        "getCounts": "node dist/agents/getListCounts"
     },
     "repository": {
         "type": "git",
@@ -49,6 +50,8 @@
         "performance-now": "^2.1.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "semantic-ui-css": "^2.5.0",
+        "semantic-ui-react": "^2.1.5",
         "ts-jest": "^29.1.0"
     },
     "devDependencies": {

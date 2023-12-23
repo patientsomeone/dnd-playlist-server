@@ -4,21 +4,21 @@
         "class-name": true
     },
     "compilerOptions": {
-        "resolveJsonModule": true,
+        "resolveJsonModule": false,
         "target": "es6",
         "jsx": "preserve",
         "module": "commonjs",
-        "outDir": "./.dist",
+        "outDir": "dist",
         "esModuleInterop": true,
         "sourceMap": true,
         "types": ["youtube"]
     },
     "include": [
-        ".src/**/*.ts"
+        "./src/**/*.ts"
     ],
     "exclude": [
         "client",
-        ".dist",
+        "dist",
         "node_modules",
         "**/*.spec.ts"
     ]
