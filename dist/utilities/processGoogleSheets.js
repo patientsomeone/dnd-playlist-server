@@ -42,6 +42,24 @@ const deAuth = debug("utilities:gSheet:authorize");
 const deSani = debug("utilities:gSheet:write:sanitize");
 const deWebId = debug("utilities:gSheet:getWebIdColumn");
 class gSheet {
+    constructor(spreadsheetID) {
+        //"1ozp-PrkrCZSMOwM6YK1XUYHq6MZdoqEME2n0QonSQ6M"
+        this.tokenPath = "./.i.token.json";
+        this.spreadsheetID = spreadsheetID;
+        /* this.sheet = new googleSpreadsheets(spreadsheetID);
+
+        this.sheet.useServiceAccountAuth(creds, (error) => {
+            if (!error) {
+                logLine("Connected to Google Spreadsheet");
+            } else {
+                logLine("UNABLE TO CONNECT TO SPREADSHEET");
+
+                deConn("'.'.'.'.' BEGIN ERROR ENCOUNTERED '.'.'.'.'");
+                deConn(error);
+                deConn("'.'.'.'.'. END ERROR ENCOUNTERED '.'.'.'.'");
+            }
+        }) */
+    }
     /**
      * WorksheetID derived from worksheet tab number, starting at 1.
      */
@@ -214,24 +232,6 @@ class gSheet {
         });
     }
     ;
-    constructor(spreadsheetID) {
-        //"1ozp-PrkrCZSMOwM6YK1XUYHq6MZdoqEME2n0QonSQ6M"
-        this.tokenPath = "./.i.token.json";
-        this.spreadsheetID = spreadsheetID;
-        /* this.sheet = new googleSpreadsheets(spreadsheetID);
-
-        this.sheet.useServiceAccountAuth(creds, (error) => {
-            if (!error) {
-                logLine("Connected to Google Spreadsheet");
-            } else {
-                logLine("UNABLE TO CONNECT TO SPREADSHEET");
-
-                deConn("'.'.'.'.' BEGIN ERROR ENCOUNTERED '.'.'.'.'");
-                deConn(error);
-                deConn("'.'.'.'.'. END ERROR ENCOUNTERED '.'.'.'.'");
-            }
-        }) */
-    }
     authorize(credentials) {
         return new Promise((resolve, reject) => {
             deAuth("Attempting to authorize");

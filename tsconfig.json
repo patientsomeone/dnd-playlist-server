@@ -4,7 +4,7 @@
         "class-name": true
     },
     "compilerOptions": {
-        "resolveJsonModule": true,
+        "resolveJsonModule": false,
         "target": "es6",
         "jsx": "react",
         "module": "commonjs",
