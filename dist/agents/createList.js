@@ -87,7 +87,7 @@ const getPlaylists = () => __awaiter(void 0, void 0, void 0, function* () {
     return lists;
 });
 const processUrl = () => __awaiter(void 0, void 0, void 0, function* () {
-    var e_1, _a;
+    var _a, e_1, _b, _c;
     const heading = document.createElement("h1");
     const list = document.createElement("dl");
     heading.innerHTML = "Dip's Organized Playlists";
@@ -95,22 +95,29 @@ const processUrl = () => __awaiter(void 0, void 0, void 0, function* () {
     document.querySelector("#listParent").appendChild(list);
     const parentElement = document.querySelector("#listParent dl");
     try {
-        for (var _b = __asyncValues(Object.keys(playlists)), _c; _c = yield _b.next(), !_c.done;) {
-            const listName = _c.value;
-            const element = document.createElement("dt");
-            const thisList = playlists[listName];
-            const thisLink = yield generateShuffler(thisList);
-            element.innerHTML = `<a href="?playlist=${listName}" list="${thisLink}">
+        for (var _d = true, _e = __asyncValues(Object.keys(playlists)), _f; _f = yield _e.next(), _a = _f.done, !_a;) {
+            _c = _f.value;
+            _d = false;
+            try {
+                const listName = _c;
+                const element = document.createElement("dt");
+                const thisList = playlists[listName];
+                const thisLink = yield generateShuffler(thisList);
+                element.innerHTML = `<a href="?playlist=${listName}" list="${thisLink}">
             ${listName}
         </a>`;
-            clickListener(element, thisLink);
-            parentElement.appendChild(element);
+                clickListener(element, thisLink);
+                parentElement.appendChild(element);
+            }
+            finally {
+                _d = true;
+            }
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+            if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
         }
         finally { if (e_1) throw e_1.error; }
     }

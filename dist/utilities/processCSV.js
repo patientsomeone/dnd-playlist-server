@@ -39,10 +39,6 @@ const deWrite = debug("utilities:csv:write");
 const deSani = debug("utilities:csv:write:sanitize");
 const deWebId = debug("utilities:csv:getWebIdColumn");
 class CSV {
-    constructor(outputFile) {
-        this.writeStream = fs.createWriteStream(outputFile);
-        this.output = outputFile;
-    }
     static readStream(inputFile, lineCallback) {
         return new Promise((resolve, reject) => {
             deRead("CSV STREAM BEGIN");
@@ -251,6 +247,10 @@ class CSV {
             }
             resolve(tempData.join("\n"));
         });
+    }
+    constructor(outputFile) {
+        this.writeStream = fs.createWriteStream(outputFile);
+        this.output = outputFile;
     }
     stream(data) {
         return new Promise((resolve, reject) => {

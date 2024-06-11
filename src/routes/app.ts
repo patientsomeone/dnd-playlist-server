@@ -3,13 +3,14 @@ import express, {Express, Request, Response, Errback} from "express";
 // import path from "path";
 import cors from "cors";
 import {jsonUtils} from "../utilities/jsonUtils"
-import listCount from "../../json/listCount.json";
+// import listCount from "../../json/listCount.json";
 import {log} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
 import {reactResponse} from "../views/index";
 import {HelloWorld} from "../views/helloWorld"
 import {reactRoutes} from "./reactRoutes";
+import {fetchLists} from "../agents/refreshList";
 
 config();
 
@@ -35,14 +36,13 @@ app.get("/", async (request: Request, response: Response) => {
     const res = await reactResponse(HelloWorld, request);
 
     respond(response, res);
-    // response.send("Hello World from the DND React Server!");
-    // response.send(
-    //     reactResponse(request)
-    //         .catch((err) => {
-    //             console.log(`Direct Catch: ${err}`);
-    //         })
-    // );
 });
+
+app.get("/refreshPlaylists", async (request: Request, response: Response) => {
+    const res = await fetchLists();
+
+    respond(response, res);
+})
 
 app.get("/listCount", async (request: Request, response: Response, next) => {
     try {
@@ -58,9 +58,9 @@ app.get("/listCount", async (request: Request, response: Response, next) => {
     }
 })
 
-app.get("/testJson", async (request: Request, response: Response) => {
-    response.send(listCount)
-});
+// app.get("/testJson", async (request: Request, response: Response) => {
+//     response.send(listCount)
+// });
 
 // app.get("/testReact", async (request: Request, response: Response) => {
 //     const res = await reactResponse(HelloWorld, request);

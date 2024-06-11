@@ -121,6 +121,6 @@ class AsyncUtil {
         return countProperties;
     }
 }
-exports.AsyncUtil = AsyncUtil;
 AsyncUtil.average = 0;
+exports.AsyncUtil = AsyncUtil;
 //# sourceMappingURL=asyncUtil.js.map

@@ -7,14 +7,15 @@ import { objectExtend } from "../utilities/objecExtend";
 /* Import MODULES */
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
+import {dateStamp} from "./dateStamp";
 
 const deb = new dBug("utilities:fsUtils");
 
-export interface IfsReturns {
+export type IfsReturns = {
     filePath: string;
     error: any;
     data: string;
-}
+};
 
 export class FsUtils {
 
@@ -195,8 +196,29 @@ export class FsUtils {
     };
 
     public writeStream = {
+        initialize: async (): Promise<IfsReturns> => {
+            const debCreate = deb.set("writeStream:initialize");
+
+            debCreate(debLine("CURRENT WORKING DATA"));
+            debCreate(this.workingData);
+
+            await this.check()
+                .catch((err) => {
+                    debCreate(`Attempting to create file at ${this.workingData.filePath}`);
+                    this.create.raw(`${Date.now().toLocaleString()}: File Created`);
+                });
+
+            if (!this.wStream) {
+                this.wStream = fs.createWriteStream(this.workingData.filePath, {flags: "a"});
+                return this.workingData;
+            }
+
+            console.log(`Write Stream exists for ${this.workingData.filePath}`);
+            return this.workingData
+
+        },
         json: (input: { [key: string]: any } | any[]): Promise<IfsReturns> => {
-            const debCreate = deb.set("create:json");
+            const debCreate = deb.set("writeStream:json");
 
             debCreate(debLine("CURRENT WORKING DATA"));
             debCreate(this.workingData);
@@ -223,8 +245,60 @@ export class FsUtils {
                     }
                 });
             });
+        },
+        raw: async (input: string): Promise<IfsReturns> => {
+            const debCreate = deb.set("writeStream:raw");
+
+            debCreate(debLine("CURRENT WORKING DATA"));
+            debCreate(this.workingData);
+
+            return new Promise(async (resolve, reject) => {
+                if (!this.wStream) {
+                    await this.writeStream.initialize();
+                }
+
+                this.wStream.write(input, "utf-8", (error) => {
+                    if (!error) {
+                        this.workingData.error = error;
+                        debCreate(`File write complete`);
+                        resolve(this.workingData);
+                    } else {
+                        this.workingData.error = error;
+                        debCreate(debLine(`WRITE ERROR ENCOUNTERED`));
+                        debCreate(error);
+                        reject(this.workingData);
+                    }
+                });
+            });
         }
     };
+
+    public logFile = async (msg: string, err?: boolean): Promise<void> => {
+        const debLog = deb.set("logFile");
+        const timeStamp = new Date(Date.now()).toLocaleString();
+        const status = !err ? "Log" : "";
+        const wMsg = `${status} [${timeStamp}]: ${msg}\n`
+        
+        try {
+            debLog(`Writing ${wMsg}`)
+            if (!!err) {
+                await this.writeStream.raw(`\n----------------------------------\\\n`);
+                await this.writeStream.raw(`--\\-- ERROR --\\--                  \\\n`);
+            }
+
+            await this.writeStream.raw(wMsg);
+            
+            if (!!err) {
+                await this.writeStream.raw(`--/-- ERROR --/--                  /\n`);
+                await this.writeStream.raw(`----------------------------------/\n\n`);
+            }
+            return;
+        } catch (error) {
+            debLog(`Failed to write ${wMsg}`);
+        }
+
+    }
+    
     private workingData: IfsReturns;
     private deb: dBug;
 
@@ -273,3 +347,14 @@ export class FsUtils {
     }
 }
 
+const test = async () => {
+    const logger = new FsUtils(`./logs/${dateStamp()}_log.txt`);
+    await logger.logFile("Test Entry 1");
+    await logger.logFile("Test Entry 2");
+    await logger.logFile("Test Error 1", true);
+    await logger.logFile("Test Entry 3");
+    await logger.logFile("Test Error 2", true);
+    await logger.logFile("Test Entry 4");
+}
+
+// test();

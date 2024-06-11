@@ -1,5 +1,6 @@
-import {HelloWorld} from "../views/helloWorld"
+import {HelloWorld} from "../views/helloWorld";
+
 
 export const reactRoutes = {
-    testReactRoutes: HelloWorld
+    testReactRoutes: HelloWorld,
 }

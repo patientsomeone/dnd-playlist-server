@@ -17,10 +17,10 @@ const express_1 = __importDefault(require("express"));
 // import path from "path";
 const cors_1 = __importDefault(require("cors"));
 const jsonUtils_1 = require("../utilities/jsonUtils");
-const listCount_json_1 = __importDefault(require("../../json/listCount.json"));
 const index_1 = require("../views/index");
 const helloWorld_1 = require("../views/helloWorld");
 const reactRoutes_1 = require("./reactRoutes");
+const refreshList_1 = require("../agents/refreshList");
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -39,13 +39,10 @@ const respond = (res, data) => res.status(200).send(data);
 app.get("/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const res = yield (0, index_1.reactResponse)(helloWorld_1.HelloWorld, request);
     respond(response, res);
-    // response.send("Hello World from the DND React Server!");
-    // response.send(
-    //     reactResponse(request)
-    //         .catch((err) => {
-    //             console.log(`Direct Catch: ${err}`);
-    //         })
-    // );
+}));
+app.get("/refreshPlaylists", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = yield (0, refreshList_1.fetchLists)();
+    respond(response, res);
 }));
 app.get("/listCount", (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -59,9 +56,9 @@ app.get("/listCount", (request, response, next) => __awaiter(void 0, void 0, voi
         next();
     }
 }));
-app.get("/testJson", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    response.send(listCount_json_1.default);
-}));
+// app.get("/testJson", async (request: Request, response: Response) => {
+//     response.send(listCount)
+// });
 // app.get("/testReact", async (request: Request, response: Response) => {
 //     const res = await reactResponse(HelloWorld, request);
 //     respond(response, res);

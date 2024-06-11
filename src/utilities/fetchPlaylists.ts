@@ -9,9 +9,20 @@ import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {getPlaylistCounts} from "./processPlaylists";
+import {logLine} from "./log";
+import {FsUtils} from "./fsUtils";
+import {dateStamp} from "./dateStamp";
 
 export const fetchChannelPlaylists = async (channelId: string) => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
+    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
+    const logger = logFile.logFile;
+
+    const apiLock = new FsUtils("./playlists.lock");
+    const isLocked = await apiLock.check()
+        .catch((err) => {
+            return Promise.resolve(false);
+        });
     
     const props = new Properties({
         "youtubeApiKey": ""
@@ -53,18 +64,37 @@ export const fetchChannelPlaylists = async (channelId: string) => {
         }
     
         return workingTitle.join(" ");
-    }
-    
-    const fetchPlaylistData = async (channelId: string) => {
+    };
+
+    const fetchPlaylistData = async (channelId: string, pageToken?: string) => {
         try {
-            const allLists = await service.playlists.list({
+            let workingLists = [];
+
+            const listConfig = {
                 part: ["id", "snippet", "status"],
-                maxResults: 200,
+                maxResults: 50,
                 channelId
-            });
+            } as {
+                part: string[];
+                maxResults: number;
+                channelId: string;
+                pageToken?: string
+            };
+
+            if (!!pageToken) (
+                listConfig.pageToken = pageToken
+            );
+
+            const allLists = await service.playlists.list(listConfig);
             console.log("Playlists fetched");
+
+            if (allLists.data.hasOwnProperty("nextPageToken")) {
+                workingLists = workingLists.concat(await fetchPlaylistData(channelId, allLists.data.nextPageToken));
+            };
     
-            return allLists.data.items;
+            workingLists = workingLists.concat(allLists.data.items);
+
+            return workingLists;
         } catch (error) {
             console.error(`Unable to fetch Playlists ${error}`);
         }
@@ -72,11 +102,15 @@ export const fetchChannelPlaylists = async (channelId: string) => {
     
     const processPlaylists = async (allPlaylists) => {
         const processedLinks = {};
+        let checkedLists = 0;
+        let foundLists = 0;
     
         for await (const playlist of allPlaylists) {
             const playlistName = playlist.snippet.title;
             const link = `https://www.youtube.com/playlist?list=${playlist.id}`;
             const id = playlist.id;
+
+            checkedLists += 1;
     
             if (playlistName.toLowerCase().indexOf("d&d") >= 0 && playlistName.toLowerCase().indexOf("d&d timeline") < 0) {
                 try {
@@ -85,6 +119,7 @@ export const fetchChannelPlaylists = async (channelId: string) => {
                         link,
                         id
                     };
+                    foundLists += 1;
                 } catch (err) {
                     throw (err);
                 }
@@ -95,46 +130,72 @@ export const fetchChannelPlaylists = async (channelId: string) => {
                         link,
                         id
                     };
+                    foundLists += 1;
                 } catch (err) {
                     throw (err);
                 }
             }
         }
+
+        logger(`Checked ${checkedLists} playlists`);
+        logger(`Found ${foundLists} playlists`);
     
         return processedLinks;
     };
     
     const initialize = async () => {
         const deb = debg.set("initialize");
+        await logger("Checking playlist files...")
         try {
             const jsonCache = new jsonUtils("./json/listCount.json");
             await jsonCache.checkPath();
-            const lastUpdate = await jsonCache.get("lastUpdate") as number;
-
+            const lastUpdate = await jsonCache.get("lastUpdate") as number || false;
+            
             if (!!lastUpdate && Date.now() < (lastUpdate + (12 * 60 * 60 * 1000))) {
-                deb("JSON Cache Recently Updated");    
+                await logger("API Data up to date");
+                deb("JSON Cache Recently Updated");
+                return jsonCache.read();
+            }
+
+            if (!isLocked) {
+                await logger("Locking API execution");
+                await apiLock.create.raw("");
             }
 
             const listItems = await fetchPlaylistData(channelId);
             const processed = await processPlaylists(listItems);
             const countedList = await getPlaylistCounts(processed, jsonCache);
-            deb("Completed Fetch");
+
+            await logger("Fetched Playlist count data");
+
+            await apiLock.delete();
+            await logger("Deleted Playlist lock");
+
+            await logger("Playlist Update Complete");
+
+            return countedList;
         } catch (error) {
             deb(`Unable to fetch ${error}`);
         }
     }
 
-    await initialize()
-        .catch((err) => {
-            console.error(err);
-        });
+    if (!!isLocked) {
+        await logger("On Load Status Check: API Processing");
+        return {status: "processing"};
+    }
+
+    try {
+        return await initialize()
+    } catch (err) {
+        logger(`Unable to fetch Playlists ${err}`, true);
+    }
 }
 
 const test = async () => {
     await fetchChannelPlaylists("UCr7k176h5b1JwD9yXpSUkGA");
 }
 
-test()
-    .catch((err) => {
-        console.log(err);
-    });
+// test()
+//     .catch((err) => {
+//         console.error(err);
+//     });

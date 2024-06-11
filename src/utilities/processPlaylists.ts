@@ -9,10 +9,14 @@ import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {playlistResponseData} from "../.types";
+import {FsUtils} from "./fsUtils";
+import {dateStamp} from "./dateStamp";
 
 
 export const getPlaylistCounts = async (playlistData: playlistResponseData, jsonCache: jsonUtils) => {
     const debg = new dBug("utilities:getPlaylistCounts");
+    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
+    const logger = logFile.logFile;
     
     const props = new Properties({
         "youtubeApiKey": ""
@@ -24,8 +28,8 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     const config = new Config({"playlists": {}})
     debg.call("Fetching Module Config");
     
-    const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
-    debg.call(listData);
+    // const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
+    // debg.call(listData);
     
     const countData: {[listName: string]: {
         link: string;
@@ -79,30 +83,47 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
         return count;
     };
 
+    console.log("Processing Fetched Playlists");
+
+    const siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
+    
+    console.log(`Resetting JSON Cache at: ${await jsonCache.viewPath()}`);
     await jsonCache.checkPath(true);
 
+    console.log(`Resetting Site Cache at: ${await siteJson.viewPath()}`);
+    await siteJson.checkPath(true);
+    
     const countedPlaylists = {};
 
     for await (const list of Object.keys(playlistData)) {
+        // console.log(`Fetching Data for: ${list}`);
         const count = await fetchCount(playlistData[list].id);
 
-        countedPlaylists[list] = playlistData[list];
-        countedPlaylists[list].count = count;
-
-        jsonCache.set(list, countedPlaylists[list]);
+        if (count > 0) {
+            countedPlaylists[list] = playlistData[list];
+            countedPlaylists[list].count = count;
+    
+            jsonCache.set(list, countedPlaylists[list]);
+            siteJson.set(list, countedPlaylists[list]);
+        }
     };
 
-    const currentDate = new Date();
-    const oneDayPast = new Date(new Date().getTime() - (1 * 24 * 60 * 60 * 1000));
+    const currentDate = Date.now();
+    
+    jsonCache.set("lastUpdate", currentDate);
+    siteJson.set("lastUpdate", currentDate);
+    countedPlaylists["lastUpdate"] = currentDate;
+
 
     // const lastUpdate = await jsonCache.get("lastUpdate");
-    jsonCache.set("lastUpdate", Date.now());
     // debg.call(`Last Updated: ${lastUpdate}`);
 
     // const allPlaylists = jsonCache.read();
 
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
+
+    logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
 };

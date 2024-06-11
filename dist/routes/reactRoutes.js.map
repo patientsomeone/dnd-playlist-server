@@ -1,1 +1,1 @@
-{"version":3,"file":"reactRoutes.js","sourceRoot":"","sources":["../../src/routes/reactRoutes.ts"],"names":[],"mappings":";;;AAAA,oDAA8C;AAEjC,QAAA,WAAW,GAAG;IACvB,eAAe,EAAE,uBAAU;CAC9B,CAAA"}
+{"version":3,"file":"reactRoutes.js","sourceRoot":"","sources":["../../src/routes/reactRoutes.ts"],"names":[],"mappings":";;;AAAA,oDAA+C;AAGlC,QAAA,WAAW,GAAG;IACvB,eAAe,EAAE,uBAAU;CAC9B,CAAA"}

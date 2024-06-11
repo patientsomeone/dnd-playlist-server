@@ -13,7 +13,8 @@
         "pullRequest": "gulp createPullRequest",
         "update": "gulp pullMaster",
         "prune": "gulp prune",
-        "getCounts": "node dist/agents/getListCounts"
+        "getCounts": "node dist/agents/getListCounts",
+        "fetchLists": "node dist/utilities/fetchPlaylists"
     },
     "repository": {
         "type": "git",

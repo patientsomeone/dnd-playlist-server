@@ -19,12 +19,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPlaylistCounts = void 0;
 /* MODULES */
 const googleapis_1 = require("googleapis");
+const jsonUtils_1 = require("./jsonUtils");
 const fetchProperties_1 = require("./fetchProperties");
 const dBug_1 = require("./dBug");
 const fetchConfig_1 = require("./fetchConfig");
+const fsUtils_1 = require("./fsUtils");
+const dateStamp_1 = require("./dateStamp");
 const getPlaylistCounts = (playlistData, jsonCache) => __awaiter(void 0, void 0, void 0, function* () {
-    var e_1, _a;
+    var _a, e_1, _b, _c;
     const debg = new dBug_1.dBug("utilities:getPlaylistCounts");
+    const logFile = new fsUtils_1.FsUtils(`./logs/${(0, dateStamp_1.dateStamp)()}_playlistLogs.txt`);
+    const logger = logFile.logFile;
     const props = new fetchProperties_1.Properties({
         "youtubeApiKey": ""
     });
@@ -33,28 +38,35 @@ const getPlaylistCounts = (playlistData, jsonCache) => __awaiter(void 0, void 0,
     debg.call(properties.youtubeApiKey);
     const config = new fetchConfig_1.Config({ "playlists": {} });
     debg.call("Fetching Module Config");
-    const listData = (yield config.fetch()).playlists;
-    debg.call(listData);
+    // const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
+    // debg.call(listData);
     const countData = {};
     const google = new googleapis_1.GoogleApis({
         auth: properties.youtubeApiKey
     });
     const service = google.youtube("v3");
-    const countVideos = (videos) => { var videos_1, videos_1_1; return __awaiter(void 0, void 0, void 0, function* () {
-        var e_2, _a;
+    const countVideos = (videos) => { var _a, videos_1, videos_1_1; return __awaiter(void 0, void 0, void 0, function* () {
+        var _b, e_2, _c, _d;
         let count = 0;
         try {
-            for (videos_1 = __asyncValues(videos); videos_1_1 = yield videos_1.next(), !videos_1_1.done;) {
-                const video = videos_1_1.value;
-                if (video.contentDetails.hasOwnProperty("videoPublishedAt")) {
-                    count += 1;
+            for (_a = true, videos_1 = __asyncValues(videos); videos_1_1 = yield videos_1.next(), _b = videos_1_1.done, !_b;) {
+                _d = videos_1_1.value;
+                _a = false;
+                try {
+                    const video = _d;
+                    if (video.contentDetails.hasOwnProperty("videoPublishedAt")) {
+                        count += 1;
+                    }
+                }
+                finally {
+                    _a = true;
                 }
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }
         finally {
             try {
-                if (videos_1_1 && !videos_1_1.done && (_a = videos_1.return)) yield _a.call(videos_1);
+                if (!_a && !_b && (_c = videos_1.return)) yield _c.call(videos_1);
             }
             finally { if (e_2) throw e_2.error; }
         }
@@ -83,33 +95,51 @@ const getPlaylistCounts = (playlistData, jsonCache) => __awaiter(void 0, void 0,
         const count = yield getListDetails(id);
         return count;
     });
+    console.log("Processing Fetched Playlists");
+    const siteJson = new jsonUtils_1.jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
+    console.log(`Resetting JSON Cache at: ${yield jsonCache.viewPath()}`);
     yield jsonCache.checkPath(true);
+    console.log(`Resetting Site Cache at: ${yield siteJson.viewPath()}`);
+    yield siteJson.checkPath(true);
     const countedPlaylists = {};
     try {
-        for (var _b = __asyncValues(Object.keys(playlistData)), _c; _c = yield _b.next(), !_c.done;) {
-            const list = _c.value;
-            const count = yield fetchCount(playlistData[list].id);
-            countedPlaylists[list] = playlistData[list];
-            countedPlaylists[list].count = count;
-            jsonCache.set(list, countedPlaylists[list]);
+        for (var _d = true, _e = __asyncValues(Object.keys(playlistData)), _f; _f = yield _e.next(), _a = _f.done, !_a;) {
+            _c = _f.value;
+            _d = false;
+            try {
+                const list = _c;
+                // console.log(`Fetching Data for: ${list}`);
+                const count = yield fetchCount(playlistData[list].id);
+                if (count > 0) {
+                    countedPlaylists[list] = playlistData[list];
+                    countedPlaylists[list].count = count;
+                    jsonCache.set(list, countedPlaylists[list]);
+                    siteJson.set(list, countedPlaylists[list]);
+                }
+            }
+            finally {
+                _d = true;
+            }
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+            if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
         }
         finally { if (e_1) throw e_1.error; }
     }
     ;
-    const currentDate = new Date();
-    const oneDayPast = new Date(new Date().getTime() - (1 * 24 * 60 * 60 * 1000));
+    const currentDate = Date.now();
+    jsonCache.set("lastUpdate", currentDate);
+    siteJson.set("lastUpdate", currentDate);
+    countedPlaylists["lastUpdate"] = currentDate;
     // const lastUpdate = await jsonCache.get("lastUpdate");
-    jsonCache.set("lastUpdate", Date.now());
     // debg.call(`Last Updated: ${lastUpdate}`);
     // const allPlaylists = jsonCache.read();
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
+    logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
     return countedPlaylists;
 });
 exports.getPlaylistCounts = getPlaylistCounts;

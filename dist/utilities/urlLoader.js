@@ -45,7 +45,6 @@ class LoadUrl {
         this.axios = (0, axios_cookiejar_support_1.wrapper)(axios_1.default.create({ jar }));
     }
 }
-exports.LoadUrl = LoadUrl;
 _a = LoadUrl;
 LoadUrl.single = (url) => __awaiter(void 0, void 0, void 0, function* () {
     const loader = new LoadUrl();
@@ -61,6 +60,7 @@ LoadUrl.single = (url) => __awaiter(void 0, void 0, void 0, function* () {
     }
     ;
 });
+exports.LoadUrl = LoadUrl;
 const test = () => {
     const deb = dBugger.set();
     deb("Initializing URL Loader Test");

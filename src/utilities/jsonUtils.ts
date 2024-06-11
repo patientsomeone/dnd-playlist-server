@@ -75,14 +75,18 @@ export class jsonUtils {
             });
     };
 
+    public viewPath = async (): Promise<string> => {
+        return this.filePath;
+    }
+
     public checkPath = (reset?: boolean): Promise<void> => {
         const deb = this.deb.set("checkPath");
 
         return this.fsOutput
             .check()
-            .then(() => {
-                if (reset) {
-                    return this.resetPath();
+            .then(async () => {
+                if (!!reset) {
+                    return await this.resetPath();
                 } else {
                     return Promise.resolve();
                 }
