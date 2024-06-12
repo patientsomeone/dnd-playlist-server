@@ -7,5 +7,4 @@ urlLoader_1.LoadUrl.single(url)
     .then((urlData) => {
     (0, log_1.log)(urlData);
 });
-// Additional Line
 //# sourceMappingURL=loadUrl.js.map

@@ -6,7 +6,7 @@
     "compilerOptions": {
         "resolveJsonModule": false,
         "target": "es6",
-        "jsx": "preserve",
+        "jsx": "react",
         "module": "commonjs",
         "outDir": "dist",
         "esModuleInterop": true,

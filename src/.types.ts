@@ -10,3 +10,18 @@ export type anyObject = {
 };
 
 export type anyArray = anyStandard[];
+
+export type playlistResponseData = {
+    [key: string]: {
+        id: string;
+        link: string;
+    }
+};
+
+export type playlistProcessed = {
+    [key: string]: {
+        id: string;
+        link: string;
+        count: number;
+    }
+};

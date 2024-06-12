@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FsUtils = void 0;
 const dBug_1 = require("../utilities/dBug");
@@ -30,6 +39,7 @@ const objecExtend_1 = require("../utilities/objecExtend");
 /* Import MODULES */
 const fs = __importStar(require("fs"));
 const JSONStream = __importStar(require("JSONStream"));
+const dateStamp_1 = require("./dateStamp");
 const deb = new dBug_1.dBug("utilities:fsUtils");
 class FsUtils {
     constructor(filePath) {
@@ -187,8 +197,24 @@ class FsUtils {
             }
         };
         this.writeStream = {
+            initialize: () => __awaiter(this, void 0, void 0, function* () {
+                const debCreate = deb.set("writeStream:initialize");
+                debCreate((0, dBug_1.debLine)("CURRENT WORKING DATA"));
+                debCreate(this.workingData);
+                yield this.check()
+                    .catch((err) => {
+                    debCreate(`Attempting to create file at ${this.workingData.filePath}`);
+                    this.create.raw(`${Date.now().toLocaleString()}: File Created`);
+                });
+                if (!this.wStream) {
+                    this.wStream = fs.createWriteStream(this.workingData.filePath, { flags: "a" });
+                    return this.workingData;
+                }
+                console.log(`Write Stream exists for ${this.workingData.filePath}`);
+                return this.workingData;
+            }),
             json: (input) => {
-                const debCreate = deb.set("create:json");
+                const debCreate = deb.set("writeStream:json");
                 debCreate((0, dBug_1.debLine)("CURRENT WORKING DATA"));
                 debCreate(this.workingData);
                 return new Promise((resolve, reject) => {
@@ -211,8 +237,53 @@ class FsUtils {
                         }
                     });
                 });
-            }
+            },
+            raw: (input) => __awaiter(this, void 0, void 0, function* () {
+                const debCreate = deb.set("writeStream:raw");
+                debCreate((0, dBug_1.debLine)("CURRENT WORKING DATA"));
+                debCreate(this.workingData);
+                return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                    if (!this.wStream) {
+                        yield this.writeStream.initialize();
+                    }
+                    this.wStream.write(input, "utf-8", (error) => {
+                        if (!error) {
+                            this.workingData.error = error;
+                            debCreate(`File write complete`);
+                            resolve(this.workingData);
+                        }
+                        else {
+                            this.workingData.error = error;
+                            debCreate((0, dBug_1.debLine)(`WRITE ERROR ENCOUNTERED`));
+                            debCreate(error);
+                            reject(this.workingData);
+                        }
+                    });
+                }));
+            })
         };
+        this.logFile = (msg, err) => __awaiter(this, void 0, void 0, function* () {
+            const debLog = deb.set("logFile");
+            const timeStamp = new Date(Date.now()).toLocaleString();
+            const status = !err ? "Log" : "";
+            const wMsg = `${status} [${timeStamp}]: ${msg}\n`;
+            try {
+                debLog(`Writing ${wMsg}`);
+                if (!!err) {
+                    yield this.writeStream.raw(`\n----------------------------------\\\n`);
+                    yield this.writeStream.raw(`--\\-- ERROR --\\--                  \\\n`);
+                }
+                yield this.writeStream.raw(wMsg);
+                if (!!err) {
+                    yield this.writeStream.raw(`--/-- ERROR --/--                  /\n`);
+                    yield this.writeStream.raw(`----------------------------------/\n\n`);
+                }
+                return;
+            }
+            catch (error) {
+                debLog(`Failed to write ${wMsg}`);
+            }
+        });
         this.check = () => {
             return new Promise((resolve, reject) => {
                 const debCheck = deb.set("checkFile");
@@ -253,4 +324,14 @@ class FsUtils {
     }
 }
 exports.FsUtils = FsUtils;
+const test = () => __awaiter(void 0, void 0, void 0, function* () {
+    const logger = new FsUtils(`./logs/${(0, dateStamp_1.dateStamp)()}_log.txt`);
+    yield logger.logFile("Test Entry 1");
+    yield logger.logFile("Test Entry 2");
+    yield logger.logFile("Test Error 1", true);
+    yield logger.logFile("Test Entry 3");
+    yield logger.logFile("Test Error 2", true);
+    yield logger.logFile("Test Entry 4");
+});
+// test();
 //# sourceMappingURL=fsUtils.js.map

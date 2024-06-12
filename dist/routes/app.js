@@ -17,7 +17,10 @@ const express_1 = __importDefault(require("express"));
 // import path from "path";
 const cors_1 = __importDefault(require("cors"));
 const jsonUtils_1 = require("../utilities/jsonUtils");
-const listCount_json_1 = __importDefault(require("../../json/listCount.json"));
+const index_1 = require("../views/index");
+const helloWorld_1 = require("../views/helloWorld");
+const reactRoutes_1 = require("./reactRoutes");
+const refreshList_1 = require("../agents/refreshList");
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -28,18 +31,24 @@ app.use((err, req, res, next) => {
     res.send(err);
 });
 app.use("/", (req, res, next) => {
-    console.log(`Sending Response for ${req.path}?${req.query}`);
+    const hasQuery = Object.keys(req.query).length > 0;
+    console.log(`Sending Response for ${req.path}${!hasQuery ? "" : `?${req.query}`}`);
     next();
 });
 const respond = (res, data) => res.status(200).send(data);
-app.get("/", (request, response) => {
-    response.send("Hello World from the DND React Server!");
-});
+app.get("/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = yield (0, index_1.reactResponse)(helloWorld_1.HelloWorld, request);
+    respond(response, res);
+}));
+app.get("/refreshPlaylists", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = yield (0, refreshList_1.fetchLists)();
+    respond(response, res);
+}));
 app.get("/listCount", (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const getJson = new jsonUtils_1.jsonUtils("./json/listCount.json");
         const res = yield getJson.read();
-        console.log("Returning Response");
+        console.log("Returning Response: Query Parameter to follow");
         console.log(request.query);
         respond(response, res);
     }
@@ -47,9 +56,20 @@ app.get("/listCount", (request, response, next) => __awaiter(void 0, void 0, voi
         next();
     }
 }));
-app.get("/testJson", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    response.send(listCount_json_1.default);
-}));
+// app.get("/testJson", async (request: Request, response: Response) => {
+//     response.send(listCount)
+// });
+// app.get("/testReact", async (request: Request, response: Response) => {
+//     const res = await reactResponse(HelloWorld, request);
+//     respond(response, res);
+//     // response.send(res);
+// });
+for (const key in reactRoutes_1.reactRoutes) {
+    app.get(`/${key}`, (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+        const res = yield (0, index_1.reactResponse)(reactRoutes_1.reactRoutes[key], request);
+        respond(response, res);
+    }));
+}
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
