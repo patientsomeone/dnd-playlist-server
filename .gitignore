@@ -5,6 +5,7 @@
 
 # Ignore node modules
 **/node_modules/*
+.amplify-hosting
 
 # Ignore log files
 *.log
@@ -45,3 +46,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.vscode
