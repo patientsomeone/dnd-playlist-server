@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Typescript and Git Boilerplate",
     "scripts": {
-        "build": "echo 'Building' && (tsc || echo TSC build failed) && echo 'Complete'",
+        "build": "node dist/routes/app.js",
         "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "start": "node dist/routes/app.js",
         "urlCheck": "node dist/agents/loadUrl",
