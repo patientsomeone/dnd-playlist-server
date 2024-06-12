@@ -8,7 +8,7 @@ import {jsonUtils} from "../utilities/jsonUtils";
 import {log} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
-import {reactResponse} from "../views/index";
+import {reactResponse} from "../index";
 import {HelloWorld} from "../views/helloWorld";
 import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
