@@ -20,10 +20,12 @@ module.exports = {
             "@typescript-eslint/no-unsafe-argument": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
-            "@typescript-eslint/no-floating-promises": {
-                "ignoreVoid": "true",
-                "ignoreIIFE": "true"
-            },
+            "@typescript-eslint/no-floating-promises": [
+                "error", {
+                    "ignoreVoid": true,
+                    "ignoreIIFE": true
+                }
+            ],
             "@typescript-eslint/array-type": [
                 "error",
                 {
@@ -63,7 +65,8 @@ module.exports = {
             "@typescript-eslint/prefer-namespace-keyword": "error",
             "@typescript-eslint/semi": "error",
             "@typescript-eslint/unified-signatures": "error",
-            "@typescript-eslint/quotes": ["error", "double"]
+            "@typescript-eslint/quotes": ["error", "double"],
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn"
         }
     }],
     rules: {

@@ -58,7 +58,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
             };
 
             nDb(`Processing Log ${currentData}`);
-            nDb(`    data: ${data}`);
+            nDb(`    data: ${data.toString()}`);
             nDb(`    workingMsg: ${workingMsg}`);
             
             if (newLineChar && currentData.indexOf(newLineChar) > 0) {
@@ -83,9 +83,9 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
             return newIndent;
         };
 
-        const newOnChar = (currentItem) => {
+        const newOnChar = (currentItem: string) => {
             if (currentItem.length < (messageLength - updateIndent() * indentCount)) {
-                splitLines.push(pad(updateIndent() * indentCount, true) + " " + currentItem/*  + pad(messageLength - currentItem.length) */);
+                splitLines.push(`${pad(updateIndent() * indentCount, true)} ${currentItem}`/*  + pad(messageLength - currentItem.length) */);
             } else {
                 splitLines = getNewLine(currentItem, false, updateIndent() + 1).concat(splitLines);
             }
@@ -93,20 +93,20 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
         
         let currentLine = pad(updateIndent() * indentCount, true);
 
-        const newOnLength = (currentItem) => {
-            db(`Processing New on Length`);
+        const newOnLength = (currentItem: string) => {
+            db("Processing New on Length");
             db(`Input: ${currentItem}`);
 
             if ((currentItem.length + currentLine.length) < (messageLength - (updateIndent() * indentCount) - 4)) {
-                db(`Adding to current Line`);
+                db("Adding to current Line");
                 if (currentLine.slice(-1) !== " " && currentLine.slice(-1) !== "/" && currentLine.slice(-1) !== "\\") {
-                    db(`Current Line does not end in space, adding space`);
+                    db("Current Line does not end in space, adding space");
                     currentLine += " ";
                 }
                 currentLine += currentItem.trim() + applyJoin;
                 db(`Current Line: ${currentLine}`);
             } else if ((currentItem.length + currentLine.length) >= (messageLength - updateIndent() * indentCount)) {
-                db(`Too Long, breaking down`);
+                db("Too Long, breaking down");
                 // splitLines.push(currentLine + pad(messageLength - currentLine.length));
                 
                 db(`Current Split Lines: ${splitLines.join(" **&&** ")}`);
@@ -166,7 +166,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
  * @param indent Number of times to indent (by 5 spaces)
  * @param newLineCharacter Character to trigger a new line
  */
-export const logLine = (msg: string | false, indent?: number, newLineCharacter?: string, isErr?: boolean) => {
+export const logLine = (msg: string | false, indent?: number, newLineCharacter?: string, isErr?: boolean): void => {
     const sanitizedMessage = msg || "";
     const toIndent = indent ? indent + 1 : 1;
 

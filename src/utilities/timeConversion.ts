@@ -16,7 +16,7 @@ export interface IAverageTime {
  * Convert human readable values into milliseconds for some reason...
  * @param inputObject Values to be converted
  */
-export const convert = (inputObject: {/* month?: number,  */day?: number, hour?: number, minute?: number, second?: number}): number => {
+export const convert = (inputObject: {/* month?: number,  */day?: number; hour?: number; minute?: number; second?: number;}): number => {
     const convert = {
         // month: {
         //     previous: "day",
@@ -35,7 +35,7 @@ export const convert = (inputObject: {/* month?: number,  */day?: number, hour?:
             ofPrevious: 60
         },
         second: {
-            ofPrevious: 1000,
+            ofPrevious: 1000
         }
     };
     let result = 0;
@@ -178,6 +178,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
 
                 for (const key in returnTime) {
                     if (returnTime.hasOwnProperty(key) && returnTime[key] > 0) {
+                        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
                         longFormArray.push(returnTime[key] + medConverter[key]);
                     }
                 }

@@ -53,7 +53,7 @@ export class Config {
             return this.config;
         } catch (err) {
             throw(err);
-        };
+        }
     };
 }
 
@@ -76,4 +76,4 @@ if (moduleTest) {
             dBugger.call()(err);
             console.error(err);
         });
-};
+}

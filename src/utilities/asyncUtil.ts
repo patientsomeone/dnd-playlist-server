@@ -3,7 +3,6 @@ import debug from "debug";
 
 
 import { log, logLine } from "../utilities/log";
-import { CSV, csvRow } from "../utilities/processCSV";
 import { elapsed, IAverageTime, IPerformance } from "../utilities/timeConversion";
 
 const debPrefix = "utilities:asyncUtil";
@@ -77,7 +76,7 @@ export class AsyncUtil {
                 const individualStart = Date.now();
 
                 const triggerCounter = (msg: string | false) => {
-                    this.counter(`${msg + " | " || ""}`, countData.trackedCount, countData.totalCount, individualStart, timeStart);
+                    this.counter(`${!msg ? "" : msg + " | "}`, countData.trackedCount, countData.totalCount, individualStart, timeStart);
                 };
 
                 deEaOfSer(`EachOfSeries Status: ${Math.ceil(((countData.trackedCount) / countData.totalCount) * 100)}% | COMPLETE | ${countData.trackedCount} / ${countData.totalCount}`);
@@ -126,11 +125,11 @@ export class AsyncUtil {
 
         if (typeof iteratee !== "object") {
             logLine("Counter Fail");
-            logLine(`Iteratee: ${iteratee} is not an object`);
+            logLine(`Iteratee: ${iteratee as string} is not an object`);
             logLine("End Counter Fail");
         } else if (iteratee === null) {
             logLine("Counter Fail");
-            logLine(`Iteratee: ${iteratee} is null`);
+            logLine(`Iteratee: ${iteratee as string} is null`);
             logLine("End Counter Fail");
         } else {
             countProperties.totalCount = Object.keys(iteratee).length;

@@ -8,6 +8,7 @@ import { objectExtend } from "../utilities/objecExtend";
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import {dateStamp} from "./dateStamp";
+import {anyObject, anyStandard} from "../.types";
 
 const deb = new dBug("utilities:fsUtils");
 
@@ -33,12 +34,12 @@ export class FsUtils {
                     
                     fs.readFile(this.workingData.filePath, "utf-8", (error, data) => {
                         if (!error) {
-                            debRead(debLine(`FILE READ SUCCESS`));
+                            debRead(debLine("FILE READ SUCCESS"));
                             this.workingData.data = data;
                             this.workingData.error = error;
                             resolve(this.workingData);
                         } else {
-                            debRead(debLine(`FILE READ ERROR`));
+                            debRead(debLine("FILE READ ERROR"));
                             this.workingData.data = data;
                             this.workingData.error = error;
                             reject(this.workingData);
@@ -46,7 +47,7 @@ export class FsUtils {
                     });
                 });
             },
-            properties: (defaultProperties: {[key: string]: any}) => {
+            properties: (defaultProperties: {[key: string]: anyStandard;}): Promise<anyObject> => {
                 const deb = this.deb.set("read:properties");
                 return this.check()
                     .then(this.read.raw)
@@ -57,21 +58,26 @@ export class FsUtils {
                             return Promise.resolve(defaultProperties);
                         });
                     })
-                    .then((result) => {
+                    .then(async (result) => {
                         deb("Properties File available");
                         deb("File Results");
                         deb(result);
-                        // @ts-ignore
-                        const data = JSON.parse(result.data) as {[key: string]: any};
+                        const data = JSON.parse(result.data as string) as {[key: string]: anyStandard;};
                         deb("Data Parsed");
                         deb(data);
 
-                        const newData = objectExtend(defaultProperties, data) as {[key: string]: any};
-                        this.create.json(newData);
-                        return Promise.resolve(newData);
+                        const newData = objectExtend(defaultProperties, data) as {[key: string]: anyObject;};
+
+                        try {
+                            await this.create.json(newData);
+                            return Promise.resolve(newData);
+                        } catch (error) {
+                            return Promise.reject(error);
+                        }
+
                     });
             },
-            jsonStream: (iterator: (individualItem: string | number | boolean | { [key: string]: any | any[]}) => void ): Promise<IfsReturns> => {
+            jsonStream: (iterator: (individualItem: string | number | boolean | { [key: string]: any | any[];}) => void ): Promise<IfsReturns> => {
                 return new Promise((resolve, reject) => {
                     const debRead = deb.set("read:jsonStream");
                     
@@ -89,20 +95,20 @@ export class FsUtils {
                     //     log(`value: ${data.value}`);
                     // });
                     
-                    parser.on("end", () => {
-                        Promise.resolve();
+                    parser.on("end", async () => {
+                        await Promise.resolve();
                     });
 
 
 
                     fs.readFile(this.workingData.filePath, "utf-8", (error, data) => {
                         if (!error) {
-                            debRead(debLine(`FILE READ SUCCESS`));
+                            debRead(debLine("FILE READ SUCCESS"));
                             this.workingData.data = data;
                             this.workingData.error = error;
                             resolve(this.workingData);
                         } else {
-                            debRead(debLine(`FILE READ ERROR`));
+                            debRead(debLine("FILE READ ERROR"));
                             this.workingData.data = data;
                             this.workingData.error = error;
                             reject(this.workingData);
@@ -140,7 +146,7 @@ export class FsUtils {
 
 
     public create = {
-        json: (input: { [key: string]: any } | any[]): Promise<IfsReturns> => {
+        json: (input: { [key: string]: any; } | any[]): Promise<IfsReturns> => {
             const debCreate = deb.set("create:json");
 
             debCreate(debLine("CURRENT WORKING DATA"));
@@ -156,11 +162,11 @@ export class FsUtils {
                 fs.writeFile(this.workingData.filePath, json, "utf-8", (error) => {
                     if (!error) {
                         this.workingData.error = error;
-                        debCreate(`File write complete`);
+                        debCreate("File write complete");
                         resolve(this.workingData);
                     } else {
                         this.workingData.error = error;
-                        debCreate(debLine(`WRITE ERROR ENCOUNTERED`));
+                        debCreate(debLine("WRITE ERROR ENCOUNTERED"));
                         debCreate(error);
                         reject(this.workingData);
                     }
@@ -182,11 +188,11 @@ export class FsUtils {
                 fs.writeFile(this.workingData.filePath, input, "utf-8", (error) => {
                     if (!error) {
                         this.workingData.error = error;
-                        debCreate(`File write complete`);
+                        debCreate("File write complete");
                         resolve(this.workingData);
                     } else {
                         this.workingData.error = error;
-                        debCreate(debLine(`WRITE ERROR ENCOUNTERED`));
+                        debCreate(debLine("WRITE ERROR ENCOUNTERED"));
                         debCreate(error);
                         reject(this.workingData);
                     }
@@ -203,9 +209,9 @@ export class FsUtils {
             debCreate(this.workingData);
 
             await this.check()
-                .catch((err) => {
+                .catch(async (err) => {
                     debCreate(`Attempting to create file at ${this.workingData.filePath}`);
-                    this.create.raw(`${Date.now().toLocaleString()}: File Created`);
+                    await this.create.raw(`${Date.now().toLocaleString()}: File Created`);
                 });
 
             if (!this.wStream) {
@@ -214,10 +220,10 @@ export class FsUtils {
             }
 
             console.log(`Write Stream exists for ${this.workingData.filePath}`);
-            return this.workingData
+            return this.workingData;
 
         },
-        json: (input: { [key: string]: any } | any[]): Promise<IfsReturns> => {
+        json: (input: { [key: string]: any; } | any[]): Promise<IfsReturns> => {
             const debCreate = deb.set("writeStream:json");
 
             debCreate(debLine("CURRENT WORKING DATA"));
@@ -235,11 +241,11 @@ export class FsUtils {
                 this.wStream.write(json, "utf-8", (error) => {
                     if (!error) {
                         this.workingData.error = error;
-                        debCreate(`File write complete`);
+                        debCreate("File write complete");
                         resolve(this.workingData);
                     } else {
                         this.workingData.error = error;
-                        debCreate(debLine(`WRITE ERROR ENCOUNTERED`));
+                        debCreate(debLine("WRITE ERROR ENCOUNTERED"));
                         debCreate(error);
                         reject(this.workingData);
                     }
@@ -252,19 +258,25 @@ export class FsUtils {
             debCreate(debLine("CURRENT WORKING DATA"));
             debCreate(this.workingData);
 
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 if (!this.wStream) {
-                    await this.writeStream.initialize();
+                    (async () => {
+                        try {
+                            await this.writeStream.initialize();
+                        } catch (error) {
+                            throw(error);
+                        }
+                    })();
                 }
 
                 this.wStream.write(input, "utf-8", (error) => {
                     if (!error) {
                         this.workingData.error = error;
-                        debCreate(`File write complete`);
+                        debCreate("File write complete");
                         resolve(this.workingData);
                     } else {
                         this.workingData.error = error;
-                        debCreate(debLine(`WRITE ERROR ENCOUNTERED`));
+                        debCreate(debLine("WRITE ERROR ENCOUNTERED"));
                         debCreate(error);
                         reject(this.workingData);
                     }
@@ -277,27 +289,27 @@ export class FsUtils {
         const debLog = deb.set("logFile");
         const timeStamp = new Date(Date.now()).toLocaleString();
         const status = !err ? "Log" : "";
-        const wMsg = `${status} [${timeStamp}]: ${msg}\n`
+        const wMsg = `${status} [${timeStamp}]: ${msg}\n`;
         
         try {
-            debLog(`Writing ${wMsg}`)
+            debLog(`Writing ${wMsg}`);
             if (!!err) {
-                await this.writeStream.raw(`\n----------------------------------\\\n`);
-                await this.writeStream.raw(`--\\-- ERROR --\\--                  \\\n`);
+                await this.writeStream.raw("\n----------------------------------\\\n");
+                await this.writeStream.raw("--\\-- ERROR --\\--                  \\\n");
             }
 
             await this.writeStream.raw(wMsg);
             
             if (!!err) {
-                await this.writeStream.raw(`--/-- ERROR --/--                  /\n`);
-                await this.writeStream.raw(`----------------------------------/\n\n`);
+                await this.writeStream.raw("--/-- ERROR --/--                  /\n");
+                await this.writeStream.raw("----------------------------------/\n\n");
             }
             return;
         } catch (error) {
             debLog(`Failed to write ${wMsg}`);
         }
 
-    }
+    };
     
     private workingData: IfsReturns;
     private deb: dBug;
@@ -331,7 +343,7 @@ export class FsUtils {
                 }
             });
         });
-    }
+    };
 
     public delete = () => {
         return new Promise((resolve, reject) => {
@@ -344,7 +356,7 @@ export class FsUtils {
             });
 
         });
-    }
+    };
 }
 
 const test = async () => {
@@ -355,6 +367,6 @@ const test = async () => {
     await logger.logFile("Test Entry 3");
     await logger.logFile("Test Error 2", true);
     await logger.logFile("Test Entry 4");
-}
+};
 
 // test();

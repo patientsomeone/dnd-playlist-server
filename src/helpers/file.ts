@@ -1,4 +1,5 @@
 /* Import UTILITIES */
+import {anyArray, anyObject, anyStandard} from "../.types";
 import { dBug, debLine } from "../utilities/dBug";
 import { FsUtils, IfsReturns } from "../utilities/fsUtils";
 import { objectExtend } from "../utilities/objecExtend";
@@ -16,14 +17,14 @@ interface IfileReturn extends IfsReturns {
 }
 
 export interface IjsonTemplate {
-    [key: string]: any;
+    [key: string]: anyStandard;
 }
 
 
 export class Json {
     private filePath: string;
     private file: FsUtils;
-    private jsonTemplate: IjsonTemplate | any[];
+    private jsonTemplate: IjsonTemplate | anyArray;
     private options: IgetOptions;
     private workingData: IjsonTemplate;
 
@@ -38,7 +39,7 @@ export class Json {
         };
     }
 
-    public get = () => {
+    public get = (): Promise<anyObject> => {
         const debGet = deb.set("json");
 
         debGet(debLine());
@@ -52,14 +53,14 @@ export class Json {
                 debGet("File check succeeded");
                 return this.file.read.raw()
                 .then((readData) => {
-                    const jsonContents = JSON.parse(readData.data);
+                    const jsonContents = JSON.parse(readData.data) as anyObject;
                     debGet("File contents read");
                     debGet(jsonContents);
                     return Promise.resolve(jsonContents);
                 });
             }, (err) => {
                 /* Create file */
-                debGet(`File Not located. AutoCreate set to ${this.options.autoCreate}. | ${this.options.autoCreate ? "Creating file" : "Stopping"}`);
+                debGet(`File Not located. AutoCreate set to ${this.options.autoCreate.toString()}. | ${this.options.autoCreate ? "Creating file" : "Stopping"}`);
                 this.workingData.exists = false;
                 
                 if (!this.options.autoCreate) {
@@ -84,5 +85,5 @@ export class Json {
                         return Promise.reject(this.workingData);
                     });
             });
-    }
+    };
 }

@@ -1,11 +1,11 @@
 /* Utilities */
 import { log } from "../utilities/log";
 
-export const dateStamp = () => {
+export const dateStamp = (): string => {
     log("Generating Date Stamp");
     const today = new Date();
     const day = (() => {
-        const currentDay = today.getDate()
+        const currentDay = today.getDate();
         if (currentDay < 10) {
             return "0" + currentDay.toString();
         } else {
@@ -19,7 +19,7 @@ export const dateStamp = () => {
         } else {
             return currentMonth;
         }
-    })();;
+    })();
     const year = today.getFullYear();
 
     return (`${year.toString().slice(2,4)}.${month}.${day}`);
@@ -27,11 +27,11 @@ export const dateStamp = () => {
 
 /**
  * Replaces **dateStamp** in any string with dateStamp
- * @param contents 
+ * @param contents: string;
  */
-export const replaceStamp = (contents) => {
+export const replaceStamp = (contents: string): string => {
     log("Replacing Date Stamp");
     const date = dateStamp();
 
     return contents.split("**dateStamp**").join(date);
-}
+};

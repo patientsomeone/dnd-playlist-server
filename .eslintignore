@@ -6,6 +6,7 @@
 
 # Ignore node modules
 **/node_modules/*
+*.spec.ts
 
 # Ignore log files
 *.log

@@ -8,7 +8,7 @@ const debg = new dBug("utilities:objectExtend");
 const testModule = false;
 
 /**
- * First listed argument is default 
+ * First listed argument is default
  */
 export const objectExtend = (...args): anyObject => {
     const deb = debg.set("utilities:objectExtend");
