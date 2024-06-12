@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "description": "Typescript and Git Boilerplate",
     "scripts": {
-        "build": "tsc",
-        "buildBak": "echo 'Cleaning Dist' && (rm ./dist/* -r || echo './dist/* does not exist') && echo 'Building' && (tsc || echo TSC build failed) && echo 'Complete'",
+        "buildBak": "tsc",
+        "build": "echo 'Cleaning Dist' && (rm ./dist/* -r || echo './dist/* does not exist') && echo 'Building' && (tsc || echo TSC build failed) && echo 'Complete'",
         "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "start": "node dist/routes/app.js",
         "urlCheck": "node dist/agents/loadUrl",
