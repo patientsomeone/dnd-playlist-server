@@ -1,5 +1,9 @@
-// /*eslint-env node, gulp, es6*/
-// "use strict";
+/* eslint-env node, gulp, es6 */
+"use strict";
+const  gulp = require("gulp");
+
+console.log("Testing Gulp");
+
 // var gulp = require("gulp"),
 //     fs = require("fs"),
 //     replace = require("gulp-replace"),
