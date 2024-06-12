@@ -20,10 +20,12 @@ module.exports = {
             "@typescript-eslint/no-unsafe-argument": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
-            "@typescript-eslint/no-floating-promises": {
-                "ignoreVoid": "true",
-                "ignoreIIFE": "true"
-            },
+            "@typescript-eslint/no-floating-promises": [
+                "error", {
+                    "ignoreVoid": true,
+                    "ignoreIIFE": true
+                }
+            ],
             "@typescript-eslint/array-type": [
                 "error",
                 {
