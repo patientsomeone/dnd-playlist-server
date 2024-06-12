@@ -75,9 +75,9 @@ export class jsonUtils {
             });
     };
 
-    public viewPath = async (): Promise<string> => {
+    public viewPath = (): string => {
         return this.filePath;
-    }
+    };
 
     public checkPath = (reset?: boolean): Promise<void> => {
         const deb = this.deb.set("checkPath");

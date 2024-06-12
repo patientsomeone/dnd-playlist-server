@@ -1,6 +1,6 @@
 import { log, logLine } from "../utilities/log";
 
-const health = () => {
+const health = (): {"status": "Okay";} => {
     return {
         status: "Okay"
     };

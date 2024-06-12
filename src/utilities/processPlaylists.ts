@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* MODULES */
 import {GoogleApis, youtube_v3} from "googleapis";
 
@@ -8,7 +9,7 @@ import {jsonUtils} from "./jsonUtils";
 import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
-import {playlistResponseData} from "../.types";
+import {anyObject, playlistResponseData} from "../.types";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 
@@ -25,7 +26,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     const properties = await props.fetch() as {youtubeApiKey: string;};
     debg.call(properties.youtubeApiKey);
     
-    const config = new Config({"playlists": {}})
+    const config = new Config({"playlists": {}});
     debg.call("Fetching Module Config");
     
     // const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
@@ -34,7 +35,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     const countData: {[listName: string]: {
         link: string;
         count: number;
-    }} = {};
+    };} = {};
     
     const google = new GoogleApis({
         auth: properties.youtubeApiKey
@@ -52,7 +53,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
         }
 
         return count;
-    }
+    };
 
     const getListDetails = async(listId: string, pageToken?: string) => {
         let videoCount = 0;
@@ -76,7 +77,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
         videoCount += count;
         
         return videoCount;
-    }
+    };
 
     const fetchCount = async (id: string) => {
         const count = await getListDetails(id);
@@ -87,13 +88,13 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
 
     const siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
     
-    console.log(`Resetting JSON Cache at: ${await jsonCache.viewPath()}`);
+    console.log(`Resetting JSON Cache at: ${jsonCache.viewPath()}`);
     await jsonCache.checkPath(true);
 
-    console.log(`Resetting Site Cache at: ${await siteJson.viewPath()}`);
+    console.log(`Resetting Site Cache at: ${siteJson.viewPath()}`);
     await siteJson.checkPath(true);
     
-    const countedPlaylists = {};
+    const countedPlaylists = {lastUpdate: 0};
 
     for await (const list of Object.keys(playlistData)) {
         // console.log(`Fetching Data for: ${list}`);
@@ -106,13 +107,13 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
             jsonCache.set(list, countedPlaylists[list]);
             siteJson.set(list, countedPlaylists[list]);
         }
-    };
+    }
 
     const currentDate = Date.now();
     
     jsonCache.set("lastUpdate", currentDate);
     siteJson.set("lastUpdate", currentDate);
-    countedPlaylists["lastUpdate"] = currentDate;
+    countedPlaylists.lastUpdate = currentDate;
 
 
     // const lastUpdate = await jsonCache.get("lastUpdate");
@@ -123,7 +124,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
 
-    logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
+    await logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
 };

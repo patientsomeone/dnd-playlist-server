@@ -44,7 +44,7 @@ export class LoadUrl {
             return await loader.getUrl(config);
         } catch (err) {
             console.error(err);
-        };
+        }
     };
     private initialized = false;
     private axios: AxiosInstance;
@@ -63,7 +63,7 @@ export class LoadUrl {
             return response;
         } catch (err) {
             throw(err);
-        };
+        }
 
 
     };

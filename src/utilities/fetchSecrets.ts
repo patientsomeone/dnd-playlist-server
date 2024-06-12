@@ -1,4 +1,5 @@
 /* UTILITIES */
+import {anyStandard} from "../.types";
 import { dBug, debLine } from "../utilities/dBug";
 import { FsUtils } from "../utilities/fsUtils";
 import { log, logLine } from "../utilities/log";
@@ -8,7 +9,7 @@ import { srcPath } from "../utilities/srcPath";
 const debg = new dBug("utilities:fetchSecrets");
 
 interface Isecrets {
-    [key: string]: any;
+    [key: string]: anyStandard;
 }
 
 export class Secrets {
@@ -21,7 +22,7 @@ export class Secrets {
         this.intendedSecrets = intendedSecrets;
     }
 
-    public fetch = () => {
+    public fetch = (): Promise<Isecrets> => {
         const fs = new FsUtils(srcPath("secrets.i.json"));
         const debFetch = debg.set("Secrets:fetch");
 
@@ -44,7 +45,7 @@ export class Secrets {
                 debFetch(err);
                 return Promise.reject(err);
             });
-    }
+    };
 }
 
 const test = () => {

@@ -13,7 +13,7 @@ const testModule = false;
 
 
 interface Iproperties {
-    [key: string]: any;
+    [key: string]: anyStandard;
 }
 
 export class Properties {
@@ -45,7 +45,7 @@ export class Properties {
             return this.properties;
         } catch (err) {
             throw(err);
-        };
+        }
     };
 }
 
@@ -80,4 +80,4 @@ if (testModule) {
             dBugger.call()(err);
             console.error(err);
         });
-};
+}

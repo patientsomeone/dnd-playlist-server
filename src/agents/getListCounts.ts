@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* MODULES */
 import {GoogleApis, youtube_v3} from "googleapis";
 
@@ -21,16 +22,16 @@ import {Config} from "../utilities/fetchConfig";
         const properties = await props.fetch() as {youtubeApiKey: string;};
         debg.call(properties.youtubeApiKey);
         
-        const config = new Config({"playlists": {}})
+        const config = new Config({"playlists": {}});
         debg.call("Fetching Module Config");
         
-        const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
+        const listData = (await config.fetch() as {playlists: {[key: string]: string;};}).playlists;
         debg.call(listData);
         
         const countData: {[listName: string]: {
             link: string;
             count: number;
-        }} = {};
+        };} = {};
         
         const google = new GoogleApis({
             auth: properties.youtubeApiKey
@@ -48,7 +49,7 @@ import {Config} from "../utilities/fetchConfig";
             }
 
             return count;
-        }
+        };
 
         const getListDetails = async(listId: string, pageToken?: string) => {
             let videoCount = 0;
@@ -72,10 +73,10 @@ import {Config} from "../utilities/fetchConfig";
             videoCount += count;
             
             return videoCount;
-        }
+        };
 
         const fetchCount = async (link: string) => {
-            const listId = (await new URLSearchParams(link.split("?")[1])).get("list");
+            const listId = (new URLSearchParams(link.split("?")[1])).get("list");
             const count = await getListDetails(listId);
 
 
@@ -87,7 +88,7 @@ import {Config} from "../utilities/fetchConfig";
             return listCount;
         };
 
-        const jsonCache = new jsonUtils("./json/listCount.json")
+        const jsonCache = new jsonUtils("./json/listCount.json");
 
         await jsonCache.checkPath(true);
 
@@ -97,13 +98,13 @@ import {Config} from "../utilities/fetchConfig";
                 link: listData[list],
                 count: data.count,
                 id: data.id
-            } 
+            };
 
             countData[list] = updatedObj;
 
             jsonCache.set(list.split(".").join("\\."), updatedObj);
             // return listCount;
-        };
+        }
 
     } catch (error) {
         console.error(error);

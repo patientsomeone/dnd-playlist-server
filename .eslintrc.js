@@ -65,7 +65,8 @@ module.exports = {
             "@typescript-eslint/prefer-namespace-keyword": "error",
             "@typescript-eslint/semi": "error",
             "@typescript-eslint/unified-signatures": "error",
-            "@typescript-eslint/quotes": ["error", "double"]
+            "@typescript-eslint/quotes": ["error", "double"],
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn"
         }
     }],
     rules: {

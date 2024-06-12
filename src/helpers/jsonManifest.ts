@@ -1,4 +1,5 @@
 /* Import Utilities */
+import {anyObject} from "../.types";
 import { AsyncUtil } from "../utilities/asyncUtil";
 import { dateStamp } from "../utilities/dateStamp";
 import { dBug } from "../utilities/dBug";
@@ -26,7 +27,7 @@ const defaultProps = {
     }
 };
 
-export const fetchManifest = () => {
+export const fetchManifest = (): Promise<anyObject> => {
     const properties: Iproperties = {
         updated: "",
         pulled: ""
@@ -38,8 +39,9 @@ export const fetchManifest = () => {
         const deb = debManifest.set("fetchProperties");
         const fs = new FsUtils(propsFile);
         return fs.read.properties(defaultProps)
-        .then((props) => {
-            deb(`Manifest Properties Received`);
+        .then((allProps) => {
+            const props = allProps as {helpers: {manifest: anyObject;};};
+            deb("Manifest Properties Received");
             deb(props);
             for (const key in props.helpers.manifest) {
                 if (props.helpers.manifest.hasOwnProperty(key)) {

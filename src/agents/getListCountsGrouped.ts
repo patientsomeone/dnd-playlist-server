@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* MODULES */
 import {GoogleApis, youtube_v3} from "googleapis";
 
@@ -9,9 +10,9 @@ import {Properties} from "../utilities/fetchProperties";
 import {dBug} from "../utilities/dBug";
 import {Config} from "../utilities/fetchConfig";
 
-type playlists = {[key: string]: string};
-type groups = {[key: string]: playlists};
-type listInput = {playlists: playlists};
+type playlists = {[key: string]: string;};
+type groups = {[key: string]: playlists;};
+type listInput = {playlists: playlists;};
 
 (async () => {
     try {
@@ -24,7 +25,7 @@ type listInput = {playlists: playlists};
         const properties = await props.fetch() as {youtubeApiKey: string;};
         debg.call(properties.youtubeApiKey);
         
-        const config = new Config({"playlists": {}})
+        const config = new Config({"playlists": {}});
         debg.call("Fetching Module Config");
         
         const listData = (await config.fetch() as listInput).playlists;
@@ -33,7 +34,7 @@ type listInput = {playlists: playlists};
         const countData: {[listName: string]: {
             link: string;
             count: number;
-        }} = {};
+        };} = {};
         
         const google = new GoogleApis({
             auth: properties.youtubeApiKey
@@ -51,7 +52,7 @@ type listInput = {playlists: playlists};
             }
 
             return count;
-        }
+        };
 
         const getListDetails = async(listId: string, pageToken?: string) => {
             let videoCount = 0;
@@ -75,10 +76,10 @@ type listInput = {playlists: playlists};
             videoCount += count;
             
             return videoCount;
-        }
+        };
 
         const fetchCount = async (link: string) => {
-            const listId = (await new URLSearchParams(link.split("?")[1])).get("list");
+            const listId = (new URLSearchParams(link.split("?")[1])).get("list");
             const count = await getListDetails(listId);
 
 
@@ -90,13 +91,13 @@ type listInput = {playlists: playlists};
             return listCount;
         };
 
-        const jsonCache = new jsonUtils("./json/listCount.json")
+        const jsonCache = new jsonUtils("./json/listCount.json");
 
         await jsonCache.checkPath(true);
 
         // const processEntry = async (entry: listInput["playlists"]) {
         //     if (typeof entry === "string") {
-        //         return 
+        //         return
         //     }
         // };
 
@@ -106,13 +107,13 @@ type listInput = {playlists: playlists};
                 link: listData[list],
                 count: data.count,
                 id: data.id
-            } 
+            };
 
             countData[list] = updatedObj;
 
             jsonCache.set(list.split(".").join("\\."), updatedObj);
             // return listCount;
-        };
+        }
 
     } catch (error) {
         console.error(error);
