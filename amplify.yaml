@@ -9,6 +9,7 @@ frontend:
   phases:
     build:
       commands:
+        - echo Starting Build Commands
         - npm run build
   artifacts:
     baseDirectory: dist
