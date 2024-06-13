@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "framework": { "name": "react", "version": "4.18.2" },
+    "framework": { "name": "express", "version": "4.18.2" },
     "imageSettings": {
       "sizes": [
         100,
