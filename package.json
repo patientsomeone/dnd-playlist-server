@@ -6,7 +6,7 @@
         "buildBak": "tsc",
         "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "start": "ts-node src/routes/app.ts",
-        "build": "echo 'Cleaning Dist' && (rm -rf ./dist/* || echo ./dist/* does not exist) && echo 'Building' && (tsc || echo TSC build failed) && echo 'Complete'",
+        "build": "echo 'Cleaning Dist' && (rm -rf ./dist/* || echo ./dist/* does not exist) && echo 'Cleaning .amplify-hosting ' && (rm -rf ./.amplify-hosting/* || echo ./amplify-hosting/* does not exist) && echo 'Building' && (tsc || echo TSC build failed) && echo 'Complete'",
         "serve": "node dist/routes/app.js",
         "postbuild": "echo Postbuild && chmod +x bin/postbuild.sh && bash ./bin/postbuild.sh",
         "urlCheck": "node dist/agents/loadUrl",
