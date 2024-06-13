@@ -34,9 +34,14 @@ app.use("/", (req: Request, res: Response, next) => {
 const respond = (res, data) => res.status(200).send(data);
 
 app.get("/", async (request: Request, response: Response) => {
-    const res = await reactResponse(HelloWorld, request);
+    try {
+        const res = await reactResponse(HelloWorld, request);
+        respond(response, res);
+    } catch (error) {
+        console.log("Failed");
+    }
 
-    respond(response, res);
+
 });
 
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
