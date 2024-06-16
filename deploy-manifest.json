@@ -44,7 +44,7 @@
       {
         "name": "default",
         "runtime": "nodejs18.x",
-        "entrypoint": "routes/app.js"
+        "entrypoint": "app.js"
       }
     ]
   }

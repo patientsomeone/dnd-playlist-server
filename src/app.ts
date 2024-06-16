@@ -3,15 +3,15 @@ import {config} from "dotenv";
 import express, {Express, Request, Response, Errback} from "express";
 // import path from "path";
 import cors from "cors";
-import {jsonUtils} from "../utilities/jsonUtils";
+import {jsonUtils} from "./utilities/jsonUtils";
 // import listCount from "../../json/listCount.json";
-import {log} from "../utilities/log";
+import {log} from "./utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
-import {reactResponse} from "../index";
-import {HelloWorld} from "../views/helloWorld";
-import {reactRoutes} from "./reactRoutes";
-import {fetchLists} from "../agents/refreshList";
+import {reactResponse} from "./index";
+import {HelloWorld} from "./views/helloWorld";
+import {reactRoutes} from "./routes/reactRoutes";
+import {fetchLists} from "./agents/refreshList";
 
 config();
 
@@ -47,7 +47,7 @@ app.get("/refreshPlaylists", async (request: Request, response: Response) => {
 
 app.get("/listCount", (request: Request, response: Response, next) => {
     try {
-        const getJson = new jsonUtils("./json/listCount.json");
+        const getJson = new jsonUtils("json/listCount.json");
         const res = getJson.read();
     
         console.log("Returning Response: Query Parameter to follow");
