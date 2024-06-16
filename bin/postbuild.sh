@@ -13,6 +13,12 @@ else
     echo AWS Build execution
 fi
 
+if ! cp ./deploy-manifest.json ./dist;
+then
+    echo Failed to copy deploy-manifest
+    exit 1
+fi
+
 # echo Patient Log: Removing ./amplify-hosting
 # if ! rm -rf ./.amplify-hosting;
 # then
