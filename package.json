@@ -6,7 +6,7 @@
         "buildBak": "tsc",
         "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "start": "ts-node src/routes/app.ts",
-        "build": "echo 'Cleaning Dist' && (rm -rf ./dist/* || echo ./dist/* does not exist) && echo 'Building' && (bash node_modules/.bin/tsc || (echo TSC build failed && exit 1)) && echo 'Complete'",
+        "build": "bash ./bin/build.sh",
         "serve": "node dist/routes/app.js",
         "postbuild": "echo Executing Postbuild && chmod +x bin/postbuild.sh && bash ./bin/postbuild.sh",
         "urlCheck": "node dist/agents/loadUrl",
