@@ -28,7 +28,7 @@ fi
 echo Patient Log: Migrating to ./.amplify-hosting
 echo Patient Log: Default files
 
-if ! mv -r ./dist ./.amplify-hosting/compute/default;
+if ! mv ./dist ./.amplify-hosting/compute/default;
 then
     echo Failed to move ./dist
     exit 1
