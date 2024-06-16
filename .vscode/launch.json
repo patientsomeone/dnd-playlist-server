@@ -9,12 +9,14 @@
             "request": "launch",
             "name": "Run JS",
             "runtimeVersion": "12.22.12",
-            "program": "${file}"
+            "program": "${file}",
+            "envFile": "${workspaceFolder}/.i.env"
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Run TS File",
+            "envFile": "${workspaceFolder}/.i.env",
             "env": {
                 "TS_NODE_FILES": "true",
                 "DEBUG": "*"

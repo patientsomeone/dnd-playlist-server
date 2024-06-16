@@ -27,14 +27,14 @@ fi
 echo Patient Log: Migrating to ./.amplify-hosting
 echo Patient Log: Default files
 
-if ! cp ./dist ./.amplify-hosting/compute/default;
+if ! cp -r ./dist ./.amplify-hosting/compute/default;
 then
     echo Failed to move ./dist
     exit 1
 fi
 
 echo Patient Log: Static files
-if ! cp public ./.amplify-hosting/static;
+if ! cp -r public ./.amplify-hosting/static;
 then
     echo Failed to move Static Files.
     exit 1
@@ -42,7 +42,7 @@ fi
 
 echo Patient Log: deploy-manifest.json
 
-if ! cp deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
+if ! cp -r deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
 then
     echo Failed to move deploy-manifest.json
     exit 1
