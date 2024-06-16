@@ -10,6 +10,9 @@ frontend:
     build:
       commands:
         - npm run build
+    deploy:
+      commands:
+        - npm run serve
   artifacts:
     baseDirectory: .amplify-hosting
     files:
