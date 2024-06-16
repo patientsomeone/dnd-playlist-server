@@ -13,7 +13,7 @@ else
     echo AWS Build execution
 fi
 
-if ! cp ./deploy-manifest.json ./dist;
+if ! cp ./deploy-manifest.json ./dist/deploy-manifest.json;
 then
     echo Failed to copy deploy-manifest
     exit 1
