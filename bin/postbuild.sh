@@ -5,7 +5,7 @@ echo ----- PATIENT POST-BUILD LOGS BEGIN -----
 echo Evironment Check
 echo $AWS_APP_ID
 
-if [$AWS_APP_ID -eq ""];
+if [ -z "$AWS_APP_ID" ];
 then
     echo Local build execution, exiting
     exit 0
