@@ -3,13 +3,12 @@
 echo ----- PATIENT POST-BUILD LOGS BEGIN -----
 
 echo Evironment Check
-echo $AWS_APP_ID
 
 if [ -z "$AWS_APP_ID" ];
 then
     echo Local build execution, exiting
-    exit 0
 else
+    echo $AWS_APP_ID
     echo AWS Build execution
 fi
 
@@ -28,14 +27,14 @@ fi
 echo Patient Log: Migrating to ./.amplify-hosting
 echo Patient Log: Default files
 
-if ! mv ./dist ./.amplify-hosting/compute/default;
+if ! cp ./dist ./.amplify-hosting/compute/default;
 then
     echo Failed to move ./dist
     exit 1
 fi
 
 echo Patient Log: Static files
-if ! mv public ./.amplify-hosting/static;
+if ! cp public ./.amplify-hosting/static;
 then
     echo Failed to move Static Files.
     exit 1
@@ -43,7 +42,7 @@ fi
 
 echo Patient Log: deploy-manifest.json
 
-if ! mv deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
+if ! cp deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
 then
     echo Failed to move deploy-manifest.json
     exit 1
