@@ -56,4 +56,10 @@ then
     exit 1
 fi
 
+if ! npm run start
+then
+    echo Failed to start react server
+    exit 1
+fi
+
 echo ----- PATIENT POST-BUILD LOGS END -----
