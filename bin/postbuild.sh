@@ -30,26 +30,30 @@ echo Patient Log: Default files
 
 if ! mv -r ./dist ./.amplify-hosting/compute/default;
 then
-    echo Failed to copy ./dist
+    echo Failed to move ./dist
+    exit 1
 fi
 
 echo Patient Log: Node Modules
-if ! mv -r ./node_modules ./.amplify-hosting/compute/default/node_modules;
+if ! mv ./node_modules ./.amplify-hosting/compute/default/node_modules;
 then
-    echo Failed to copy ./node_modules
+    echo Failed to move ./node_modules
+    exit 1
 fi
 
 echo Patient Log: Static files
-if ! mv -r public ./.amplify-hosting/static;
+if ! mv public ./.amplify-hosting/static;
 then
-    echo Failed to copy Static Files.
+    echo Failed to move Static Files.
+    exit 1
 fi
 
 echo Patient Log: deploy-manifest.json
 
 if ! mv deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
 then
-    echo Failed to copy deploy-manifest.json
+    echo Failed to move deploy-manifest.json
+    exit 1
 fi
 
 echo ----- PATIENT POST-BUILD LOGS END -----
