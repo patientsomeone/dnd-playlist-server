@@ -40,6 +40,27 @@ then
     exit 1
 fi
 
+
+# Migrate /json
+echo Migrating JSON
+if ! cp -r ./src/json ./.amplify-hosting/compute/json; 
+then 
+    echo Failed to migrate /json
+    exit 1
+else 
+    echo JSON Migration Successful
+fi
+
+# Migrate /logs
+echo Migrating Logs
+if ! cp -r ./src/logs ./.amplify-hosting/compute/logs; 
+then 
+    echo Failed to migrate /logs
+    exit 1
+else 
+    echo Log Migration Successful
+fi
+
 echo Patient Log: deploy-manifest.json
 
 if ! cp -r deploy-manifest.json ./.amplify-hosting/deploy-manifest.json;
