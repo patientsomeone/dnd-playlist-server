@@ -43,7 +43,7 @@ fi
 
 # Migrate /json
 echo Migrating JSON
-if ! cp -r ./src/json ./.amplify-hosting/compute/json; 
+if ! cp -r ./json ./.amplify-hosting/compute/json; 
 then 
     echo Failed to migrate /json
     exit 1
@@ -53,7 +53,7 @@ fi
 
 # Migrate /logs
 echo Migrating Logs
-if ! cp -r ./src/logs ./.amplify-hosting/compute/logs; 
+if ! cp -r ./logs ./.amplify-hosting/compute/logs; 
 then 
     echo Failed to migrate /logs
     exit 1
