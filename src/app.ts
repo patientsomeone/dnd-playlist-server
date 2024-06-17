@@ -33,9 +33,9 @@ app.use("/", (req: Request, res: Response, next) => {
 
 const respond = (res, data) => {
     if (!!process.env.AWS_APP_ID) {
-        return res.status(200).send("get-response-from-compute");
+        return res.status(200).header("x-get-header", "get-header-value").send("get-response-from-compute");
     }
-    
+
     return res.status(200).send(data);
 };
 
