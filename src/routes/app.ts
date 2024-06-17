@@ -3,15 +3,15 @@ import {config} from "dotenv";
 import express, {Express, Request, Response, Errback} from "express";
 // import path from "path";
 import cors from "cors";
-import {jsonUtils} from "./utilities/jsonUtils";
+import {jsonUtils} from "../utilities/jsonUtils";
 // import listCount from "../../json/listCount.json";
-import {log} from "./utilities/log";
+import {log} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
-import {reactResponse} from "./index";
-import {HelloWorld} from "./views/helloWorld";
-import {reactRoutes} from "./routes/reactRoutes";
-import {fetchLists} from "./agents/refreshList";
+import {reactResponse} from "../index";
+import {HelloWorld} from "../views/helloWorld";
+import {reactRoutes} from "./reactRoutes";
+import {fetchLists} from "../agents/refreshList";
 
 config();
 

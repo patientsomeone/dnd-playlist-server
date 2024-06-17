@@ -44,7 +44,7 @@
       {
         "name": "default",
         "runtime": "nodejs18.x",
-        "entrypoint": "app.js"
+        "entrypoint": "lambda.js"
       }
     ]
   }
