@@ -31,7 +31,13 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
-const respond = (res, data) => res.status(200).send(data);
+const respond = (res, data) => {
+    if (!!process.env.AWS_APP_ID) {
+        return res.status(200).send("get-response-from-compute");
+    }
+    
+    return res.status(200).send(data);
+};
 
 app.get("/", async (request: Request, response: Response) => {
     const res = await reactResponse(HelloWorld, request);
@@ -80,7 +86,7 @@ for (const key in reactRoutes) {
     }
 }
 
-const port = /* process.env.PORT ||  */3000;
+const port = process.env.PORT || 8000;
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
