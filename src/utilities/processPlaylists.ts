@@ -6,12 +6,12 @@ import {GoogleApis, youtube_v3} from "googleapis";
 import {AsyncUtil} from "./asyncUtil";
 import {LoadUrl} from "./urlLoader";
 import {jsonUtils} from "./jsonUtils";
-import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {anyObject, playlistResponseData} from "../.types";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
+import {fetchEnv} from "./fetchEnv";
 
 
 export const getPlaylistCounts = async (playlistData: playlistResponseData, jsonCache: jsonUtils) => {
@@ -19,12 +19,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
     const logger = logFile.logFile;
     
-    const props = new Properties({
-        "youtubeApiKey": ""
-    });
-    debg.call("Fetching Properties");
-    const properties = await props.fetch() as {youtubeApiKey: string;};
-    debg.call(properties.youtubeApiKey);
+    const youtubeApiKey = await fetchEnv("YT_API_KEY");
     
     const config = new Config({"playlists": {}});
     debg.call("Fetching Module Config");
@@ -38,7 +33,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     };} = {};
     
     const google = new GoogleApis({
-        auth: properties.youtubeApiKey
+        auth: youtubeApiKey
     });
 
     const service = google.youtube("v3");

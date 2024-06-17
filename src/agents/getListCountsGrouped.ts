@@ -6,9 +6,9 @@ import {GoogleApis, youtube_v3} from "googleapis";
 import {AsyncUtil} from "../utilities/asyncUtil";
 import {LoadUrl} from "../utilities/urlLoader";
 import {jsonUtils} from "../utilities/jsonUtils";
-import {Properties} from "../utilities/fetchProperties";
 import {dBug} from "../utilities/dBug";
 import {Config} from "../utilities/fetchConfig";
+import {fetchEnv} from "../utilities/fetchEnv";
 
 type playlists = {[key: string]: string;};
 type groups = {[key: string]: playlists;};
@@ -18,12 +18,7 @@ type listInput = {playlists: playlists;};
     try {
         const debg = new dBug("utilities:getListCounts");
         
-        const props = new Properties({
-            "youtubeApiKey": ""
-        });
-        debg.call("Fetching Properties");
-        const properties = await props.fetch() as {youtubeApiKey: string;};
-        debg.call(properties.youtubeApiKey);
+        const youtubeApiKey = await fetchEnv("YT_API_KEY");
         
         const config = new Config({"playlists": {}});
         debg.call("Fetching Module Config");
@@ -37,7 +32,7 @@ type listInput = {playlists: playlists;};
         };} = {};
         
         const google = new GoogleApis({
-            auth: properties.youtubeApiKey
+            auth: youtubeApiKey
         });
 
         const service = google.youtube("v3");

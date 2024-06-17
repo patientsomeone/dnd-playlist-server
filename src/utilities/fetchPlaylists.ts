@@ -5,7 +5,6 @@ import {GoogleApis} from "googleapis";
 import {AsyncUtil} from "./asyncUtil";
 import {LoadUrl} from "./urlLoader";
 import {jsonUtils} from "./jsonUtils";
-import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {getPlaylistCounts} from "./processPlaylists";
@@ -13,6 +12,7 @@ import {logLine} from "./log";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 import {anyObject} from "../.types";
+import {fetchEnv} from "./fetchEnv";
 
 export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
@@ -25,16 +25,9 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
             return Promise.resolve(false);
         });
     
-    const props = new Properties({
-        "youtubeApiKey": ""
-    });
-
-    debg.call("Fetching Properties");
-    const properties = await props.fetch() as {youtubeApiKey: string;};
-    debg.call(properties.youtubeApiKey);
-    
+    const youtubeApiKey = await fetchEnv("YT_API_KEY");
     const google = new GoogleApis({
-        auth: properties.youtubeApiKey
+        auth: youtubeApiKey
     });
     
     const service = google.youtube("v3");

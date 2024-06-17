@@ -6,21 +6,16 @@ import {GoogleApis, youtube_v3} from "googleapis";
 import {AsyncUtil} from "../utilities/asyncUtil";
 import {LoadUrl} from "../utilities/urlLoader";
 import {jsonUtils} from "../utilities/jsonUtils";
-import {Properties} from "../utilities/fetchProperties";
 import {dBug} from "../utilities/dBug";
 import {Config} from "../utilities/fetchConfig";
+import {fetchEnv} from "../utilities/fetchEnv";
 
 
 (async () => {
     try {
         const debg = new dBug("utilities:getListCounts");
-        
-        const props = new Properties({
-            "youtubeApiKey": ""
-        });
-        debg.call("Fetching Properties");
-        const properties = await props.fetch() as {youtubeApiKey: string;};
-        debg.call(properties.youtubeApiKey);
+
+        const youtubeApiKey = await fetchEnv("YT_API_KEY");
         
         const config = new Config({"playlists": {}});
         debg.call("Fetching Module Config");
@@ -34,7 +29,7 @@ import {Config} from "../utilities/fetchConfig";
         };} = {};
         
         const google = new GoogleApis({
-            auth: properties.youtubeApiKey
+            auth: youtubeApiKey
         });
 
         const service = google.youtube("v3");
@@ -108,5 +103,6 @@ import {Config} from "../utilities/fetchConfig";
 
     } catch (error) {
         console.error(error);
+        process.exit(1);
     }
 })();
