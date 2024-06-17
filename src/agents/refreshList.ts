@@ -3,9 +3,12 @@ import {executeArguments} from "../utilities/argProcessor";
 import {FsUtils} from "../utilities/fsUtils";
 import {dateStamp} from "../utilities/dateStamp";
 import {anyObject} from "../.types";
+import {fetchEnv} from "../utilities/fetchEnv";
+import {log} from "../utilities/log";
 
 export const fetchLists = async (): Promise<anyObject> => {
-    const listData = await fetchChannelPlaylists("UCr7k176h5b1JwD9yXpSUkGA");
+    const playlistOwner = await fetchEnv("YT_LIST_OWNER");
+    const listData = await fetchChannelPlaylists(playlistOwner);
 
     return listData;
 };
