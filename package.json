@@ -4,7 +4,7 @@
     "description": "Typescript and Git Boilerplate",
     "scripts": {
         "buildBak": "tsc",
-        "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/app.ts",
+        "dev": "nodemon --watch \"./src/**/*\" --exec \"ts-node\" src/routes/app.ts",
         "build": "bash ./bin/build.sh",
         "start": "node dist/routes/app.js",
         "urlCheck": "node dist/agents/loadUrl",

@@ -17,7 +17,9 @@ import {log} from "./log";
 
 export const getPlaylistCounts = async (playlistData: playlistResponseData, jsonCache: jsonUtils) => {
     const debg = new dBug("utilities:getPlaylistCounts");
-    const envUrl = await fetchEnv("DO_ENV");
+    const envUrl = await fetchEnv("DO_ENV").catch((err) => {
+        return Promise.resolve(false);
+    });
     
     const youtubeApiKey = await fetchEnv("YT_API_KEY");
     

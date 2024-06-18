@@ -3,6 +3,9 @@
 # Ignore any file or folder by .i flag
 *.i.*
 
+# Ignore .lock files
+*.lock
+
 # Ignore node modules
 **/node_modules/*
 .amplify-hosting
@@ -47,4 +50,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-.vscode

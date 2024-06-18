@@ -1,8 +1,29 @@
 import debug from "debug";
 import {dBug} from "../utilities/dBug";
+import {fetchEnv} from "./fetchEnv";
+import {config} from "dotenv";
 
-export const log = debug("logger*");
-export const err = debug("---ERROR*");
+config({path: "./.i.env"});
+
+const isProduction = process.env.DO_ENV;
+
+const loggers = {
+    log: (() => {
+        if (isProduction) {
+            return console.log;
+        }
+        return debug("logger*");
+    })(),
+    err: (() => {
+        if (isProduction) {
+            return console.error;
+        }
+        return debug("logger*");
+    })()
+};
+
+export const log = loggers.log;
+export const err = loggers.err;
 const deb = new dBug("log");
 /**
  * Pad text to a certain number of characters for uniform outputs
