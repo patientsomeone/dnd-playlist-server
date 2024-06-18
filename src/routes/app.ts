@@ -46,7 +46,7 @@ app.get("/", (request: Request, response: Response) => {
     response.sendFile(srcPath(mainPath));
 });
 
-app.get("/createLists", (request: Request, response: Response) => {
+app.get("/createList.js", (request: Request, response: Response) => {
     const mainPath = "./public/createList.js";
     console.log(`Attempting to fetch ${srcPath(mainPath)}`)
     response.sendFile(srcPath(mainPath));
