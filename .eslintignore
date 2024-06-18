@@ -1,6 +1,9 @@
 # Ignore any file or folder by .es.i flag
 *.es.i.*
 
+# Ignore /json files
+json/*
+
 # Ignore Typescript compled files
 **/.dist/*.js
 
