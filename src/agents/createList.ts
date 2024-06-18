@@ -60,8 +60,6 @@ const injectApi = () => {
     }
 };
 
-
-
 const generateShuffler = (url: string): string => {
     const shuffleParams = "&autoplay=1&loop=1&enablejsapi=1";
     const youtubeBaseline = "https://www.youtube.com/embed/videoseries?";
