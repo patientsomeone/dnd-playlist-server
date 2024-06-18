@@ -52,7 +52,7 @@ app.get("/createList.js", (request: Request, response: Response) => {
     response.sendFile(srcPath(mainPath));
 });
 
-app.get("/createList.js", (request: Request, response: Response) => {
+app.get("/listCount.json", (request: Request, response: Response) => {
     const mainPath = "./json/listCount.json";
     console.log(`Attempting to fetch ${srcPath(mainPath)}`);
     response.sendFile(srcPath(mainPath));
