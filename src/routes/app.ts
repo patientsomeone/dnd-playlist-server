@@ -52,6 +52,12 @@ app.get("/createList.js", (request: Request, response: Response) => {
     response.sendFile(srcPath(mainPath));
 });
 
+// app.get("/listCount.json", (request: Request, response: Response) => {
+//     const mainPath = "json/listCount.json";
+//     console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+//     response.sendFile(srcPath(mainPath));
+// });
+
 // app.get("/", async (request: Request, response: Response) => {
 //     const res = await reactResponse(HelloWorld, request);
 
@@ -65,6 +71,20 @@ app.get("/refreshPlaylists", async (request: Request, response: Response) => {
 });
 
 app.get("/listCount", (request: Request, response: Response, next) => {
+    try {
+        const getJson = new jsonUtils("json/listCount.json");
+        const res = getJson.read();
+    
+        console.log("Returning Response: Query Parameter to follow");
+        console.log(request.query);
+    
+        respond(response, res);
+    } catch (error) {
+        next();
+    }
+});
+
+app.get("/listCount.json", (request: Request, response: Response, next) => {
     try {
         const getJson = new jsonUtils("json/listCount.json");
         const res = getJson.read();
