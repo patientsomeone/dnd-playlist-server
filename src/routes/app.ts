@@ -42,13 +42,19 @@ const respond = (res, data) => {
 
 app.get("/", (request: Request, response: Response) => {
     const mainPath = "./public/playlists.html";
-    console.log(`Attempting to fetch ${srcPath(mainPath)}`)
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
     response.sendFile(srcPath(mainPath));
 });
 
 app.get("/createList.js", (request: Request, response: Response) => {
     const mainPath = "./public/createList.js";
-    console.log(`Attempting to fetch ${srcPath(mainPath)}`)
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+    response.sendFile(srcPath(mainPath));
+});
+
+app.get("/createList.js", (request: Request, response: Response) => {
+    const mainPath = "./json/listCount.json";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
     response.sendFile(srcPath(mainPath));
 });
 
