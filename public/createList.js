@@ -169,7 +169,7 @@ const processUrl = async() => {
         log("Refreshing Playlist Data");
 
         await refreshLists();
-        let refreshedData = await fetch("/dndReactApp/refreshPlaylists");
+        let refreshedData = await fetch("/refreshPlaylists");
         let refProcessed = await refreshedData.json();
         const isProcessing = refProcessed.hasOwnProperty("status") && refProcessed.status === "processing";
 
@@ -181,7 +181,7 @@ const processUrl = async() => {
                 return Promise.resolve();
             }, 3000);
             
-            refreshedData = await fetch("/dndReactApp/refreshPlaylists");
+            refreshedData = await fetch("/refreshPlaylists");
             refProcessed = await refreshedData.json();
         }
         
