@@ -359,14 +359,14 @@ export class FsUtils {
     };
 }
 
-const test = async () => {
+const test = () => {
     const logger = new FsUtils(`./logs/${dateStamp()}_log.txt`);
-    await logger.logFile("Test Entry 1");
-    await logger.logFile("Test Entry 2");
-    await logger.logFile("Test Error 1", true);
-    await logger.logFile("Test Entry 3");
-    await logger.logFile("Test Error 2", true);
-    await logger.logFile("Test Entry 4");
+    log("Test Entry 1");
+    log("Test Entry 2");
+    log("Test Error 1", true);
+    log("Test Entry 3");
+    log("Test Error 2", true);
+    log("Test Entry 4");
 };
 
 // test();

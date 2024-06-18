@@ -76,9 +76,9 @@ window.onYouTubeIframeAPIReady = () => {
     log("Loaded YouTube API, firing onload");
 }
 
-const getCount = async(listUrl) => {
+// const getCount = async(listUrl) => {
 
-};
+// };
 
 const injectApi = async(url) => {
     if (!document.querySelector("head #youTubeApi")) {

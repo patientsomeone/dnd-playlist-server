@@ -12,20 +12,17 @@ import {anyObject, playlistResponseData} from "../.types";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 import {fetchEnv} from "./fetchEnv";
+import {log} from "./log";
 
 
 export const getPlaylistCounts = async (playlistData: playlistResponseData, jsonCache: jsonUtils) => {
     const debg = new dBug("utilities:getPlaylistCounts");
-    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
-    const logger = logFile.logFile;
+    const envUrl = await fetchEnv("DO_ENV");
     
     const youtubeApiKey = await fetchEnv("YT_API_KEY");
     
     const config = new Config({"playlists": {}});
     debg.call("Fetching Module Config");
-    
-    // const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
-    // debg.call(listData);
     
     const countData: {[listName: string]: {
         link: string;
@@ -79,19 +76,18 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
         return count;
     };
 
-    console.log("Processing Fetched Playlists");
+    log("Processing Fetched Playlists");
 
-    const siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
-    
-    console.log(`Resetting JSON Cache at: ${jsonCache.viewPath()}`);
-    await jsonCache.checkPath(true);
+    let siteJson = null;
 
-    console.log(`Resetting Site Cache at: ${siteJson.viewPath()}`);
-    try {
+    if (!envUrl) {
+        siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
+        log(`Resetting Site Cache at: ${siteJson.viewPath() as string}`);
         await siteJson.checkPath(true);
-    } catch (error) {
-        console.log("Failed to reset cache, probably up on DO");
     }
+    
+    log(`Resetting JSON Cache at: ${jsonCache.viewPath()}`);
+    await jsonCache.checkPath(true);
     
     const countedPlaylists = {lastUpdate: 0};
 
@@ -104,14 +100,20 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
             countedPlaylists[list].count = count;
     
             jsonCache.set(list, countedPlaylists[list]);
-            siteJson.set(list, countedPlaylists[list]);
+
+            if (!envUrl && !!siteJson) {
+                siteJson.set(list, countedPlaylists[list]);
+            }
         }
     }
 
     const currentDate = Date.now();
     
     jsonCache.set("lastUpdate", currentDate);
-    siteJson.set("lastUpdate", currentDate);
+
+    if (!envUrl && !!siteJson) {
+        siteJson.set("lastUpdate", currentDate);
+    }
     countedPlaylists.lastUpdate = currentDate;
 
 
@@ -123,7 +125,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
 
-    await logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
+    log(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
 };

@@ -8,7 +8,7 @@ import {jsonUtils} from "./jsonUtils";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {getPlaylistCounts} from "./processPlaylists";
-import {logLine} from "./log";
+import {log, logLine} from "./log";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 import {anyObject} from "../.types";
@@ -16,16 +16,6 @@ import {fetchEnv} from "./fetchEnv";
 
 export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
-    // const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
-    // const logger = logFile.logFile;
-
-    const logger = (msg: string, err?: boolean) => {
-        if (err) {
-        return console.error(msg);
-        }
-        
-        return console.log(msg);
-    };
 
     const apiLock = new FsUtils("./playlists.lock");
     const isLocked = await apiLock.check()
@@ -139,28 +129,28 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
             }
         }
 
-        await logger(`Checked ${checkedLists} playlists`);
-        await logger(`Found ${foundLists} playlists`);
+        log(`Checked ${checkedLists} playlists`);
+        log(`Found ${foundLists} playlists`);
     
         return processedLinks;
     };
     
     const initialize = async () => {
         const deb = debg.set("initialize");
-        await logger("Checking playlist files...");
+        log("Checking playlist files...");
         try {
             const jsonCache = new jsonUtils("./json/listCount.json");
             await jsonCache.checkPath();
             const lastUpdate = jsonCache.get("lastUpdate") as number || false;
             
             if (!!lastUpdate && Date.now() < (lastUpdate + (12 * 60 * 60 * 1000))) {
-                await logger("API Data up to date");
+                log("API Data up to date");
                 deb("JSON Cache Recently Updated");
                 return jsonCache.read();
             }
 
             if (!isLocked) {
-                await logger("Locking API execution");
+                log("Locking API execution");
                 await apiLock.create.raw("");
             }
 
@@ -168,12 +158,12 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
             const processed = await processPlaylists(listItems);
             const countedList = await getPlaylistCounts(processed, jsonCache);
 
-            await logger("Fetched Playlist count data");
+            log("Fetched Playlist count data");
 
             await apiLock.delete();
-            await logger("Deleted Playlist lock");
+            log("Deleted Playlist lock");
 
-            await logger("Playlist Update Complete");
+            log("Playlist Update Complete");
 
             return countedList;
         } catch (error) {
@@ -182,14 +172,14 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
     };
 
     if (!!isLocked) {
-        await logger("On Load Status Check: API Processing");
+        log("On Load Status Check: API Processing");
         return {status: "processing"};
     }
 
     try {
         return await initialize();
     } catch (err) {
-        await logger(`Unable to fetch Playlists ${err as string}`, true);
+        log(`Unable to fetch Playlists ${err as string}`, true);
     }
 };
 

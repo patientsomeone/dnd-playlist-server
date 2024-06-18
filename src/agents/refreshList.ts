@@ -14,12 +14,10 @@ export const fetchLists = async (): Promise<anyObject> => {
 };
 
 const initialize = async () => {
-    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
-    const logger = logFile.logFile;
-    console.log("Fetching Playlists");
+    log("Fetching Playlists");
 
     try {
-        await logger("Fetching Playlists");
+        log("Fetching Playlists");
         return fetchLists()
             .catch((err) => {
                 console.error(err);
