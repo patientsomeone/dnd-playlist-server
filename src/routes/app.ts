@@ -41,11 +41,15 @@ const respond = (res, data) => {
 };
 
 app.get("/", (request: Request, response: Response) => {
-    response.sendFile(srcPath("../../public/playlists.html"));
+    const mainPath = "../../public/playlists.html";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`)
+    response.sendFile(srcPath(mainPath));
 });
 
 app.get("/createLists", (request: Request, response: Response) => {
-    response.sendFile(srcPath("../../public/createList.js"));
+    const mainPath = "../../public/createList.js";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`)
+    response.sendFile(srcPath(mainPath));
 });
 
 // app.get("/", async (request: Request, response: Response) => {
