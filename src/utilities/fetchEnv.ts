@@ -17,21 +17,15 @@ config({path: "./.i.env"});
 
 const env = process.env;
 
-for (const [key, value] of Object.entries(env)) {
-    log(`${key}: ${value}`);
-}
-
 export const fetchEnv = async (key: string): Promise<string> => {
     const requestedEnv = env.hasOwnProperty(key) && key;
     
-
     return await (async () => {
         try {
             if (!requestedEnv) {
                 log(`Environment Key ${key} not found`);
                 return Promise.reject(`Environment Key ${key} not found`);
             }
-            log(`Environment Key ${key}: ${env[key]} found`);
             return env[key];
         } catch (error) {
             throw(error);
