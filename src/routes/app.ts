@@ -70,7 +70,7 @@ app.get("/refreshPlaylists", async (request: Request, response: Response) => {
     respond(response, res);
 });
 
-app.get("/listCount", (request: Request, response: Response, next) => {
+app.get("/listCount*", (request: Request, response: Response, next) => {
     try {
         const getJson = new jsonUtils("json/listCount.json");
         const res = getJson.read();
@@ -84,19 +84,6 @@ app.get("/listCount", (request: Request, response: Response, next) => {
     }
 });
 
-app.get("/listCount.json", (request: Request, response: Response, next) => {
-    try {
-        const getJson = new jsonUtils("json/listCount.json");
-        const res = getJson.read();
-    
-        console.log("Returning Response: Query Parameter to follow");
-        console.log(request.query);
-    
-        respond(response, res);
-    } catch (error) {
-        next();
-    }
-});
 
 
 for (const key in reactRoutes) {
