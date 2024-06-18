@@ -20,7 +20,7 @@ outputs/
 *input*.json
 *output*.json
 dist/
-json/*.*
+json/*.json
 
 ### OS Files ###
 # Ignore Mac .DS_Store files
