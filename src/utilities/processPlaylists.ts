@@ -87,7 +87,11 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     await jsonCache.checkPath(true);
 
     console.log(`Resetting Site Cache at: ${siteJson.viewPath()}`);
-    await siteJson.checkPath(true);
+    try {
+        await siteJson.checkPath(true);
+    } catch (error) {
+        console.log("Failed to reset cache, probably up on DO");
+    }
     
     const countedPlaylists = {lastUpdate: 0};
 
