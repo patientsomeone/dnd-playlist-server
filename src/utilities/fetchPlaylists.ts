@@ -16,8 +16,12 @@ import {fetchEnv} from "./fetchEnv";
 
 export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
-    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
-    const logger = logFile.logFile;
+    // const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
+    // const logger = logFile.logFile;
+
+    const logger = (msg: string) => {
+        console.log(msg);
+    }
 
     const apiLock = new FsUtils("./playlists.lock");
     const isLocked = await apiLock.check()

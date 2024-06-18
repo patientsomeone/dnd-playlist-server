@@ -16,6 +16,7 @@ export const fetchLists = async (): Promise<anyObject> => {
 const initialize = async () => {
     const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
     const logger = logFile.logFile;
+    console.log("Fetching Playlists");
 
     try {
         await logger("Fetching Playlists");
