@@ -9,9 +9,10 @@ import {log} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
 import {reactResponse} from "../index";
-import {HelloWorld} from "../views/helloWorld";
+// import {HelloWorld} from "../views/helloWorld";
 import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
+import {srcPath} from "../utilities/srcPath";
 
 config();
 
@@ -39,11 +40,19 @@ const respond = (res, data) => {
     return res.status(200).send(data);
 };
 
-app.get("/", async (request: Request, response: Response) => {
-    const res = await reactResponse(HelloWorld, request);
-
-    respond(response, res);
+app.get("/", (request: Request, response: Response) => {
+    response.sendFile(srcPath("../../public/playlists.html"));
 });
+
+app.get("/createLists", (request: Request, response: Response) => {
+    response.sendFile(srcPath("../../public/createList.js"));
+});
+
+// app.get("/", async (request: Request, response: Response) => {
+//     const res = await reactResponse(HelloWorld, request);
+
+//     respond(response, res);
+// });
 
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
     const res = await fetchLists();
@@ -65,16 +74,6 @@ app.get("/listCount", (request: Request, response: Response, next) => {
     }
 });
 
-// app.get("/testJson", async (request: Request, response: Response) => {
-//     response.send(listCount)
-// });
-
-// app.get("/testReact", async (request: Request, response: Response) => {
-//     const res = await reactResponse(HelloWorld, request);
-
-//     respond(response, res);
-//     // response.send(res);
-// });
 
 for (const key in reactRoutes) {
     if (reactRoutes.hasOwnProperty(key)) {
