@@ -156,7 +156,7 @@ const completeRefresh = async () => {
 
 const processUrl = async() => {
     const listData = await (async () => {
-        const data = await fetch("listCount");
+        const data = await fetch("/listCount");
         const processed = await data.json();
         const lastUpdate = processed.hasOwnProperty("lastUpdate") && processed.lastUpdate;
         
