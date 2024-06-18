@@ -84,22 +84,6 @@ app.get("/listCount", (request: Request, response: Response, next) => {
     }
 });
 
-app.get("/listCount.json", (request: Request, response: Response, next) => {
-    try {
-        const getJson = new jsonUtils("json/listCount.json");
-        const res = getJson.read();
-    
-        console.log("Returning Response: Query Parameter to follow");
-        console.log(request.query);
-    
-        respond(response, res);
-    } catch (error) {
-        next();
-    }
-});
-
-
-
 for (const key in reactRoutes) {
     if (reactRoutes.hasOwnProperty(key)) {
         app.get(`/${key}`, async (request: Request, response: Response) => {
