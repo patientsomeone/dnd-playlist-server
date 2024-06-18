@@ -184,7 +184,7 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
 };
 
 const test = async () => {
-    await fetchChannelPlaylists("UCr7k176h5b1JwD9yXpSUkGA");
+    await fetchChannelPlaylists(await fetchEnv("YT_PLAYLIST_OWNER"));
 };
 
 // test()
