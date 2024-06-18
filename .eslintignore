@@ -2,7 +2,7 @@
 *.es.i.*
 
 # Ignore /json files
-json/*
+./json/*
 
 # Ignore Typescript compled files
 **/.dist/*.js
