@@ -2,9 +2,9 @@
 "use strict";
 var gulp = require("gulp"),
     fs = require("fs"),
-    replace = require("gulp-replace"),
+    // replace = require("gulp-replace"),
     prompt = require("gulp-prompt"),
-    rename = require("gulp-rename"),
+    // rename = require("gulp-rename"),
     cmd = require("child_process"),
     opn = require("opn"),
     debug = require("debug"),
@@ -519,3 +519,7 @@ gulp.task("prune", () => {
         .then(executePrune);
 
 });
+
+gulp.task("default", () => {
+    console.log("Gulp default ran");
+})

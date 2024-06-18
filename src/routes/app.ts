@@ -8,10 +8,11 @@ import {jsonUtils} from "../utilities/jsonUtils";
 import {log} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
-import {reactResponse} from "../views/index";
-import {HelloWorld} from "../views/helloWorld";
+import {reactResponse} from "../index";
+// import {HelloWorld} from "../views/helloWorld";
 import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
+import {srcPath} from "../utilities/srcPath";
 
 config();
 
@@ -31,12 +32,30 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
-const respond = (res, data) => res.status(200).send(data);
+const respond = (res, data) => {
+    if (!!process.env.AWS_APP_ID) {
+        return res.status(200).header("x-get-header", "get-header-value").send("get-response-from-compute");
+    }
 
-app.get("/", async (request: Request, response: Response) => {
-    const res = await reactResponse(HelloWorld, request);
+    return res.status(200).send(data);
+};
 
-    respond(response, res);
+app.get("/", (request: Request, response: Response) => {
+    const mainPath = "./public/playlists.html";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+    response.sendFile(srcPath(mainPath));
+});
+
+app.get("/createList.js", (request: Request, response: Response) => {
+    const mainPath = "./public/createList.js";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+    response.sendFile(srcPath(mainPath));
+});
+
+app.get("/favicon.ico", (request: Request, response: Response) => {
+    const mainPath = "./public/favicon.ico";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+    response.sendFile(srcPath(mainPath));
 });
 
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
@@ -47,7 +66,7 @@ app.get("/refreshPlaylists", async (request: Request, response: Response) => {
 
 app.get("/listCount", (request: Request, response: Response, next) => {
     try {
-        const getJson = new jsonUtils("./json/listCount.json");
+        const getJson = new jsonUtils("json/listCount.json");
         const res = getJson.read();
     
         console.log("Returning Response: Query Parameter to follow");
@@ -58,17 +77,6 @@ app.get("/listCount", (request: Request, response: Response, next) => {
         next();
     }
 });
-
-// app.get("/testJson", async (request: Request, response: Response) => {
-//     response.send(listCount)
-// });
-
-// app.get("/testReact", async (request: Request, response: Response) => {
-//     const res = await reactResponse(HelloWorld, request);
-
-//     respond(response, res);
-//     // response.send(res);
-// });
 
 for (const key in reactRoutes) {
     if (reactRoutes.hasOwnProperty(key)) {
@@ -85,3 +93,5 @@ const port = process.env.PORT || 8000;
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
+
+export {app};

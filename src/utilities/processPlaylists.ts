@@ -6,31 +6,25 @@ import {GoogleApis, youtube_v3} from "googleapis";
 import {AsyncUtil} from "./asyncUtil";
 import {LoadUrl} from "./urlLoader";
 import {jsonUtils} from "./jsonUtils";
-import {Properties} from "./fetchProperties";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
 import {anyObject, playlistResponseData} from "../.types";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
+import {fetchEnv} from "./fetchEnv";
+import {log} from "./log";
 
 
 export const getPlaylistCounts = async (playlistData: playlistResponseData, jsonCache: jsonUtils) => {
     const debg = new dBug("utilities:getPlaylistCounts");
-    const logFile = new FsUtils(`./logs/${dateStamp()}_playlistLogs.txt`);
-    const logger = logFile.logFile;
-    
-    const props = new Properties({
-        "youtubeApiKey": ""
+    const envUrl = await fetchEnv("DO_ENV").catch((err) => {
+        return Promise.resolve(false);
     });
-    debg.call("Fetching Properties");
-    const properties = await props.fetch() as {youtubeApiKey: string;};
-    debg.call(properties.youtubeApiKey);
+    
+    const youtubeApiKey = await fetchEnv("YT_API_KEY");
     
     const config = new Config({"playlists": {}});
     debg.call("Fetching Module Config");
-    
-    // const listData = (await config.fetch() as {playlists: {[key: string]: string}}).playlists;
-    // debg.call(listData);
     
     const countData: {[listName: string]: {
         link: string;
@@ -38,7 +32,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     };} = {};
     
     const google = new GoogleApis({
-        auth: properties.youtubeApiKey
+        auth: youtubeApiKey
     });
 
     const service = google.youtube("v3");
@@ -84,15 +78,18 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
         return count;
     };
 
-    console.log("Processing Fetched Playlists");
+    log("Processing Fetched Playlists");
 
-    const siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
+    let siteJson = null;
+
+    if (!envUrl) {
+        siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
+        log(`Resetting Site Cache at: ${siteJson.viewPath() as string}`);
+        await siteJson.checkPath(true);
+    }
     
-    console.log(`Resetting JSON Cache at: ${jsonCache.viewPath()}`);
+    log(`Resetting JSON Cache at: ${jsonCache.viewPath()}`);
     await jsonCache.checkPath(true);
-
-    console.log(`Resetting Site Cache at: ${siteJson.viewPath()}`);
-    await siteJson.checkPath(true);
     
     const countedPlaylists = {lastUpdate: 0};
 
@@ -105,14 +102,20 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
             countedPlaylists[list].count = count;
     
             jsonCache.set(list, countedPlaylists[list]);
-            siteJson.set(list, countedPlaylists[list]);
+
+            if (!envUrl && !!siteJson) {
+                siteJson.set(list, countedPlaylists[list]);
+            }
         }
     }
 
     const currentDate = Date.now();
     
     jsonCache.set("lastUpdate", currentDate);
-    siteJson.set("lastUpdate", currentDate);
+
+    if (!envUrl && !!siteJson) {
+        siteJson.set("lastUpdate", currentDate);
+    }
     countedPlaylists.lastUpdate = currentDate;
 
 
@@ -124,7 +127,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
 
-    await logger(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
+    log(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
 };

@@ -3,7 +3,7 @@ import { Request } from "express";
 
 export const HelloWorld = async (request: Request) => {
     console.log("Attempting to write to TSX");
-    return (
+    return Promise.resolve(
         <div>
             <h1> Hello World from the land of DND! </h1>
             <span>
@@ -11,4 +11,4 @@ export const HelloWorld = async (request: Request) => {
             </span>
         </div>
     );
-}; 
+};

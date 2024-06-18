@@ -20,6 +20,8 @@
         "client",
         "dist",
         "node_modules",
-        "**/*.spec.ts"
+        "**/*.spec.ts",
+        "*.json",
+        "./src/logs/*"
     ]
 }

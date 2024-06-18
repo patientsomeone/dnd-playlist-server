@@ -1,0 +1,146 @@
+<!-- 
+
+    DEVELOPER'S NOTE:
+    
+    This simple site was created to support a group of friends whom I play a weekly DnD game with. On the front end it is a very simple site that organizes playlists alphabetically based on the naming convention of the YouTube account. The YouTube API sorts by either Creation Date or Updated Date, which is not conducive to our specific use case. In addition to sorting, when a playlist is selected the video player automatically loops and shuffles the playlist unless it is instructed not to based on naming convention. Within the YouTube UI, looping takes two additional clicks and shuffling takes an additional click and only applies after the first video has played or is skipped.
+
+    In order to minimize YouTube API calls, the data is only updated if the site has not been accessed by a user for 2 days. In this case the site will display "Please Wait" messaging while it fetches and processes fresh data from the YouTube account. This messaging typically lasts for 3 - 5 seconds during fetching and processing, and paints the organized list upon completion.
+    
+    If you are reading this it is highly likely that you are reviewing my resume and application in consideration for a position within your organization, so I thought I'd leave this note. I appreciate your time and consideration.
+    
+    Sincerely,
+    Joshua Robinson
+
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dip's Organized Playlists</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KB6D58NPK"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3KB6D58NPK');
+    </script>
+    <script type="module" src="/createList.js"></script>
+    <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
+    <style>
+        html {
+            color-scheme: light dark;
+        }
+        
+        body {
+            width: 100%;
+            margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+
+        #listParent sub {
+            display: block;
+            width: 100%;
+            text-align: right;
+
+            &.expired {
+                color: #dbd472;
+            };
+
+            &.fresh {
+                color: #647dc4;
+            };
+        }
+
+        #listParent dt a {
+            display: block;
+            background: rgb(20 20 20 / 75%);
+            border-radius: 1vh;
+            padding: 0.5vh 1vh;
+            border: solid 1px rgb(255 255 255 / 25%);
+            color: #fff;
+            text-decoration: none;
+            
+            &:hover {
+                background: rgb(0 0 0 / 25%);
+                border: solid 1px rgb(255 255 255 / 75%);
+                color: #80a7d9;
+            };
+
+            &:visited {
+                color: #d6d9ae;
+            };
+
+            &:visited:hover {
+                color: #80a7d9;
+            };
+
+
+        }
+        
+        dl dt {
+            margin: .5rem;
+        }
+        
+        #listOrganizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        #listOrganizer div {
+            padding: 2rem;
+        }
+
+        div#framePlacer {
+            position: sticky;
+            top: 0px;
+            height: 92vh;
+            display: flex;
+            align-content: center;
+            align-items: center;
+        }
+        
+        #listOrganizer #frameParent {
+            /* position: sticky;
+            top: 1vh; */
+            min-width: 640px;
+            min-height: 495px;
+
+            & iframe {
+                border-radius: 1vh;
+            }
+        }
+        
+        #frameParent h2.buffering {
+            color: #c56c6c;
+        }
+        
+        #frameParent h2.playing {
+            color: #647dc4;
+        }
+        
+        #frameParent h2.paused {
+            color: #dbd472;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <h1>Dip's D&D Playlists Automated</h1> -->
+    <div id="listOrganizer">
+        <div id="framePlacer">
+            <div id="frameParent">
+                <h2 class="">Ready to Play</h2>
+                <div id="shufflerFrame"></div>
+            </div>
+        </div>
+        <div id="listParent"> </div>
+    </div>
+</body>
+
+</html>

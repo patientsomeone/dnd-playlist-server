@@ -3,11 +3,16 @@
 # Ignore any file or folder by .i flag
 *.i.*
 
+# Ignore .lock files
+*.lock
+
 # Ignore node modules
 **/node_modules/*
+.amplify-hosting
 
 # Ignore log files
 *.log
+logs/*
 
 # Ignore input and output files
 *.csv
@@ -15,6 +20,7 @@ outputs/
 *input*.json
 *output*.json
 dist/
+json/*.json
 
 ### OS Files ###
 # Ignore Mac .DS_Store files
