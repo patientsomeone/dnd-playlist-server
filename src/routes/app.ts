@@ -34,8 +34,8 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
-const respond = (res: Response, data: anyStandard) => {
-    console.log(`Responding to request for ${res.location.toString()}`);
+const respond = (req: Request, res: Response, data: anyStandard) => {
+    console.log(`Responding to computed request from: ${req.path} at ${currentTime()}`);
     return res.status(200).send(data);
 };
 
@@ -62,7 +62,7 @@ app.get("/favicon.ico", (request: Request, response: Response) => {
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
     const res = await fetchLists();
     console.log("Refreshing Playlists");
-    respond(response, res);
+    respond(request, response, res);
 });
 
 app.get("/listCount", (request: Request, response: Response, next) => {
@@ -73,7 +73,7 @@ app.get("/listCount", (request: Request, response: Response, next) => {
         console.log(`Returning Response on ${request.path}: Query Parameter to follow`);
         console.log(request.query);
     
-        respond(response, res);
+        respond(request, response, res);
     } catch (error) {
         next();
     }
@@ -84,7 +84,7 @@ for (const key in reactRoutes) {
         app.get(`/${key}`, async (request: Request, response: Response) => {
             const res = await reactResponse(reactRoutes[key], request);
     
-            respond(response, res);
+            respond(request, response, res);
         });
     }
 }
