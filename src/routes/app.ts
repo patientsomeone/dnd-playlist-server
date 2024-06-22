@@ -33,12 +33,10 @@ app.use("/", (req: Request, res: Response, next) => {
 });
 
 const respond = (res, data) => {
-    if (!!process.env.AWS_APP_ID) {
-        return res.status(200).header("x-get-header", "get-header-value").send("get-response-from-compute");
-    }
-
     return res.status(200).send(data);
 };
+
+console.log(`Starting application at: ${Date.now().toLocaleString()}`);
 
 app.get("/", (request: Request, response: Response) => {
     const mainPath = "./public/playlists.html";
@@ -60,7 +58,7 @@ app.get("/favicon.ico", (request: Request, response: Response) => {
 
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
     const res = await fetchLists();
-
+    console.log("Refreshing Playlists");
     respond(response, res);
 });
 
@@ -69,7 +67,7 @@ app.get("/listCount", (request: Request, response: Response, next) => {
         const getJson = new jsonUtils("json/listCount.json");
         const res = getJson.read();
     
-        console.log("Returning Response: Query Parameter to follow");
+        console.log(`Returning Response on ${request.path}: Query Parameter to follow`);
         console.log(request.query);
     
         respond(response, res);
