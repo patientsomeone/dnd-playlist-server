@@ -13,6 +13,7 @@ import {reactResponse} from "../index";
 import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
 import {srcPath} from "../utilities/srcPath";
+import {anyObject, anyStandard} from "../.types";
 
 config();
 
@@ -32,11 +33,8 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
-const respond = (res, data) => {
-    if (!!process.env.AWS_APP_ID) {
-        return res.status(200).header("x-get-header", "get-header-value").send("get-response-from-compute");
-    }
-
+const respond = (res: Response, data: anyStandard) => {
+    console.log(`Responding to request for ${res.location.toString()}`);
     return res.status(200).send(data);
 };
 
