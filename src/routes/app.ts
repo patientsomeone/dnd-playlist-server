@@ -14,6 +14,7 @@ import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
 import {srcPath} from "../utilities/srcPath";
 import {anyObject, anyStandard} from "../.types";
+import {currentTime} from "../utilities/timeConversion";
 
 config();
 
@@ -38,9 +39,7 @@ const respond = (res: Response, data: anyStandard) => {
     return res.status(200).send(data);
 };
 
-const time = new Date(Date.now());
-
-console.log(`Starting application at: ${time.toLocaleString("en-US", {timeZone: "PT"})}`);
+console.log(`Application started at: ${currentTime()}`);
 
 app.get("/", (request: Request, response: Response) => {
     const mainPath = "./public/playlists.html";
