@@ -38,7 +38,7 @@ const respond = (res: Response, data: anyStandard) => {
     return res.status(200).send(data);
 };
 
-console.log(`Starting application at: ${Date.now().toLocaleString()}`);
+console.log(`Starting application at: ${Date.now().toLocaleString("en-US")}`);
 
 app.get("/", (request: Request, response: Response) => {
     const mainPath = "./public/playlists.html";
