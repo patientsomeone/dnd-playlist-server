@@ -40,7 +40,7 @@ const respond = (res: Response, data: anyStandard) => {
 
 const time = new Date(Date.now());
 
-console.log(`Starting application at: ${time.toLocaleString("en-US", {timeZone: "PDT"})}`);
+console.log(`Starting application at: ${time.toLocaleString("en-US", {timeZone: "PT"})}`);
 
 app.get("/", (request: Request, response: Response) => {
     const mainPath = "./public/playlists.html";
