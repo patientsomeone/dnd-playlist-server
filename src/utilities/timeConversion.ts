@@ -11,6 +11,12 @@ export interface IAverageTime {
     end: number;
 }
 
+export const currentTime = (timeZone?: string): string => {
+    const currentTime = new Date(Date.now());
+
+    return currentTime.toLocaleString("en-US", {timeZone: timeZone || "america/los_angeles"});
+};
+
 
 /**
  * Convert human readable values into milliseconds for some reason...
