@@ -130,7 +130,7 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
         }
 
         log(`Checked ${checkedLists} playlists`);
-        log(`Found ${foundLists} playlists`);
+        log(`Identified ${foundLists} playlists`);
     
         return processedLinks;
     };
