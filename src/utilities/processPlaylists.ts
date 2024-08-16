@@ -118,15 +118,6 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     }
     countedPlaylists.lastUpdate = currentDate;
 
-
-    // const lastUpdate = await jsonCache.get("lastUpdate");
-    // debg.call(`Last Updated: ${lastUpdate}`);
-
-    // const allPlaylists = jsonCache.read();
-
-    // jsonCache = new jsonUtils("./json/listCount.json");
-    // await jsonCache.checkPath(true);
-
     log(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
