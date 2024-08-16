@@ -1,0 +1,53 @@
+<!-- 
+
+    DEVELOPER'S NOTE:
+    
+    This simple site was created to support a group of friends whom I play a weekly DnD game with. On the front end it is a very simple site that organizes playlists alphabetically based on the naming convention of the YouTube account (https://www.youtube.com/@dipjyotibhattacharjee7641/playlists). YouTube sorts by either Creation Date or Updated Date, which is not conducive to our specific use case. In addition to sorting, when a playlist is selected the video player automatically loops and shuffles the playlist unless it is instructed not to based on naming convention. Within the YouTube UI, looping takes two additional clicks and shuffling takes an additional click and only applies after the first video has played or is skipped.
+
+    In order to minimize YouTube API calls, the data is only updated if the site has not been accessed by a user for 2 days. In this case the site will display "Please Wait" messaging while it fetches and processes fresh data from the YouTube account. This messaging typically lasts for 3 - 5 seconds during fetching and processing, and paints the organized list upon completion.
+    
+    If you are reading this it is highly likely that you are reviewing my resume and application in consideration for a position within your organization, so I thought I'd leave this note. I appreciate your time and consideration.
+    
+    Sincerely,
+    Joshua Robinson
+
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>cRPG Bro's Pathfinder WOTR Builds</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KB6D58NPK"></script>
+    <script>
+        window.listEndpoint = "pathfinderBuilds";
+        window.pageTitle = "Pathfinder WOTR Builds";
+        window.listAuthor = "cRPG Bro"
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3KB6D58NPK');
+    </script>
+    <script type="module" src="/createList.js"></script>
+    <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
+    <link rel="stylesheet" href="/pageStyle.css"/>
+</head>
+
+<body>
+    <!-- <h1>Dip's D&D Playlists Automated</h1> -->
+    <div id="listOrganizer">
+        <div id="framePlacer">
+            <div id="frameParent">
+                <h2 class="">Ready to Play</h2>
+                <div id="shufflerFrame"></div>
+            </div>
+        </div>
+        <div id="listParent"> </div>
+    </div>
+</body>
+
+</html>
