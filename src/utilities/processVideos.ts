@@ -21,6 +21,8 @@ export const processPlaylists = async (allPlaylists: {snippet: {title: string;};
     let checkedLists = 0;
     let foundLists = 0;
 
+    // TODO: Migrate hard coded logic into passthrough methodology
+
     for await (const playlist of allPlaylists) {
         const playlistName = playlist.snippet.title;
         const link = `https://www.youtube.com/playlist?list=${playlist.id}`;

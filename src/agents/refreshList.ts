@@ -35,6 +35,8 @@ export const fetchLists = async (queryObject: {[key: string]: string;}): Promise
 
     let listData = null;
 
+    // TODO: Differentiate a playlist ID from a user ID
+
     if (queryObject.singlePlaylist.toLowerCase() === "false") {
         log("Loading all Playlists");
         listData = await fetchChannelPlaylists(query.listOwner, query.ownerId);
