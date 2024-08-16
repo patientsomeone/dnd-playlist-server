@@ -14,11 +14,12 @@ import {dateStamp} from "./dateStamp";
 import {anyObject} from "../.types";
 import {fetchEnv} from "./fetchEnv";
 import {toTitleCase} from "./textManipulators";
+import {processPlaylists} from "./processVideos";
 
-export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
+export const fetchChannelPlaylists = async (channelId: string, ownerId: string): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
 
-    const apiLock = new FsUtils("./playlists.lock");
+    const apiLock = new FsUtils(`./public/locks/${ownerId}.lock`);
     const isLocked = await apiLock.check()
         .catch((err) => {
             return Promise.resolve(false);
@@ -63,49 +64,6 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
         } catch (error) {
             console.error(`Unable to fetch Playlists ${error as string}`);
         }
-    };
-    
-    const processPlaylists = async (allPlaylists: {snippet: {title: string;}; id: string;}[]) => {
-        const processedLinks = {};
-        let checkedLists = 0;
-        let foundLists = 0;
-    
-        for await (const playlist of allPlaylists) {
-            const playlistName = playlist.snippet.title;
-            const link = `https://www.youtube.com/playlist?list=${playlist.id}`;
-            const id = playlist.id;
-
-            checkedLists += 1;
-    
-            if (playlistName.toLowerCase().indexOf("d&d") >= 0 && playlistName.toLowerCase().indexOf("d&d timeline") < 0) {
-                try {
-                    const playlistTitle = await toTitleCase(playlistName.toLowerCase().split("d&d")[1].trim());
-                    processedLinks[playlistTitle === "Intro" ? "!!! Intro !!!" : playlistTitle] = {
-                        link,
-                        id
-                    };
-                    foundLists += 1;
-                } catch (err) {
-                    throw (err);
-                }
-            } else if (playlistName.toLowerCase().indexOf("emotional") >= 0 || playlistName.toLowerCase().indexOf("normal explore") >= 0) {
-                try {
-                    const playlistTitle = await toTitleCase(playlistName.toLowerCase().trim());
-                    processedLinks[playlistTitle] = {
-                        link,
-                        id
-                    };
-                    foundLists += 1;
-                } catch (err) {
-                    throw (err);
-                }
-            }
-        }
-
-        log(`Checked ${checkedLists} playlists`);
-        log(`Identified ${foundLists} playlists`);
-    
-        return processedLinks;
     };
     
     const initialize = async () => {
@@ -157,7 +115,7 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
 };
 
 const test = async () => {
-    await fetchChannelPlaylists(await fetchEnv("YT_PLAYLIST_OWNER"));
+    await fetchChannelPlaylists(await fetchEnv("YT_PLAYLIST_OWNER"), "dipsLists");
 };
 
 // test()
