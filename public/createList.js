@@ -15,7 +15,7 @@ const pathMap = {
         refresh: "/pfRefresh"
     },
     dipsLists: {
-        count: "/listCount",
+        count: "/json/dipsList.json",
         refresh: "/refreshPlaylists"
     },
     standard: {
