@@ -13,6 +13,7 @@ import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 import {anyObject} from "../.types";
 import {fetchEnv} from "./fetchEnv";
+import {toTitleCase} from "./textManipulators";
 
 export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
@@ -30,34 +31,6 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
     
     const service = google.youtube("v3");
     
-    const capWord = async (word: string) => {
-        const capLetter = word.slice(0, 1);
-        const restWord = word.slice(1);
-        const slashWord = word.split("/");
-    
-        if (slashWord.length > 1) {
-            const newWords = [];
-            for await (const newWord of slashWord) {
-                const thisWord = await capWord(newWord);
-                newWords.push(thisWord);
-            }
-    
-            return newWords.join(" / ");
-        }
-        return `${capLetter.toUpperCase()}${restWord}`;
-    };
-    
-    const toTitleCase = async(fullTitle) => {
-        const titleWords = fullTitle.split(" ");
-        const workingTitle = [];
-    
-        for await (const word of titleWords) {
-            workingTitle.push(await capWord(word));
-        }
-    
-        return workingTitle.join(" ");
-    };
-
     const fetchPlaylistData = async (channelId: string, pageToken?: string) => {
         try {
             let workingLists = [];
@@ -139,7 +112,7 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
         const deb = debg.set("initialize");
         log("Checking playlist files...");
         try {
-            const jsonCache = new jsonUtils("./json/listCount.json");
+            const jsonCache = new jsonUtils("./public/json/listCount.json");
             await jsonCache.checkPath();
             const lastUpdate = jsonCache.get("lastUpdate") as number || false;
             
