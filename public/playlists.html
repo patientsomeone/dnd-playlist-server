@@ -20,6 +20,8 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KB6D58NPK"></script>
     <script>
+        window.listEndpoint = "dipsLists";
+
         window.dataLayer = window.dataLayer || [];
 
         function gtag() {
@@ -30,8 +32,9 @@
         gtag('config', 'G-3KB6D58NPK');
     </script>
     <script type="module" src="/createList.js"></script>
+    <link rel="stylesheet" href="/pageStyle.css"/>
     <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
-    <style>
+    <!-- <style>
         html {
             color-scheme: light dark;
         }
@@ -110,12 +113,24 @@
             top: 1vh; */
             min-width: 640px;
             min-height: 495px;
+            display: flex;
+            flex-direction: column;
+
+            & a {
+                padding: 1em 0;
+            }
+
+            & div#shufflerFrame {
+                display: block;
+                height: 360px;
+                padding: 0;
+            }
 
             & iframe {
                 border-radius: 1vh;
             }
         }
-        
+
         #frameParent h2.buffering {
             color: #c56c6c;
         }
@@ -127,7 +142,7 @@
         #frameParent h2.paused {
             color: #dbd472;
         }
-    </style>
+    </style> -->
 </head>
 
 <body>
@@ -139,7 +154,11 @@
                 <div id="shufflerFrame"></div>
             </div>
         </div>
-        <div id="listParent"> </div>
+        <div id="listParent">
+            <sub>
+                <a href="/pathfinderBuilds.html"> Click here for organized Pathfinder WOTR Builds by cRPG Bro </a>
+            </sub>
+        </div>
     </div>
 </body>
 
