@@ -52,11 +52,11 @@ app.get("/", (request: Request, response: Response) => {
     response.sendFile(srcPath(mainPath));
 });
 
-// app.get("/createList.js", (request: Request, response: Response) => {
-//     const mainPath = "./public/createList.js";
-//     console.log(`Attempting to fetch ${srcPath(mainPath)}`);
-//     response.sendFile(srcPath(mainPath));
-// });
+app.get("/pathfinderBuilds", (request: Request, response: Response) => {
+    const mainPath = "./public/pathfinderBuilds.html";
+    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+    response.sendFile(srcPath(mainPath));
+});
 
 app.get("/favicon.ico", (request: Request, response: Response) => {
     const mainPath = "./public/favicon.ico";
@@ -72,7 +72,7 @@ app.get("/refreshPlaylists", async (request: Request, response: Response) => {
 
 app.get("/listCount", (request: Request, response: Response, next) => {
     try {
-        const getJson = new jsonUtils("json/listCount.json");
+        const getJson = new jsonUtils("public/json/listCount.json");
         const res = getJson.read();
     
         console.log(`Returning Response on ${request.path}: Query Parameter to follow`);
