@@ -7,6 +7,22 @@ const log = (msg) => {
 }
 
 log("Runing createList.js");
+log(`Checking for lists at ${window.listEndpoint || "standard"}`);
+
+const pathMap = {
+    pathfinderBuilds: {
+        count: "/pfCount",
+        refresh: "/pfRefresh"
+    },
+    dipsLists: {
+        count: "/listCount",
+        refresh: "/refreshPlaylists"
+    },
+    standard: {
+        count: "/listCount",
+        refresh: "/refreshPlaylists"
+    }
+}
 
 let youTubeReady = false;
 let queue = false;
@@ -155,63 +171,106 @@ const completeRefresh = async () => {
 }
 
 const processUrl = async() => {
+    const endpoint = (() => {
+        if (!!window.listEndpoint && pathMap.hasOwnProperty(window.listEndpoint)) {
+            log(`Fetching data from ${listEndpoint}`);
+            return pathMap[listEndpoint];
+        }
+
+        log(`Fetching data from default`);
+        return pathMap.standard;
+    })();
+
+
     const listData = await (async () => {
-        const data = await fetch("/listCount");
-        const processed = await data.json();
-        const lastUpdate = processed.hasOwnProperty("lastUpdate") && processed.lastUpdate;
-        
-        log(`JSON Cache Last Updated: ${new Date(lastUpdate)}`);
+        try {
+            const data = await fetch(endpoint.count);
 
-        if (!!lastUpdate && Date.now() <= (lastUpdate + (12 * 60 * 60 * 1000))) {
-            return processed;
-        }
+            if (data.status === 404) {
+                console.error(`Unable to access ${endpoint.count}. Exiting`);
+                return {
+                    lastUpdate: false
+                };
+            }
 
-        log("Refreshing Playlist Data");
-
-        await refreshLists();
-        let refreshedData = await fetch("/refreshPlaylists");
-        let refProcessed = await refreshedData.json();
-        const isProcessing = refProcessed.hasOwnProperty("status") && refProcessed.status === "processing";
-
-        log(`Refresh is Processing: ${isProcessing}`);
-
-        if (!!isProcessing) {
-            await setTimeout(() => {
-                log("Timeout Ended");
-                return Promise.resolve();
-            }, 3000);
+            const processed = await data.json();
+            const lastUpdate = processed.hasOwnProperty("lastUpdate") && processed.lastUpdate;
             
-            refreshedData = await fetch("/refreshPlaylists");
-            refProcessed = await refreshedData.json();
+            log(`JSON Cache Last Updated: ${new Date(lastUpdate)}`);
+    
+            if (!!lastUpdate && Date.now() <= (lastUpdate + (12 * 60 * 60 * 1000))) {
+                return processed;
+            }
+    
+            log("Refreshing Playlist Data");
+    
+            await refreshLists();
+            let refreshedData = await fetch(endpoint.refresh);
+            let refProcessed = await refreshedData.json();
+            const isProcessing = refProcessed.hasOwnProperty("status") && refProcessed.status === "processing";
+    
+            log(`Refresh is Processing: ${isProcessing}`);
+    
+            if (!!isProcessing) {
+                await setTimeout(() => {
+                    log("Timeout Ended");
+                    return Promise.resolve();
+                }, 3000);
+                
+                refreshedData = await fetch(endpoint.refresh);
+                refProcessed = await refreshedData.json();
+            }
+            
+            await completeRefresh();
+            return refProcessed;
+        } catch (error) {
+            console.error(error);
+            return;
         }
-        
-        await completeRefresh();
-        return refProcessed;
     })();
 
     const lastUpdate = listData.lastUpdate;
 
     const heading = document.createElement("h1");
+    const subHeading = document.createElement("h3");
+    const listAuthor = document.createElement("listAuthor");
     const updated = document.createElement("sub");
     const list = document.createElement("dl");
-    heading.innerHTML = "Dip's Organized Playlists";
+    heading.innerHTML = window.pageTitle || document.querySelector("title").innerText;
+    
     updated.id = "lastUpdated";
-    updated.innerHTML = `Last Updated: ${new Date(lastUpdate).toLocaleString()}
+    updated.innerHTML = `Last Updated: ${!lastUpdate ? "List inaccessible" : new Date(lastUpdate).toLocaleString()}
     <br>
     Author: Joshua Robinson
     `
-
-    document.querySelector("#listParent").appendChild(heading);
-    document.querySelector("#listParent").appendChild(list);
-    document.querySelector("#listParent").appendChild(updated);
-
-    if (!lastUpdate || Date.now() >= (lastUpdate + (12 * 60 * 60 * 1000))) {
+    document.querySelector("#listParent").prepend(updated);
+    document.querySelector("#listParent").prepend(list);
+    
+    if (!lastUpdate) {
+        document.querySelector("#lastUpdated").classList.add("error");
+        console.warn(`Playlist was inaccessible`);
+    } else if (Date.now() >= (lastUpdate + (12 * 60 * 60 * 1000))) {
         document.querySelector("#lastUpdated").classList.add("expired");
         console.warn(`Playlist data may need to be refreshed`);
     } else {
         document.querySelector("#lastUpdated").classList.add("fresh");
-        console.log("Playlist data appears up to date");
+        log("Playlist data appears up to date");
+    };
+
+    if (!!window.listAuthor) {
+        listAuthor.innerHTML = `List Created By: ${window.listAuthor}`;
+        listAuthor.style.textAlign = "right";
+        listAuthor.style.display = "block";
+        listAuthor.style.margin = "-1.5em 0px 0px 0px";
+        document.querySelector("#listParent").prepend(listAuthor);
     }
+    
+    if (!!window.pageSubtitle) {
+        subHeading.innerHTML = window.pageSubtitle;
+        document.querySelector("#listParent").prepend(subHeading);
+    };
+
+    document.querySelector("#listParent").prepend(heading);
     
     const sorted = Object.keys(listData).sort().reduce((item, key) => {
         item[key] = listData[key];
