@@ -65,7 +65,10 @@ app.get("/favicon.ico", (request: Request, response: Response) => {
 });
 
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
-    const res = await fetchLists();
+    console.log(`Refreshing Playlists from ${request.path}: Query Parameters to follow`);
+    console.log(request.query);
+    
+    const res = await fetchLists(request.query as {[key: string]: string;});
     console.log("Refreshing Playlists");
     respond(request, response, res);
 });
