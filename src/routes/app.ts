@@ -34,6 +34,11 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
+app.use(express.static("./public/"), (req: Request, res: Response, next) => {
+    console.log(`Attempting to fetch ${req.path}`);
+    next();
+});
+
 const respond = (req: Request, res: Response, data: anyStandard) => {
     console.log(`Responding to computed request from: ${req.path} at ${currentTime()}`);
     return res.status(200).send(data);
@@ -47,11 +52,11 @@ app.get("/", (request: Request, response: Response) => {
     response.sendFile(srcPath(mainPath));
 });
 
-app.get("/createList.js", (request: Request, response: Response) => {
-    const mainPath = "./public/createList.js";
-    console.log(`Attempting to fetch ${srcPath(mainPath)}`);
-    response.sendFile(srcPath(mainPath));
-});
+// app.get("/createList.js", (request: Request, response: Response) => {
+//     const mainPath = "./public/createList.js";
+//     console.log(`Attempting to fetch ${srcPath(mainPath)}`);
+//     response.sendFile(srcPath(mainPath));
+// });
 
 app.get("/favicon.ico", (request: Request, response: Response) => {
     const mainPath = "./public/favicon.ico";
