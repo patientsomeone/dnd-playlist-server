@@ -102,21 +102,21 @@ export const fetchChannelPlaylists = async (query: playlistQueries): Promise<any
             try {
                 listItems = await fetchPlaylistData(query.channelId);
             } catch (error) {
-                err(`Unable to list items | Error: ${error.toString()}`);
+                err(`Unable to list items | Error: ${error}`);
                 return Promise.reject(error);
             }
 
             try {
                 processed = await processPlaylists(listItems, dipsProcessor);
             } catch (error) {
-                err(`Unable to process playlists | Error: ${error.toString()}`);
+                err(`Unable to process playlists | Error: ${error}`);
                 return Promise.reject(error);
             }
 
             try {
                 countedList = await getPlaylistCounts(processed, jsonCache);
             } catch (error) {
-                err(`Unable to list items | Error: ${error.toString()}`);
+                err(`Unable to list items | Error: ${error}`);
                 return Promise.reject(error);
             }
 
