@@ -12,7 +12,7 @@ import {anyObject, playlistResponseData} from "../.types";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
 import {fetchEnv} from "./fetchEnv";
-import {log} from "./log";
+import {err, log} from "./log";
 import {toTitleCase} from "./textManipulators";
 
 export type playlistData = {
@@ -36,13 +36,22 @@ type allLinks = {
 
 type playlistArray = playlistData[];
 
-export const processPlaylists = async (allPlaylists: playlistArray, playlistProcessor: (playlist: playlistData) => Promise<processedLinks>): Promise<allLinks> => {
+export const processPlaylists = async (allPlaylists: playlistArray, playlistProcessor: (playlist: playlistData) => Promise<processedLinks | false>): Promise<allLinks> => {
     const processedLinks = {};
     let checkedLists = 0;
 
     for await (const playlist of allPlaylists) {
         checkedLists += 1;
-        const processed = await playlistProcessor(playlist);
+        let processed = null;
+        try {
+            processed = await playlistProcessor(playlist);
+            if (!processed) {
+                continue;
+            }
+        } catch (error) {
+            err(error);
+            throw(error);
+        }
 
         processedLinks[processed.name] = processed.data;
     }
