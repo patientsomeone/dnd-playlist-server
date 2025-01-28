@@ -3,7 +3,7 @@ import {log, err} from "../utilities/log";
 import {playlistData, processedLinks} from "../utilities/processPlaylists";
 import {toTitleCase} from "../utilities/textManipulators";
 
-export const dipsProcessor = async (playlist: playlistData): Promise<processedLinks> => {
+export const dipsProcessor = async (playlist: playlistData): Promise<processedLinks | false> => {
     const playlistName = playlist.snippet.title;
     const link = `https://www.youtube.com/playlist?list=${playlist.id}`;
     const id = playlist.id;
@@ -39,5 +39,7 @@ export const dipsProcessor = async (playlist: playlistData): Promise<processedLi
             err(error);
             throw (error);
         }
+    } else {
+        return false;
     }
 };
