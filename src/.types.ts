@@ -9,6 +9,10 @@ export type anyObject = {
     [key: string | number]: anyStandard;
 };
 
+export type stringObject = {
+    [key: string]: string;
+}
+
 export type anyArray = anyStandard[];
 
 export type playlistResponseData = {
@@ -25,3 +29,9 @@ export type playlistProcessed = {
         count: number;
     }
 };
+
+export type playlistQueries = {
+    channelId: string; 
+    singlePlaylist?: boolean;
+    test?: string;
+}

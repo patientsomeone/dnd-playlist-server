@@ -16,44 +16,40 @@ import {log} from "./log";
 import {toTitleCase} from "./textManipulators";
 
 
-export const processPlaylists = async (allPlaylists: {snippet: {title: string;}; id: string;}[]) => {
+export const processVideos = async (playlistId: string) => {
     const processedLinks = {};
     let checkedLists = 0;
     let foundLists = 0;
 
     // TODO: Migrate hard coded logic into passthrough methodology
 
-    for await (const playlist of allPlaylists) {
-        const playlistName = playlist.snippet.title;
-        const link = `https://www.youtube.com/playlist?list=${playlist.id}`;
-        const id = playlist.id;
+        // const link = `https://www.youtube.com/playlist?list=${playlistId}`;
 
-        checkedLists += 1;
+        // checkedLists += 1;
 
-        if (playlistName.toLowerCase().indexOf("d&d") >= 0 && playlistName.toLowerCase().indexOf("d&d timeline") < 0) {
-            try {
-                const playlistTitle = await toTitleCase(playlistName.toLowerCase().split("d&d")[1].trim());
-                processedLinks[playlistTitle === "Intro" ? "!!! Intro !!!" : playlistTitle] = {
-                    link,
-                    id
-                };
-                foundLists += 1;
-            } catch (err) {
-                throw (err);
-            }
-        } else if (playlistName.toLowerCase().indexOf("emotional") >= 0 || playlistName.toLowerCase().indexOf("normal explore") >= 0) {
-            try {
-                const playlistTitle = await toTitleCase(playlistName.toLowerCase().trim());
-                processedLinks[playlistTitle] = {
-                    link,
-                    id
-                };
-                foundLists += 1;
-            } catch (err) {
-                throw (err);
-            }
-        }
-    }
+        // if (playlistName.toLowerCase().indexOf("d&d") >= 0 && playlistName.toLowerCase().indexOf("d&d timeline") < 0) {
+        //     try {
+        //         const playlistTitle = await toTitleCase(playlistName.toLowerCase().split("d&d")[1].trim());
+        //         processedLinks[playlistTitle === "Intro" ? "!!! Intro !!!" : playlistTitle] = {
+        //             link,
+        //             id
+        //         };
+        //         foundLists += 1;
+        //     } catch (err) {
+        //         throw (err);
+        //     }
+        // } else if (playlistName.toLowerCase().indexOf("emotional") >= 0 || playlistName.toLowerCase().indexOf("normal explore") >= 0) {
+        //     try {
+        //         const playlistTitle = await toTitleCase(playlistName.toLowerCase().trim());
+        //         processedLinks[playlistTitle] = {
+        //             link,
+        //             id
+        //         };
+        //         foundLists += 1;
+        //     } catch (err) {
+        //         throw (err);
+        //     }
+        // }
 
     log(`Checked ${checkedLists} playlists`);
     log(`Identified ${foundLists} playlists`);

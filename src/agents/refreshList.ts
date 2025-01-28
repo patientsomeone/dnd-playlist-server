@@ -1,49 +1,25 @@
 import {fetchChannelPlaylists} from "../utilities/fetchPlaylists";
-import {anyObject} from "../.types";
+import {anyObject, playlistQueries} from "../.types";
 import {fetchEnv} from "../utilities/fetchEnv";
 import {log} from "../utilities/log";
+import {queryProcessor} from "../utilities/queryProcessor";
 
-export const fetchLists = async (queryObject: {[key: string]: string;}): Promise<anyObject> => {
-    const query = await (async () => {
-        const workingQuery = {
-            listOwner: "",
-            ownerId: ""
-        };
-
-        const defaultQuery = {
-            listOwner: async () => {
-                return await fetchEnv("YT_LIST_OWNER");
-            },
-            ownerId: async () => {
-                return await defaultQuery.listOwner();
-            },
-            singlePlaylist: async () => {
-                return Promise.resolve("false");
-            }
-        };
-        
-        for await (const key of Object.keys(defaultQuery)) {
-            if (queryObject.hasOwnProperty(key)) {
-                workingQuery[key] = queryObject[key];
-            } else {
-                workingQuery[key] = await defaultQuery[key]();
-            }
-        }
-        
-        return workingQuery;
-    })();
-
+export const fetchLists = async (query: playlistQueries): Promise<anyObject> => {
     let listData = null;
 
-    // TODO: Differentiate a playlist ID from a user ID
+    // const query = await queryProcessor(queryObject);
 
-    if (queryObject.singlePlaylist.toLowerCase() === "false") {
+    log("Fetching Playlists");
+    log(query);
+    // TODO: Differentiate a list of Playlists from a list of Videos
+
+    if (!query.singlePlaylist) {
         log("Loading all Playlists");
-        listData = await fetchChannelPlaylists(query.listOwner, query.ownerId);
+        listData = await fetchChannelPlaylists(query);
     } else {
         // TODO: Set assign Single Playlist Endpoint
         log("Loading Single Playlist");
-        listData = await fetchChannelPlaylists(query.listOwner, query.ownerId);
+        listData = await fetchChannelPlaylists(query);
     }
 
     return listData;

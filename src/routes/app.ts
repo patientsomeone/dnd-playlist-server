@@ -13,8 +13,9 @@ import {reactResponse} from "../index";
 import {reactRoutes} from "./reactRoutes";
 import {fetchLists} from "../agents/refreshList";
 import {srcPath} from "../utilities/srcPath";
-import {anyObject, anyStandard} from "../.types";
+import {anyObject, anyStandard, playlistQueries, stringObject} from "../.types";
 import {currentTime} from "../utilities/timeConversion";
+import {queryProcessor} from "../utilities/queryProcessor";
 
 config();
 
@@ -23,19 +24,27 @@ const app: Express = express();
 app.use(express.json());
 app.use(cors());
 app.use((err, req: Request, res: Response, next) => {
-    console.log(`Sending Error for ${req.route as string}`);
+    console.log("\x1b[31m%s\x1b[0m", `Sending Error for ${req.route as string}`);
     res.status(err.status || 500);
     res.send(err);
 });
 
 app.use("/", (req: Request, res: Response, next) => {
     const hasQuery = Object.keys(req.query).length > 0;
-    console.log(`Sending Response for ${req.path}${!hasQuery ? "" : `?${req.query.toString()}`}`);
+    console.log(`Sending Response for ${req.hostname} | ${req.path}`);
+    if (hasQuery) {
+        console.log(req.query);
+    }
+    console.log(`Response: ${res.statusMessage || "OK"} | ${res.statusCode}`);
     next();
 });
 
 app.use(express.static("./public/"), (req: Request, res: Response, next) => {
     console.log(`Attempting to fetch ${req.path}`);
+    if (req.path.indexOf("../") > 0) {
+        console.error("\x1b[31m%s\x1b[0m", `Pathing attempt detected from ${req.originalUrl}`);
+        res.send("No pathing please");
+    }
     next();
 });
 
@@ -67,8 +76,13 @@ app.get("/favicon.ico", (request: Request, response: Response) => {
 app.get("/refreshPlaylists", async (request: Request, response: Response) => {
     console.log(`Refreshing Playlists from ${request.path}: Query Parameters to follow`);
     console.log(request.query);
+
+    // Apply default query
+    const query = await queryProcessor(request.query as stringObject);
+
+    // TODO: Separate endpoints to query based
     
-    const res = await fetchLists(request.query as {[key: string]: string;});
+    const res = await fetchLists(query);
     console.log("Refreshing Playlists");
     respond(request, response, res);
 });

@@ -7,7 +7,7 @@ const log = (msg) => {
 }
 
 log("Runing createList.js");
-log(`Checking for lists at ${window.listEndpoint || "standard"}`);
+log(`Checking for lists at ${(window.listData && window.listData.listEndpoint)|| "standard"}`);
 
 const pathMap = {
     pathfinderBuilds: {
@@ -15,7 +15,7 @@ const pathMap = {
         refresh: "/pfRefresh"
     },
     dipsLists: {
-        count: "/json/dipsList.json",
+        count: "/json/UCr7k176h5b1JwD9yXpSUkGA.json",
         refresh: "/refreshPlaylists"
     },
     standard: {
@@ -143,7 +143,9 @@ const clickListener = (element, config) => {
     currentElement.addEventListener("click", (evt) => {
         evt.preventDefault();
         window.gtag("event", "click", {
+            // eslint-disable-next-line camelcase
             event_category: "button",
+            // eslint-disable-next-line camelcase
             event_label: config.name
         })
         if (!!youTubeReady) {
@@ -172,40 +174,36 @@ const completeRefresh = async () => {
 
 const processUrl = async() => {
     const endpoint = (() => {
-        if (!!window.listEndpoint && pathMap.hasOwnProperty(window.listEndpoint)) {
-            log(`Fetching data from ${listEndpoint}`);
-            return pathMap[listEndpoint];
+        if (!!window.listData && !!window.listData.listEndpoint && pathMap.hasOwnProperty(window.listData.listEndpoint)) {
+            log(`Fetching data from ${window.listData.listEndpoint}`);
+            return pathMap[window.listData.listEndpoint];
         }
 
         log(`Fetching data from default`);
         return pathMap.standard;
     })();
 
-
     const listData = await (async () => {
         try {
             const data = await fetch(endpoint.count);
 
-            if (data.status === 404) {
-                console.error(`Unable to access ${endpoint.count}. Exiting`);
-                return {
-                    lastUpdate: false
-                };
+            if (data.status === 200) {
+                const processed = await data.json();
+                const lastUpdate = processed.hasOwnProperty("lastUpdate") && processed.lastUpdate;
+                
+                log(`JSON Cache Last Updated: ${new Date(lastUpdate)}`);
+        
+                if (!!lastUpdate && Date.now() <= (lastUpdate + (12 * 60 * 60 * 1000))) {
+                    return processed;
+                }
             }
-
-            const processed = await data.json();
-            const lastUpdate = processed.hasOwnProperty("lastUpdate") && processed.lastUpdate;
-            
-            log(`JSON Cache Last Updated: ${new Date(lastUpdate)}`);
     
-            if (!!lastUpdate && Date.now() <= (lastUpdate + (12 * 60 * 60 * 1000))) {
-                return processed;
-            }
+            log("Playlist cache not found");
     
             log("Refreshing Playlist Data");
     
             await refreshLists();
-            let refreshedData = await fetch(endpoint.refresh);
+            let refreshedData = await fetch(`${endpoint.refresh}?test=true`);
             let refProcessed = await refreshedData.json();
             const isProcessing = refProcessed.hasOwnProperty("status") && refProcessed.status === "processing";
     
@@ -229,14 +227,14 @@ const processUrl = async() => {
         }
     })();
 
-    const lastUpdate = listData.lastUpdate;
+    const lastUpdate = (!!listData && !!listData.lastUpdate) ? listData.lastUpdate : 0;
 
     const heading = document.createElement("h1");
     const subHeading = document.createElement("h3");
     const listAuthor = document.createElement("listAuthor");
     const updated = document.createElement("sub");
     const list = document.createElement("dl");
-    heading.innerHTML = window.pageTitle || document.querySelector("title").innerText;
+    heading.innerHTML = document.querySelector("title").innerText;
     
     updated.id = "lastUpdated";
     updated.innerHTML = `Last Updated: ${!lastUpdate ? "List inaccessible" : new Date(lastUpdate).toLocaleString()}
@@ -246,10 +244,10 @@ const processUrl = async() => {
     document.querySelector("#listParent").prepend(updated);
     document.querySelector("#listParent").prepend(list);
     
-    if (!lastUpdate) {
+    if (lastUpdate === false) {
         document.querySelector("#lastUpdated").classList.add("error");
         console.warn(`Playlist was inaccessible`);
-    } else if (Date.now() >= (lastUpdate + (12 * 60 * 60 * 1000))) {
+    } else if (!lastUpdate || Date.now() >= (lastUpdate + (12 * 60 * 60 * 1000))) {
         document.querySelector("#lastUpdated").classList.add("expired");
         console.warn(`Playlist data may need to be refreshed`);
     } else {

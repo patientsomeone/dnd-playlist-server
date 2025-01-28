@@ -7,19 +7,26 @@ import {LoadUrl} from "./urlLoader";
 import {jsonUtils} from "./jsonUtils";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
-import {getPlaylistCounts} from "./processPlaylists";
-import {log, logLine} from "./log";
+import {getPlaylistCounts} from "./getPlaylistCounts";
+import {err, log, logLine} from "./log";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
-import {anyObject} from "../.types";
+import {anyObject, playlistQueries, stringObject} from "../.types";
 import {fetchEnv} from "./fetchEnv";
 import {toTitleCase} from "./textManipulators";
-import {processPlaylists} from "./processVideos";
+import {processPlaylists} from "./processPlaylists";
+import {dipsProcessor} from "../agents/dipsListProcessor";
+import {currentTime} from "./timeConversion";
 
-export const fetchChannelPlaylists = async (channelId: string, ownerId: string): Promise<anyObject> => {
+
+// TODO: Convert LockID to Query passthrough
+export const fetchChannelPlaylists = async (query: playlistQueries): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
 
-    const apiLock = new FsUtils(`./public/locks/${ownerId}.lock`);
+    // TODO: Lock file with timestamp
+    log(`Locking with ID: ${query.channelId} marked at ${currentTime()}`);
+
+    const apiLock = new FsUtils(`./public/locks/${query.channelId}.lock`);
     const isLocked = await apiLock.check()
         .catch((err) => {
             return Promise.resolve(false);
@@ -70,7 +77,9 @@ export const fetchChannelPlaylists = async (channelId: string, ownerId: string):
         const deb = debg.set("initialize");
         log("Checking playlist files...");
         try {
-            const jsonCache = new jsonUtils("./public/json/listCount.json");
+            // TODO: Pass variables through query parameters
+            log(`Setting Cache name: ${query.channelId}`);
+            const jsonCache = new jsonUtils(`./public/json/${query.channelId}.json`);
             await jsonCache.checkPath();
             const lastUpdate = jsonCache.get("lastUpdate") as number || false;
             
@@ -83,11 +92,36 @@ export const fetchChannelPlaylists = async (channelId: string, ownerId: string):
             if (!isLocked) {
                 log("Locking API execution");
                 await apiLock.create.raw("");
+                // return {status: "processing"};
             }
 
-            const listItems = await fetchPlaylistData(channelId);
-            const processed = await processPlaylists(listItems);
-            const countedList = await getPlaylistCounts(processed, jsonCache);
+            let listItems = null;
+            let processed = null;
+            let countedList = null;
+
+            try {
+                listItems = await fetchPlaylistData(query.channelId);
+            } catch (error) {
+                err(`Unable to list items | Error: ${error.toString()}`);
+                return Promise.reject(error);
+            }
+
+            try {
+                processed = await processPlaylists(listItems, dipsProcessor);
+            } catch (error) {
+                err(`Unable to process playlists | Error: ${error.toString()}`);
+                return Promise.reject(error);
+            }
+
+            try {
+                countedList = await getPlaylistCounts(processed, jsonCache);
+            } catch (error) {
+                err(`Unable to list items | Error: ${error.toString()}`);
+                return Promise.reject(error);
+            }
+
+            
+            
 
             log("Fetched Playlist count data");
 
@@ -98,7 +132,7 @@ export const fetchChannelPlaylists = async (channelId: string, ownerId: string):
 
             return countedList;
         } catch (error) {
-            deb(`Unable to fetch ${error as string}`);
+            log(`Unable to fetch ${error as string}`);
         }
     };
 
@@ -115,10 +149,12 @@ export const fetchChannelPlaylists = async (channelId: string, ownerId: string):
 };
 
 const test = async () => {
-    await fetchChannelPlaylists(await fetchEnv("YT_PLAYLIST_OWNER"), "dipsLists");
+    await fetchChannelPlaylists({
+        channelId: await fetchEnv("YT_LIST_OWNER")
+    });
 };
 
-// test()
-//     .catch((err) => {
-//         console.error(err);
-//     });
+test()
+    .catch((err) => {
+        console.error(err);
+    });
