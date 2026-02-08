@@ -10,6 +10,7 @@ var gulp = require("gulp"),
     debug = require("debug"),
     log = debug("logger:message*"),
     logError = debug("logger:error*"),
+    esbuild = require('esbuild'),
 
     housekeep = () => {
         return new Promise((resolve) => {
@@ -519,6 +520,29 @@ gulp.task("prune", () => {
         .then(executePrune);
 
 });
+
+gulp.task("copyCreateList", () => {
+    return gulp.src("dist/agents/createList.js")
+        .pipe(gulp.dest("public/"));
+});
+
+// ESBuild bundle task for createList.ts
+gulp.task('bundleCreateList', (done) => {
+  esbuild.build({
+    entryPoints: ['src/agents/createList.ts'],
+    outfile: 'public/createList.js',
+    bundle: true,
+    sourcemap: true,
+    format: 'esm',
+    platform: 'browser',
+    target: ['es2020']
+  }).then(() => done()).catch((e) => { console.error(e); done(e); });
+});
+
+// Watch task that bundles on change (runs an initial bundle first)
+gulp.task('watchBundle', gulp.series('bundleCreateList', () => {
+  gulp.watch('src/agents/createList.ts', gulp.series('bundleCreateList'));
+}));
 
 gulp.task("default", () => {
     console.log("Gulp default ran");

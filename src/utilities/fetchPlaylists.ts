@@ -24,7 +24,7 @@ export const fetchChannelPlaylists = async (query: playlistQueries): Promise<any
     const debg = new dBug("utilities:fetchChannelPlaylists");
 
     // TODO: Lock file with timestamp
-    log(`Locking with ID: ${query.channelId} marked at ${currentTime()}`);
+    log(`Locking with ID: ${query.channelId} at ${currentTime()}`);
 
     const apiLock = new FsUtils(`./public/locks/${query.channelId}.lock`);
     const isLocked = await apiLock.check()
@@ -78,7 +78,7 @@ export const fetchChannelPlaylists = async (query: playlistQueries): Promise<any
         log("Checking playlist files...");
         try {
             // TODO: Pass variables through query parameters
-            log(`Setting Cache name: ${query.channelId}`);
+            log(`Checking cache: ${query.channelId}`);
             const jsonCache = new jsonUtils(`./public/json/${query.channelId}.json`);
             await jsonCache.checkPath();
             const lastUpdate = jsonCache.get("lastUpdate") as number || false;
@@ -154,7 +154,7 @@ const test = async () => {
     });
 };
 
-test()
-    .catch((err) => {
-        console.error(err);
-    });
+// test()
+//     .catch((err) => {
+//         console.error(err);
+//     });

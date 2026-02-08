@@ -10,7 +10,7 @@ const isProduction = !!process.env.DO_ENV;
 
 const loggers = {
     log: (() => {
-        console.log(`isProduction: ${isProduction.toString()}`);
+        // console.log(`isProduction: ${isProduction.toString()}`);
         if (!isProduction) {
             return console.log;
         }

@@ -1,10 +1,32 @@
-import React from "react";
-import {Request} from "express";
-import {renderToStaticMarkup} from "react-dom/server";
+import {dipsLists} from "./views/dipsList";
 import {HelloWorld} from "./views/helloWorld";
+import {ReactLists} from "./views/reactLists";
 
-export const reactResponse = async (jsxElement: (request: Request) => Promise<JSX.Element>, request: Request): Promise<string> => {
-    const res = await jsxElement(request);
+export const reactRoutes = {
+    testReactRoutes: {
+        title: "Test Page",
+        component: HelloWorld
+    },
+    dipsLists: {
+        title: "Dip's Lists",
+        component: dipsLists
+    },
+    ReactLists: {
+        title: "Patient's Playlist Organizer",
+        component: ReactLists
+    }
+};
 
-    return renderToStaticMarkup(res);
+export const reactResponse = (title: string) => {
+    return `
+        <!DOCTYPE html>
+            <html>
+                <head>
+                    <title> ${title} </title>
+                </head>
+                <body>
+                    <div id="root"> </div>
+                </body>
+            </html>
+    `
 };

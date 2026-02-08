@@ -80,7 +80,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
 
     log("Processing Fetched Playlists");
 
-    let siteJson = null;
+    // let siteJson = null;
 
     // if (!envUrl) {
     //     siteJson = new jsonUtils("../../Apps/nginx-1.22.1/html/dndPlaylists/listCount.json");
@@ -103,9 +103,9 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     
             jsonCache.set(list, countedPlaylists[list]);
 
-            if (!envUrl && !!siteJson) {
-                siteJson.set(list, countedPlaylists[list]);
-            }
+            // if (!envUrl && !!siteJson) {
+            //     siteJson.set(list, countedPlaylists[list]);
+            // }
         }
     }
 
@@ -113,9 +113,9 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     
     jsonCache.set("lastUpdate", currentDate);
 
-    if (!envUrl && !!siteJson) {
-        siteJson.set("lastUpdate", currentDate);
-    }
+    // if (!envUrl && !!siteJson) {
+    //     siteJson.set("lastUpdate", currentDate);
+    // }
     countedPlaylists.lastUpdate = currentDate;
 
 
@@ -127,7 +127,7 @@ export const getPlaylistCounts = async (playlistData: playlistResponseData, json
     // jsonCache = new jsonUtils("./json/listCount.json");
     // await jsonCache.checkPath(true);
 
-    log(`Successfully Processed ${Object.keys(countedPlaylists).length} playlists`);
+    log(`Processed ${Object.keys(countedPlaylists).length} playlists`);
 
     return countedPlaylists;
 };

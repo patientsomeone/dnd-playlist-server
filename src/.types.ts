@@ -22,16 +22,22 @@ export type playlistResponseData = {
     }
 };
 
+export type individualPlaylist = {
+    id: string;
+    link: string;
+    count: number;
+}
+
 export type playlistProcessed = {
-    [key: string]: {
-        id: string;
-        link: string;
-        count: number;
-    }
+    [key: string]: individualPlaylist;
 };
 
 export type playlistQueries = {
     channelId: string; 
     singlePlaylist?: boolean;
     test?: string;
-}
+};
+
+export type listData = {
+    listEndpoint?: string;
+};

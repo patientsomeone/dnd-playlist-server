@@ -1,20 +1,18 @@
 {
     "compileOnSave": false,
-    "rules": {
-        "class-name": true
-    },
     "compilerOptions": {
         "resolveJsonModule": false,
-        "target": "es6",
+        "target": "es2020",
         "jsx": "react",
-        "module": "commonjs",
+        "module": "nodenext",
         "outDir": "dist",
         "esModuleInterop": true,
         "sourceMap": true,
-        "types": ["youtube"]
+        "types": ["youtube"],
+        "moduleResolution": "nodenext"
     },
     "include": [
-        "./src/**/*.ts"
+        "./src/**/*.ts*"
     ],
     "exclude": [
         "client",

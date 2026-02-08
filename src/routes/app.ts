@@ -5,7 +5,7 @@ import express, {Express, Request, Response, Errback} from "express";
 import cors from "cors";
 import {jsonUtils} from "../utilities/jsonUtils";
 // import listCount from "../../json/listCount.json";
-import {log} from "../utilities/log";
+import {log, logLine} from "../utilities/log";
 // import React from "react";
 import {renderToReadableStream, renderToStaticMarkup} from "react-dom/server";
 import {reactResponse} from "../index";
@@ -16,16 +16,18 @@ import {srcPath} from "../utilities/srcPath";
 import {anyObject, anyStandard, playlistQueries, stringObject} from "../.types";
 import {currentTime} from "../utilities/timeConversion";
 import {queryProcessor} from "../utilities/queryProcessor";
+import {fetchEnv} from "../utilities/fetchEnv";
 
 config();
 
 const app: Express = express();
+const isProduction = !!process.env.DO_ENV;
 
 app.use(express.json());
 app.use(cors());
 app.use((err, req: Request, res: Response, next) => {
     console.log("\x1b[31m%s\x1b[0m", `Sending Error for ${req.route as string}`);
-    res.status(err.status || 500);
+    res.status(err.status || 404);
     res.send(err);
 });
 
@@ -101,15 +103,32 @@ app.get("/listCount", (request: Request, response: Response, next) => {
     }
 });
 
-for (const key in reactRoutes) {
-    if (reactRoutes.hasOwnProperty(key)) {
-        app.get(`/${key}`, async (request: Request, response: Response) => {
-            const res = await reactResponse(reactRoutes[key], request);
+// [] Refactor to {[key: string]: {title: string, component: React.ComponentType}}
+// for (const route in reactRoutes) {
+//     if (reactRoutes.hasOwnProperty(route)) {
+//         app.get(`/${route}`, async (request: Request, response: Response) => {
+//             const res = await reactResponse(reactRoutes[route], request);
+    
+//             respond(request, response, res);
+//         });
+//     }
+// }
+
+for (const route in reactRoutes) {
+    if (reactRoutes.hasOwnProperty(route)) {
+        app.get(`/${route}`, async (request: Request, response: Response) => {
+            const res = await reactResponse(reactRoutes[route]);
     
             respond(request, response, res);
         });
     }
 }
+
+app.get("/*", (req: Request, res: Response) => {
+    console.log("\x1b[31m%s\x1b[0m", `Sending Error for ${req.path}`);
+
+    res.status(404).send("This is not the page you are looking for...");
+});
 
 const port = process.env.PORT || 8000;
 
