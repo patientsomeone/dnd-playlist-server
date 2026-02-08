@@ -20,7 +20,9 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KB6D58NPK"></script>
     <script>
-        window.listEndpoint = "dipsLists";
+        window.listData = {
+            listEndpoint: "dipsLists"
+        };
 
         window.dataLayer = window.dataLayer || [];
 
@@ -33,120 +35,9 @@
     </script>
     <script type="module" src="/createList.js"></script>
     <link rel="stylesheet" href="/pageStyle.css"/>
-    <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
-    <!-- <style>
-        html {
-            color-scheme: light dark;
-        }
-        
-        body {
-            width: 100%;
-            margin: 0 auto;
-            font-family: Tahoma, Verdana, Arial, sans-serif;
-        }
-
-        #listParent sub {
-            display: block;
-            width: 100%;
-            text-align: right;
-
-            &.expired {
-                color: #dbd472;
-            };
-
-            &.fresh {
-                color: #647dc4;
-            };
-        }
-
-        #listParent dt a {
-            display: block;
-            background: rgb(20 20 20 / 75%);
-            border-radius: 1vh;
-            padding: 0.5vh 1vh;
-            border: solid 1px rgb(255 255 255 / 25%);
-            color: #fff;
-            text-decoration: none;
-            
-            &:hover {
-                background: rgb(0 0 0 / 25%);
-                border: solid 1px rgb(255 255 255 / 75%);
-                color: #80a7d9;
-            };
-
-            &:visited {
-                color: #d6d9ae;
-            };
-
-            &:visited:hover {
-                color: #80a7d9;
-            };
-
-
-        }
-        
-        dl dt {
-            margin: .5rem;
-        }
-        
-        #listOrganizer {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        
-        #listOrganizer div {
-            padding: 2rem;
-        }
-
-        div#framePlacer {
-            position: sticky;
-            top: 0px;
-            height: 92vh;
-            display: flex;
-            align-content: center;
-            align-items: center;
-        }
-        
-        #listOrganizer #frameParent {
-            /* position: sticky;
-            top: 1vh; */
-            min-width: 640px;
-            min-height: 495px;
-            display: flex;
-            flex-direction: column;
-
-            & a {
-                padding: 1em 0;
-            }
-
-            & div#shufflerFrame {
-                display: block;
-                height: 360px;
-                padding: 0;
-            }
-
-            & iframe {
-                border-radius: 1vh;
-            }
-        }
-
-        #frameParent h2.buffering {
-            color: #c56c6c;
-        }
-        
-        #frameParent h2.playing {
-            color: #647dc4;
-        }
-        
-        #frameParent h2.paused {
-            color: #dbd472;
-        }
-    </style> -->
 </head>
 
 <body>
-    <!-- <h1>Dip's D&D Playlists Automated</h1> -->
     <div id="listOrganizer">
         <div id="framePlacer">
             <div id="frameParent">
@@ -155,9 +46,9 @@
             </div>
         </div>
         <div id="listParent">
-            <sub>
+            <!-- <sub>
                 <a href="/pathfinderBuilds.html"> Click here for organized Pathfinder WOTR Builds by cRPG Bro </a>
-            </sub>
+            </sub> -->
         </div>
     </div>
 </body>
