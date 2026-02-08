@@ -219,7 +219,7 @@ export class FsUtils {
                 return this.workingData;
             }
 
-            console.log(`Write Stream exists for ${this.workingData.filePath}`);
+            log(`Write Stream exists for ${this.workingData.filePath}`);
             return this.workingData;
 
         },
@@ -315,7 +315,7 @@ export class FsUtils {
     private deb: dBug;
 
     private wStream: fs.WriteStream;
-    constructor(filePath) {
+    constructor(filePath: string) {
         this.workingData = {
             filePath,
             error: null,

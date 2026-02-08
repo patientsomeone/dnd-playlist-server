@@ -1,7 +1,7 @@
 import React from "react";
 import { Request } from "express";
 
-export const HelloWorld = async (request: Request) => {
+export const HelloWorld = async (request: Request): Promise<JSX.Element> => {
     console.log("Attempting to write to TSX");
     return Promise.resolve(
         <div>

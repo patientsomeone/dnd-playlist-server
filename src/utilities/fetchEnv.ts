@@ -23,7 +23,7 @@ export const fetchEnv = async (key: string): Promise<string> => {
     return await (async () => {
         try {
             if (!requestedEnv) {
-                log(`Environment Key ${key} not found`);
+                // log(`Environment Key ${key} not found`);
                 return Promise.reject(`Environment Key ${key} not found`);
             }
             return env[key];

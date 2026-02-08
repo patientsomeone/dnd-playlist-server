@@ -7,17 +7,26 @@ import {LoadUrl} from "./urlLoader";
 import {jsonUtils} from "./jsonUtils";
 import {dBug} from "./dBug";
 import {Config} from "./fetchConfig";
-import {getPlaylistCounts} from "./processPlaylists";
-import {log, logLine} from "./log";
+import {getPlaylistCounts} from "./getPlaylistCounts";
+import {err, log, logLine} from "./log";
 import {FsUtils} from "./fsUtils";
 import {dateStamp} from "./dateStamp";
-import {anyObject} from "../.types";
+import {anyObject, playlistQueries, stringObject} from "../.types";
 import {fetchEnv} from "./fetchEnv";
+import {toTitleCase} from "./textManipulators";
+import {processPlaylists} from "./processPlaylists";
+import {dipsProcessor} from "../agents/dipsListProcessor";
+import {currentTime} from "./timeConversion";
 
-export const fetchChannelPlaylists = async (channelId: string): Promise<anyObject> => {
+
+// TODO: Convert LockID to Query passthrough
+export const fetchChannelPlaylists = async (query: playlistQueries): Promise<anyObject> => {
     const debg = new dBug("utilities:fetchChannelPlaylists");
 
-    const apiLock = new FsUtils("./playlists.lock");
+    // TODO: Lock file with timestamp
+    log(`Locking with ID: ${query.channelId} at ${currentTime()}`);
+
+    const apiLock = new FsUtils(`./public/locks/${query.channelId}.lock`);
     const isLocked = await apiLock.check()
         .catch((err) => {
             return Promise.resolve(false);
@@ -30,34 +39,6 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
     
     const service = google.youtube("v3");
     
-    const capWord = async (word: string) => {
-        const capLetter = word.slice(0, 1);
-        const restWord = word.slice(1);
-        const slashWord = word.split("/");
-    
-        if (slashWord.length > 1) {
-            const newWords = [];
-            for await (const newWord of slashWord) {
-                const thisWord = await capWord(newWord);
-                newWords.push(thisWord);
-            }
-    
-            return newWords.join(" / ");
-        }
-        return `${capLetter.toUpperCase()}${restWord}`;
-    };
-    
-    const toTitleCase = async(fullTitle) => {
-        const titleWords = fullTitle.split(" ");
-        const workingTitle = [];
-    
-        for await (const word of titleWords) {
-            workingTitle.push(await capWord(word));
-        }
-    
-        return workingTitle.join(" ");
-    };
-
     const fetchPlaylistData = async (channelId: string, pageToken?: string) => {
         try {
             let workingLists = [];
@@ -92,54 +73,13 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
         }
     };
     
-    const processPlaylists = async (allPlaylists: {snippet: {title: string;}; id: string;}[]) => {
-        const processedLinks = {};
-        let checkedLists = 0;
-        let foundLists = 0;
-    
-        for await (const playlist of allPlaylists) {
-            const playlistName = playlist.snippet.title;
-            const link = `https://www.youtube.com/playlist?list=${playlist.id}`;
-            const id = playlist.id;
-
-            checkedLists += 1;
-    
-            if (playlistName.toLowerCase().indexOf("d&d") >= 0 && playlistName.toLowerCase().indexOf("d&d timeline") < 0) {
-                try {
-                    const playlistTitle = await toTitleCase(playlistName.toLowerCase().split("d&d")[1].trim());
-                    processedLinks[playlistTitle === "Intro" ? "!!! Intro !!!" : playlistTitle] = {
-                        link,
-                        id
-                    };
-                    foundLists += 1;
-                } catch (err) {
-                    throw (err);
-                }
-            } else if (playlistName.toLowerCase().indexOf("emotional") >= 0 || playlistName.toLowerCase().indexOf("normal explore") >= 0) {
-                try {
-                    const playlistTitle = await toTitleCase(playlistName.toLowerCase().trim());
-                    processedLinks[playlistTitle] = {
-                        link,
-                        id
-                    };
-                    foundLists += 1;
-                } catch (err) {
-                    throw (err);
-                }
-            }
-        }
-
-        log(`Checked ${checkedLists} playlists`);
-        log(`Identified ${foundLists} playlists`);
-    
-        return processedLinks;
-    };
-    
     const initialize = async () => {
         const deb = debg.set("initialize");
         log("Checking playlist files...");
         try {
-            const jsonCache = new jsonUtils("./json/listCount.json");
+            // TODO: Pass variables through query parameters
+            log(`Checking cache: ${query.channelId}`);
+            const jsonCache = new jsonUtils(`./public/json/${query.channelId}.json`);
             await jsonCache.checkPath();
             const lastUpdate = jsonCache.get("lastUpdate") as number || false;
             
@@ -152,11 +92,36 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
             if (!isLocked) {
                 log("Locking API execution");
                 await apiLock.create.raw("");
+                // return {status: "processing"};
             }
 
-            const listItems = await fetchPlaylistData(channelId);
-            const processed = await processPlaylists(listItems);
-            const countedList = await getPlaylistCounts(processed, jsonCache);
+            let listItems = null;
+            let processed = null;
+            let countedList = null;
+
+            try {
+                listItems = await fetchPlaylistData(query.channelId);
+            } catch (error) {
+                err(`Unable to list items | Error: ${error}`);
+                return Promise.reject(error);
+            }
+
+            try {
+                processed = await processPlaylists(listItems, dipsProcessor);
+            } catch (error) {
+                err(`Unable to process playlists | Error: ${error}`);
+                return Promise.reject(error);
+            }
+
+            try {
+                countedList = await getPlaylistCounts(processed, jsonCache);
+            } catch (error) {
+                err(`Unable to list items | Error: ${error}`);
+                return Promise.reject(error);
+            }
+
+            
+            
 
             log("Fetched Playlist count data");
 
@@ -167,7 +132,7 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
 
             return countedList;
         } catch (error) {
-            deb(`Unable to fetch ${error as string}`);
+            log(`Unable to fetch ${error as string}`);
         }
     };
 
@@ -184,7 +149,9 @@ export const fetchChannelPlaylists = async (channelId: string): Promise<anyObjec
 };
 
 const test = async () => {
-    await fetchChannelPlaylists(await fetchEnv("YT_PLAYLIST_OWNER"));
+    await fetchChannelPlaylists({
+        channelId: await fetchEnv("YT_LIST_OWNER")
+    });
 };
 
 // test()

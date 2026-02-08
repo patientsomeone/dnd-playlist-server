@@ -1,42 +1,26 @@
 import {fetchChannelPlaylists} from "../utilities/fetchPlaylists";
-import {executeArguments} from "../utilities/argProcessor";
-import {FsUtils} from "../utilities/fsUtils";
-import {dateStamp} from "../utilities/dateStamp";
-import {anyObject} from "../.types";
+import {anyObject, playlistQueries} from "../.types";
 import {fetchEnv} from "../utilities/fetchEnv";
 import {log} from "../utilities/log";
+import {queryProcessor} from "../utilities/queryProcessor";
 
-export const fetchLists = async (): Promise<anyObject> => {
-    const playlistOwner = await fetchEnv("YT_LIST_OWNER");
-    const listData = await fetchChannelPlaylists(playlistOwner);
+export const fetchLists = async (query: playlistQueries): Promise<anyObject> => {
+    let listData = null;
+
+    // const query = await queryProcessor(queryObject);
+
+    log("Fetching Playlists");
+    log(query);
+    // TODO: Differentiate a list of Playlists from a list of Videos
+
+    if (!query.singlePlaylist) {
+        log("Loading all Playlists");
+        listData = await fetchChannelPlaylists(query);
+    } else {
+        // TODO: Set assign Single Playlist Endpoint
+        log("Loading Single Playlist");
+        listData = await fetchChannelPlaylists(query);
+    }
 
     return listData;
 };
-
-const initialize = async () => {
-    log("Fetching Playlists");
-
-    try {
-        log("Fetching Playlists");
-        return fetchLists()
-            .catch((err) => {
-                console.error(err);
-            });
-    } catch (error) {
-        throw(error);
-    }
-
-};
-
-(async () => {
-    try {
-        await initialize();
-
-        // await executeArguments({
-        //     start: initialize
-        // });
-    } catch (error) {
-        throw(error);
-    }
-})();
-

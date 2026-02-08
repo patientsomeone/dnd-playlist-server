@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import debug from "debug";
 import {dBug} from "../utilities/dBug";
 import {fetchEnv} from "./fetchEnv";
@@ -5,17 +6,18 @@ import {config} from "dotenv";
 
 config({path: "./.i.env"});
 
-const isProduction = process.env.DO_ENV;
+const isProduction = !!process.env.DO_ENV;
 
 const loggers = {
     log: (() => {
-        if (isProduction) {
+        // console.log(`isProduction: ${isProduction.toString()}`);
+        if (!isProduction) {
             return console.log;
         }
         return debug("logger*");
     })(),
     err: (() => {
-        if (isProduction) {
+        if (!isProduction) {
             return console.error;
         }
         return debug("logger*");
