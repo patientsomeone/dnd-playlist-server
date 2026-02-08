@@ -16,13 +16,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dip's Organized Playlists</title>
+    <title>cRPG Bro's Pathfinder WOTR Builds</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3KB6D58NPK"></script>
     <script>
         window.listData = {
-            listEndpoint: "dipsLists"
-        };
+            listEndpoint: "pathfinderBuilds",
+            listAuthor: "cRPG Bro"
+        }
 
         window.dataLayer = window.dataLayer || [];
 
@@ -34,10 +35,12 @@
         gtag('config', 'G-3KB6D58NPK');
     </script>
     <script type="module" src="/createList.js"></script>
+    <!-- <script type="module" src="https://www.youtube.com/iframe_api"></script> -->
     <link rel="stylesheet" href="/pageStyle.css"/>
 </head>
 
 <body>
+    <!-- <h1>Dip's D&D Playlists Automated</h1> -->
     <div id="listOrganizer">
         <div id="framePlacer">
             <div id="frameParent">
@@ -45,11 +48,7 @@
                 <div id="shufflerFrame"></div>
             </div>
         </div>
-        <div id="listParent">
-            <!-- <sub>
-                <a href="/pathfinderBuilds.html"> Click here for organized Pathfinder WOTR Builds by cRPG Bro </a>
-            </sub> -->
-        </div>
+        <div id="listParent"> </div>
     </div>
 </body>
 
