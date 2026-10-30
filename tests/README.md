@@ -27,6 +27,13 @@ the `dist/server` Node entry used by `npm start`, from an unrelated working dire
 environment values and a safely cleaned temporary SQLite database. It checks the
 page, bundle, metadata endpoint, and 404 without YouTube or cache refreshes.
 
+`test:client` uses the same temporary built server, then launches Playwright with
+`tests/built-client.config.cjs`. Browser actions have a 10-second limit, the test
+has a 60-second limit, and the runner has a 120-second limit. Failure screenshots
+and traces are retained in `test-results/built-client/`; stage messages identify
+progress in CI. The CI step also has a separate three-minute limit, so a stalled
+browser smoke cannot consume the entire job timeout.
+
 For a new checkout:
 
 Select Node 24.22.1 / npm 11.19.1 first; see [setup](../README.md).
