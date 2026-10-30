@@ -1,5 +1,7 @@
 # Strict TypeScript and YouTube integration
 
+The `JSONStream` runtime package has a capitalized module name, while its maintained declarations are published as `@types/jsonstream`. The shared compiler paths map that exact runtime name to the lowercase declaration file, so both Windows and case-sensitive Linux resolve the same typings. Emitted Node imports still use the original runtime package; strictness and declaration checking remain enabled.
+
 `strict: true` is enabled in the shared compiler base and inherited by the server, legacy browser, React client, shared, Jest, and Playwright projects. This includes implicit-any, nullability, callback variance, property initialization, and unknown catch-variable checks. No strict subflags are disabled, declaration checking is not skipped, and application code does not use `@ts-ignore` / `@ts-nocheck` to pass the build. Strict mode still permits intentional explicit `any` in generic legacy JSON/analytics boundaries; it is no longer used for the YouTube player or its events.
 
 ## The two YouTube APIs
