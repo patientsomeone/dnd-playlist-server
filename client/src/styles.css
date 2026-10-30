@@ -8,6 +8,7 @@ body { margin: 0; }
     --icon-button-size: 2.75rem;
 }
 .playlist-app a { color: light-dark(#214b93, #9bbdff); }
+.playlist-app .app-title { margin: 0 0 1.5rem; font-size: 2rem; }
 .playlist-app .organizer { display: grid; grid-template-columns: minmax(20rem, 1.4fr) minmax(16rem, 1fr); gap: 2rem; align-items: start; }
 .playlist-app #frameParent { position: sticky; top: 1rem; min-width: 0; }
 .playlist-app .player-stage { position: relative; }

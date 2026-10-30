@@ -55,6 +55,7 @@ export function ReactLists() {
     const status = message || messages[phase];
     return (
         <main className="playlist-app">
+            <h1 className="app-title">{document.title}</h1>
             <div className="organizer">
                 <YouTubePlayer ref={player} key={channelId || "default"} selection={selection} view={playback} onPlaybackChange={setPlayback}
                     headingAction={<PlaylistSearch query={search.query} scope={channelId ? "channel:" + channelId : "default"} onSearch={updateSearch}/>}
