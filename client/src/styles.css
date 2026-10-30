@@ -10,8 +10,9 @@ body { margin: 0; }
 .playlist-app a { color: light-dark(#214b93, #9bbdff); }
 .playlist-app .app-title { margin: 0 0 1.5rem; font-size: 2rem; }
 .playlist-app .organizer { display: grid; grid-template-columns: minmax(20rem, 1.4fr) minmax(16rem, 1fr); gap: 2rem; align-items: start; }
-.playlist-app #frameParent { position: sticky; top: 1rem; min-width: 0; }
-.playlist-app .player-stage { position: relative; }
+.playlist-app #frameParent { position: sticky; top: 1.5rem; min-width: 0; height: calc(100dvh - 3rem); display: flex; flex-direction: column; overflow-y: auto; }
+.playlist-app #frameParent > * { flex-shrink: 0; }
+.playlist-app .player-stage { position: relative; margin-block-end: auto; }
 .playlist-app .player-placeholder { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 1rem; text-align: center; color: light-dark(#606975, #9097a1); font-size: clamp(1rem, 1.8vw, 1.35rem); pointer-events: none; }
 .playlist-app .player-host { min-height: 200px; aspect-ratio: 16 / 9; background: light-dark(#eceef2, #15171b); border-radius: .5rem; overflow: hidden; }
 .playlist-app .player-host iframe { width: 100%; height: 100%; border: 0; }
@@ -34,7 +35,7 @@ body { margin: 0; }
 }
 .playlist-app .playback-badge { align-self: center; white-space: nowrap; font-size: .8em; font-weight: 600; border: 1px solid currentColor; border-radius: .3rem; padding: .15rem .4rem; }
 .playlist-app button { padding: .4rem .8rem; cursor: pointer; }
-.playlist-app .player-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 1rem; }
+.playlist-app .player-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 1rem; margin-block-start: auto; }
 .playlist-app .player-toolbar h2 { min-width: 0; overflow-wrap: anywhere; }
 .playlist-app .search-anchor { display: inline-flex; flex: 0 0 var(--icon-button-size); width: var(--icon-button-size); height: var(--icon-button-size); }
 .playlist-app .icon-button {
@@ -71,5 +72,5 @@ body { margin: 0; }
 @media (max-width: 700px) {
     .playlist-app { padding: 1rem; padding-inline-end: 3.25rem; }
     .playlist-app .organizer { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
-    .playlist-app #frameParent { position: static; }
+    .playlist-app #frameParent { position: static; height: auto; display: block; overflow: visible; }
 }

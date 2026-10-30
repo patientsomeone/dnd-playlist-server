@@ -55,12 +55,12 @@ export function ReactLists() {
     const status = message || messages[phase];
     return (
         <main className="playlist-app">
-            <h1 className="app-title">{document.title}</h1>
             <div className="organizer">
                 <YouTubePlayer ref={player} key={channelId || "default"} selection={selection} view={playback} onPlaybackChange={setPlayback}
                     headingAction={<PlaylistSearch query={search.query} scope={channelId ? "channel:" + channelId : "default"} onSearch={updateSearch}/>}
                     onInteraction={check} resolveSelection={resolveSelection}/>
                 <section aria-label="Playlists">
+                    <h1 className="app-title">{document.title}</h1>
                     {catalog && Object.keys(catalog.playlists).length === 0 && <p>No playlists found for this channel.</p>}
                     <PlayLister playlists={catalog?.playlists || {}} playback={playback} onSelect={(id) => { void select(id); }}
                         query={search.query} page={search.page} onPageChange={(page) => setSearch((current) => ({...current, page}))}/>
