@@ -1,160 +1,62 @@
-/* MODULES */
-import {GoogleApis} from "googleapis";
-
-/* UTILITIES */
-import {AsyncUtil} from "./asyncUtil";
-import {LoadUrl} from "./urlLoader";
-import {jsonUtils} from "./jsonUtils";
-import {dBug} from "./dBug";
-import {Config} from "./fetchConfig";
+import {youtube} from "@googleapis/youtube";
+import type {anyObject, playlistQueries} from "../.types";
+import {getPlaylistCache} from "./playlistCacher";
 import {getPlaylistCounts} from "./getPlaylistCounts";
-import {err, log, logLine} from "./log";
-import {FsUtils} from "./fsUtils";
-import {dateStamp} from "./dateStamp";
-import {anyObject, playlistQueries, stringObject} from "../.types";
 import {fetchEnv} from "./fetchEnv";
-import {toTitleCase} from "./textManipulators";
 import {processPlaylists} from "./processPlaylists";
+import type {playlistData} from "./processPlaylists";
 import {dipsProcessor} from "../agents/dipsListProcessor";
-import {currentTime} from "./timeConversion";
+import {isPlaylistCacheFresh} from "../shared/playlistCachePolicy";
+import {REFRESH_LEASE_MS} from "./sqlitePlaylistCache";
 
-
-// TODO: Convert LockID to Query passthrough
 export const fetchChannelPlaylists = async (query: playlistQueries): Promise<anyObject> => {
-    const debg = new dBug("utilities:fetchChannelPlaylists");
+    const cache = getPlaylistCache(query.channelId);
+    if (await cache.isRefreshing()) return {status: "processing"};
+    const cached = await cache.read();
+    if (isPlaylistCacheFresh(cached.lastUpdate)) return cached;
 
-    // TODO: Lock file with timestamp
-    log(`Locking with ID: ${query.channelId} at ${currentTime()}`);
-
-    const apiLock = new FsUtils(`./public/locks/${query.channelId}.lock`);
-    const isLocked = await apiLock.check()
-        .catch((err) => {
-            return Promise.resolve(false);
-        });
-    
-    const youtubeApiKey = await fetchEnv("YT_API_KEY");
-    const google = new GoogleApis({
-        auth: youtubeApiKey
-    });
-    
-    const service = google.youtube("v3");
-    
-    const fetchPlaylistData = async (channelId: string, pageToken?: string) => {
-        try {
-            let workingLists = [];
-
-            const listConfig = {
-                part: ["id", "snippet", "status"],
-                maxResults: 50,
-                channelId
-            } as {
-                part: string[];
-                maxResults: number;
-                channelId: string;
-                pageToken?: string;
-            };
-
-            if (!!pageToken) (
-                listConfig.pageToken = pageToken
-            );
-
-            const allLists = await service.playlists.list(listConfig);
-            /* console.log("Playlists fetched"); */
-
-            if (allLists.data.hasOwnProperty("nextPageToken")) {
-                workingLists = workingLists.concat(await fetchPlaylistData(channelId, allLists.data.nextPageToken));
-            }
-    
-            workingLists = workingLists.concat(allLists.data.items);
-
-            return workingLists;
-        } catch (error) {
-            console.error(`Unable to fetch Playlists ${error as string}`);
-        }
-    };
-    
-    const initialize = async () => {
-        const deb = debg.set("initialize");
-        log("Checking playlist files...");
-        try {
-            // TODO: Pass variables through query parameters
-            log(`Checking cache: ${query.channelId}`);
-            const jsonCache = new jsonUtils(`./public/json/${query.channelId}.json`);
-            await jsonCache.checkPath();
-            const lastUpdate = jsonCache.get("lastUpdate") as number || false;
-            
-            if (!!lastUpdate && Date.now() < (lastUpdate + (12 * 60 * 60 * 1000))) {
-                log("API Data up to date");
-                deb("JSON Cache Recently Updated");
-                return jsonCache.read();
-            }
-
-            if (!isLocked) {
-                log("Locking API execution");
-                await apiLock.create.raw("");
-                // return {status: "processing"};
-            }
-
-            let listItems = null;
-            let processed = null;
-            let countedList = null;
-
-            try {
-                listItems = await fetchPlaylistData(query.channelId);
-            } catch (error) {
-                err(`Unable to list items | Error: ${error}`);
-                return Promise.reject(error);
-            }
-
-            try {
-                processed = await processPlaylists(listItems, dipsProcessor);
-            } catch (error) {
-                err(`Unable to process playlists | Error: ${error}`);
-                return Promise.reject(error);
-            }
-
-            try {
-                countedList = await getPlaylistCounts(processed, jsonCache);
-            } catch (error) {
-                err(`Unable to list items | Error: ${error}`);
-                return Promise.reject(error);
-            }
-
-            
-            
-
-            log("Fetched Playlist count data");
-
-            await apiLock.delete();
-            log("Deleted Playlist lock");
-
-            log("Playlist Update Complete");
-
-            return countedList;
-        } catch (error) {
-            log(`Unable to fetch ${error as string}`);
-        }
-    };
-
-    if (!!isLocked) {
-        log("On Load Status Check: API Processing");
-        return {status: "processing"};
-    }
+    const token = await cache.acquire();
+    if (!token) return {status: "processing"};
+    let leaseLost = false;
+    const heartbeat = setInterval(() => {
+        cache.renew(token).then((renewed) => {
+            if (!renewed) leaseLost = true;
+        }).catch(() => { leaseLost = true; });
+    }, REFRESH_LEASE_MS / 3);
+    heartbeat.unref();
 
     try {
-        return await initialize();
-    } catch (err) {
-        log(`Unable to fetch Playlists ${err as string}`, true);
+        // A different request may have completed between our first read and acquisition.
+        const latest = await cache.read();
+        if (isPlaylistCacheFresh(latest.lastUpdate)) return latest;
+        const service = youtube({version: "v3", auth: await fetchEnv("YT_API_KEY")});
+        const lists: playlistData[] = [];
+        const seenTokens = new Set<string>();
+        let pageToken: string | undefined;
+        do {
+            const response = await service.playlists.list({
+                part: ["id", "snippet", "status"],
+                maxResults: 50,
+                channelId: query.channelId,
+                ...(pageToken ? {pageToken} : {})
+            }, {timeout: 30000});
+            for (const item of response.data.items || []) {
+                if (typeof item.id !== "string" || typeof item.snippet?.title !== "string") {
+                    throw new Error("Incomplete YouTube playlist response");
+                }
+                lists.push({id: item.id, snippet: {title: item.snippet.title}});
+            }
+            pageToken = response.data.nextPageToken || undefined;
+            if (pageToken && seenTokens.has(pageToken)) throw new Error("Repeated YouTube playlist page token");
+            if (pageToken) seenTokens.add(pageToken);
+        } while (pageToken);
+        const processed = await processPlaylists(lists, dipsProcessor);
+        const counted = await getPlaylistCounts(processed);
+        if (leaseLost) throw new Error("Playlist refresh lease was lost");
+        await cache.replace(counted, token);
+        return counted;
+    } finally {
+        clearInterval(heartbeat);
+        await cache.release(token);
     }
 };
-
-const test = async () => {
-    await fetchChannelPlaylists({
-        channelId: await fetchEnv("YT_LIST_OWNER")
-    });
-};
-
-// test()
-//     .catch((err) => {
-//         console.error(err);
-//     });

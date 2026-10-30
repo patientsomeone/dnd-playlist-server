@@ -1,10 +1,8 @@
-/* eslint-disable no-console */
+
 import debug from "debug";
 import {dBug} from "../utilities/dBug";
 import {fetchEnv} from "./fetchEnv";
-import {config} from "dotenv";
-
-config({path: "./.i.env"});
+import "./environment";
 
 const isProduction = !!process.env.DO_ENV;
 
@@ -37,7 +35,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
     const indentCount = 5;
     let messageLength = 130;
     const workingMsg = msg;
-    
+
     const pad = (toInsert: number, eqOnly?: boolean) => {
         const pad = [];
 
@@ -65,10 +63,10 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
 
     const getNewLine = (data?: string | false, newLineChar?: string | false, initialIndent?: number): string[] => {
         const nDb = deb.set("padMsg:getNewLine");
-        let splitLines = [];
+        let splitLines: string[] = [];
         const currentData = (data || workingMsg).toString();
         const strArr = (() => {
-            const splitChecks = {
+            const splitChecks: Record<string, {reapply: boolean;}> = {
                 " ": {
                     reapply: false
                 },
@@ -81,9 +79,9 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
             };
 
             nDb(`Processing Log ${currentData}`);
-            nDb(`    data: ${data.toString()}`);
+            nDb(`    data: ${data?.toString()}`);
             nDb(`    workingMsg: ${workingMsg}`);
-            
+
             if (newLineChar && currentData.indexOf(newLineChar) > 0) {
                 return currentData.split(newLineChar);
             } else {
@@ -99,7 +97,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
                 return [currentData];
             }
         })();
-        
+
         const updateIndent = (): number => {
             const newIndent = (splitLines.length > 1 ? ((initialIndent || indent) + 1) : (initialIndent || indent));
             // messageLength -= newIndent * indentCount;
@@ -113,7 +111,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
                 splitLines = getNewLine(currentItem, false, updateIndent() + 1).concat(splitLines);
             }
         };
-        
+
         let currentLine = pad(updateIndent() * indentCount, true);
 
         const newOnLength = (currentItem: string) => {
@@ -131,7 +129,7 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
             } else if ((currentItem.length + currentLine.length) >= (messageLength - updateIndent() * indentCount)) {
                 db("Too Long, breaking down");
                 // splitLines.push(currentLine + pad(messageLength - currentLine.length));
-                
+
                 db(`Current Split Lines: ${splitLines.join(" **&&** ")}`);
 
                 splitLines = (getNewLine(currentItem, false, updateIndent() + 1)).concat(splitLines);
@@ -158,11 +156,11 @@ const padMsg = (msg: string, indent: number, newLineChar?: string, isErr?: boole
         }
 
         // splitLines.push(currentLine);
-        
+
         return splitLines;
     };
 
-    const output = (msg) => {
+    const output = (msg: string) => {
         if (!isErr) {
             log(msg);
         } else {

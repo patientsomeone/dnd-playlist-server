@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Run JS",
-            "runtimeVersion": "12.22.12",
+            "runtimeVersion": "24.22.1",
             "program": "${file}",
             "envFile": "${workspaceFolder}/.i.env"
         },
@@ -16,6 +16,7 @@
             "type": "node",
             "request": "launch",
             "name": "Run TS File",
+            "runtimeVersion": "24.22.1",
             "envFile": "${workspaceFolder}/.i.env",
             "env": {
                 "TS_NODE_FILES": "true",

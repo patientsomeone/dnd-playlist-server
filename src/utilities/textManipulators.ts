@@ -1,11 +1,11 @@
-const capWord = async (word: string) => {
+const capWord = async (word: string): Promise<string> => {
     const capLetter = word.slice(0, 1);
     const restWord = word.slice(1);
     const slashWord = word.split("/");
 
     if (slashWord.length > 1) {
         const newWords = [];
-        for await (const newWord of slashWord) {
+        for (const newWord of slashWord) {
             const thisWord = await capWord(newWord);
             newWords.push(thisWord);
         }
@@ -19,7 +19,7 @@ export const toTitleCase = async(fullTitle: string) => {
     const titleWords = fullTitle.split(" ");
     const workingTitle = [];
 
-    for await (const word of titleWords) {
+    for (const word of titleWords) {
         workingTitle.push(await capWord(word));
     }
 

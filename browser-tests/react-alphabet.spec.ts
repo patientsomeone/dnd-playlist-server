@@ -1,0 +1,88 @@
+import {test, expect} from "@playwright/test";
+import {catalog, cacheState, defaultTime, mockCatalogNetwork, startQueuedPlayer} from "./catalog-fixtures";
+
+test.beforeEach(async ({context}) => mockCatalogNetwork(context));
+
+test("alphabet jumps switch pages and focus rows without loading or interrupting playback", async ({page}, testInfo) => {
+    await page.emulateMedia({colorScheme: "dark"});
+    const extra = Object.fromEntries(Array.from({length: 250}, (_, index) => ["A Camp " + String(index).padStart(3, "0"), {id: "PL_a_" + index, link: "fixture", count: 1}]));
+    let payloads = 0;
+    await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: {...catalog(), ...extra, Zither: {id: "PL_z", link: "fixture", count: 1}}}); });
+    await page.goto("/react");
+    const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
+    await expect(rail.getByRole("button", {name: "Jump to Q", exact: true})).toBeDisabled();
+    await rail.getByRole("button", {name: "Jump to T", exact: true}).click();
+    await expect(page.getByRole("navigation", {name: "Playlist pages"})).toContainText("Page 3 of 3");
+    await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toBeFocused();
+    expect(await page.evaluate(() => (window as any).__playerCreations || 0)).toBe(0);
+    await startQueuedPlayer(page);
+    await expect(page.locator("#frameParent h2")).toHaveText("Buffering: Travel / Campfire");
+    await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
+    const before = await page.evaluate(() => (window as any).__playerCalls);
+    await rail.getByRole("button", {name: "Jump to Z", exact: true}).click();
+    await expect(page.getByRole("link", {name: "Zither", exact: true})).toBeFocused();
+    await expect(page.getByRole("link", {name: "Zither", exact: true})).toBeInViewport();
+    await testInfo.attach("alphabet-desktop.png", {body: await page.screenshot(), contentType: "image/png"});
+    await rail.getByRole("button", {name: "Jump to numbers and symbols", exact: true}).click();
+    await expect(page.getByRole("link", {name: "!!! Intro !!!", exact: true})).toBeFocused();
+    await expect(page.getByRole("navigation", {name: "Playlist pages"})).toContainText("Page 1 of 3");
+    await rail.getByRole("button", {name: "Jump to A", exact: true}).click();
+    await expect(page.getByRole("link", {name: "A Camp 000", exact: true})).toBeFocused();
+    const boss = rail.getByRole("button", {name: "Jump to B", exact: true});
+    await boss.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("link", {name: "Boss Battle", exact: true})).toBeFocused();
+    expect(await page.evaluate(() => (window as any).__playerCalls)).toEqual(before);
+    expect(payloads).toBe(1);
+    await expect(page.locator("#listParent dt a")).toHaveCount(54);
+});
+
+test("alphabet availability follows filtering, accents, and refreshed catalogs", async ({page}) => {
+    const data = {...catalog(), "Énigma": {id: "PL_enigma", link: "fixture", count: 1}};
+    await page.route("**/listCount*", (route) => route.fulfill({json: data}));
+    await page.goto("/react");
+    const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
+    await rail.getByRole("button", {name: "Jump to E", exact: true}).click();
+    await expect(page.getByRole("link", {name: "Énigma", exact: true})).toBeFocused();
+    await expect(rail.getByRole("button", {name: "Jump to W", exact: true})).toBeDisabled();
+    await page.getByRole("button", {name: "Search playlists", exact: true}).click();
+    const search = page.getByRole("searchbox", {name: "Search playlists"});
+    await search.fill("campfire");
+    await expect(rail.getByRole("button", {name: "Jump to B", exact: true})).toBeDisabled();
+    await expect(rail.getByRole("button", {name: "Jump to T", exact: true})).toBeEnabled();
+    await rail.getByRole("button", {name: "Jump to T", exact: true}).click();
+    await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toBeFocused();
+    await expect(search).toHaveValue("campfire");
+    await search.fill("no matching name");
+    await expect(rail.locator("button:enabled")).toHaveCount(0);
+    await page.getByRole("button", {name: "Clear search", exact: true}).click();
+    await expect(rail.getByRole("button", {name: "Jump to E", exact: true})).toBeEnabled();
+    await page.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1)}));
+    await page.route("**/listCount*", (route) => route.fulfill({json: {...data, lastUpdate: defaultTime + 1, Winter: {id: "PL_winter", link: "fixture", count: 1}}}));
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await rail.getByRole("button", {name: "Jump to W", exact: true}).click();
+    await expect(page.getByRole("link", {name: "Winter", exact: true})).toBeFocused();
+});
+
+test("alphabet rail stays beside mobile rows after scrolling without covering the list", async ({page}, testInfo) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await page.emulateMedia({colorScheme: "light"});
+    const rows = Object.fromEntries([..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].flatMap((letter) => Array.from({length: 3}, (_, index) => [letter + " playlist " + index, {id: "PL_" + letter + index, link: "fixture", count: 1}])));
+    await page.route("**/listCount*", (route) => route.fulfill({json: {...rows, lastUpdate: defaultTime}}));
+    await page.goto("/react");
+    const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
+    await rail.getByRole("button", {name: "Jump to Z", exact: true}).click();
+    const target = page.getByRole("link", {name: "Z playlist 0", exact: true});
+    await expect(target).toBeFocused();
+    await expect(target).toBeInViewport();
+    await expect(rail).toBeInViewport();
+    const railBox = await rail.boundingBox();
+    const rowBox = await target.boundingBox();
+    expect(railBox && rowBox && rowBox.x + rowBox.width < railBox.x).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await testInfo.attach("alphabet-mobile.png", {body: await page.screenshot(), contentType: "image/png"});
+    await page.setViewportSize({width: 667, height: 375});
+    await expect(rail).toBeInViewport();
+    const shortBox = await rail.boundingBox();
+    expect(shortBox && shortBox.y >= 65 && shortBox.y + shortBox.height <= 375).toBe(true);
+});

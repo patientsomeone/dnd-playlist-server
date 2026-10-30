@@ -1,0 +1,12 @@
+{
+    "items": [
+        {"id": "PL_fixture_intro", "snippet": {"title": "D&D INTRO"}},
+        {"id": "PL_fixture_tavern", "snippet": {"title": "Session D&D Tavern"}},
+        {"id": "PL_fixture_forest", "snippet": {"title": "D&D Forest/Day"}},
+        {"id": "PL_fixture_boss", "snippet": {"title": "d&d BOSS BATTLE"}},
+        {"id": "PL_fixture_emotional", "snippet": {"title": "EMOTIONAL MUSIC"}},
+        {"id": "PL_fixture_explore", "snippet": {"title": "Normal Explore"}},
+        {"id": "PL_fixture_timeline", "snippet": {"title": "D&D Timeline"}},
+        {"id": "PL_fixture_cooking", "snippet": {"title": "Cooking"}}
+    ]
+}

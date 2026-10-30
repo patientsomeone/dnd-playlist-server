@@ -40,14 +40,19 @@ export const fetchManifest = (): Promise<anyObject> => {
         const fs = new FsUtils(propsFile);
         return fs.read.properties(defaultProps)
         .then((allProps) => {
-            const props = allProps as {helpers: {manifest: anyObject;};};
+            const helpers = allProps.helpers;
+            if (!helpers || typeof helpers !== "object" || Array.isArray(helpers)) throw new Error("Invalid manifest helpers");
+            const manifest = helpers.manifest;
+            if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("Invalid manifest properties");
             deb("Manifest Properties Received");
-            deb(props);
-            for (const key in props.helpers.manifest) {
-                if (props.helpers.manifest.hasOwnProperty(key)) {
+            deb(manifest);
+            for (const key of ["updated", "pulled"] as const) {
+                if (Object.prototype.hasOwnProperty.call(manifest, key)) {
                     deb(`Setting Manifest Properties for ${key}`);
-                    deb(props.helpers.manifest[key]);
-                    properties[key] = props.helpers.manifest[key];
+                    const value = manifest[key];
+                    if (typeof value !== "string") throw new Error(`Invalid manifest path: ${key}`);
+                    deb(value);
+                    properties[key] = value;
                 }
             }
         })
@@ -127,7 +132,7 @@ export const fetchManifest = (): Promise<anyObject> => {
     };
 
     
-    const updateManifest = (manifestData) => {
+    const updateManifest = (manifestData: anyObject) => {
         const deb = debManifest.set("fetchManifest:updateManifest");
         return fsUpdated.create.json(manifestData)
         .then(() => {

@@ -1,0 +1,512 @@
+{
+  "generatedAt": "2026-10-30T02:08:55.701Z",
+  "environment": {
+    "node": "v20.18.3",
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz",
+    "logicalCpus": 12,
+    "sqliteDriver": "5.1.7"
+  },
+  "methodology": "Synthetic warm filesystem reads plus JSON serialization; prototype adapters; no HTTP, browser, live API, refresh concurrency, or durability comparison. JSON uses one file per channel. SQLite uses indexed rows. Samples are serial, with two warmups and optional explicit GC outside timing.",
+  "datasets": [
+    {
+      "totalPlaylists": 1000,
+      "channelCount": 1,
+      "selectedChannelPlaylists": 1000,
+      "totalJsonBytes": 171495,
+      "selectedChannelJsonBytes": 171495,
+      "sqliteAllChannelsBytes": 237568,
+      "sqliteSeedMs": 25.416,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.671,
+          "p95Ms": 2.835,
+          "maxMs": 2.835,
+          "responseBytes": 130488
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 5.283,
+          "p95Ms": 9.099,
+          "maxMs": 9.099,
+          "responseBytes": 130488
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.477,
+          "p95Ms": 2.262,
+          "maxMs": 2.262,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.692,
+          "p95Ms": 0.849,
+          "maxMs": 0.849,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.483,
+          "p95Ms": 1.77,
+          "maxMs": 1.77,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.657,
+          "p95Ms": 1.032,
+          "maxMs": 1.032,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.183,
+          "p95Ms": 1.709,
+          "maxMs": 1.709,
+          "responseBytes": 109
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.206,
+          "p95Ms": 0.562,
+          "maxMs": 0.562,
+          "responseBytes": 109
+        }
+      ]
+    },
+    {
+      "totalPlaylists": 1000,
+      "channelCount": 100,
+      "selectedChannelPlaylists": 10,
+      "totalJsonBytes": 174960,
+      "selectedChannelJsonBytes": 1745,
+      "sqliteAllChannelsBytes": 237568,
+      "sqliteSeedMs": 38.084,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.227,
+          "p95Ms": 0.443,
+          "maxMs": 0.443,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.283,
+          "p95Ms": 1.14,
+          "maxMs": 1.14,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.244,
+          "p95Ms": 0.647,
+          "maxMs": 0.647,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.301,
+          "p95Ms": 0.583,
+          "maxMs": 0.583,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.262,
+          "p95Ms": 0.63,
+          "maxMs": 0.63,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.307,
+          "p95Ms": 0.486,
+          "maxMs": 0.486,
+          "responseBytes": 1328
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.223,
+          "p95Ms": 0.53,
+          "maxMs": 0.53,
+          "responseBytes": 109
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.18,
+          "p95Ms": 0.303,
+          "maxMs": 0.303,
+          "responseBytes": 109
+        }
+      ]
+    },
+    {
+      "totalPlaylists": 10000,
+      "channelCount": 1,
+      "selectedChannelPlaylists": 10000,
+      "totalJsonBytes": 1714635,
+      "selectedChannelJsonBytes": 1714635,
+      "sqliteAllChannelsBytes": 2146304,
+      "sqliteSeedMs": 113.616,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 15.652,
+          "p95Ms": 16.686,
+          "maxMs": 16.686,
+          "responseBytes": 1304628
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 53.063,
+          "p95Ms": 58.589,
+          "maxMs": 58.589,
+          "responseBytes": 1304628
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 12.208,
+          "p95Ms": 15.087,
+          "maxMs": 15.087,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.671,
+          "p95Ms": 1.232,
+          "maxMs": 1.232,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 11.667,
+          "p95Ms": 13.377,
+          "maxMs": 13.377,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 1.307,
+          "p95Ms": 1.925,
+          "maxMs": 1.925,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 10.118,
+          "p95Ms": 10.94,
+          "maxMs": 10.94,
+          "responseBytes": 107
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.231,
+          "p95Ms": 0.339,
+          "maxMs": 0.339,
+          "responseBytes": 107
+        }
+      ]
+    },
+    {
+      "totalPlaylists": 10000,
+      "channelCount": 100,
+      "selectedChannelPlaylists": 100,
+      "totalJsonBytes": 1718100,
+      "selectedChannelJsonBytes": 17135,
+      "sqliteAllChannelsBytes": 2146304,
+      "sqliteSeedMs": 256.02,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.426,
+          "p95Ms": 0.845,
+          "maxMs": 0.845,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.838,
+          "p95Ms": 1.501,
+          "maxMs": 1.501,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.521,
+          "p95Ms": 1.236,
+          "maxMs": 1.236,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.819,
+          "p95Ms": 1.399,
+          "maxMs": 1.399,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.496,
+          "p95Ms": 0.912,
+          "maxMs": 0.912,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.767,
+          "p95Ms": 0.951,
+          "maxMs": 0.951,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 0.502,
+          "p95Ms": 1.085,
+          "maxMs": 1.085,
+          "responseBytes": 107
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.217,
+          "p95Ms": 0.392,
+          "maxMs": 0.392,
+          "responseBytes": 107
+        }
+      ]
+    },
+    {
+      "totalPlaylists": 100000,
+      "channelCount": 1,
+      "selectedChannelPlaylists": 100000,
+      "totalJsonBytes": 17146035,
+      "selectedChannelJsonBytes": 17146035,
+      "sqliteAllChannelsBytes": 21598208,
+      "sqliteSeedMs": 1084.062,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 219.6,
+          "p95Ms": 241.753,
+          "maxMs": 241.753,
+          "responseBytes": 13046028
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 632.669,
+          "p95Ms": 665.471,
+          "maxMs": 665.471,
+          "responseBytes": 13046028
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 172.808,
+          "p95Ms": 213.47,
+          "maxMs": 213.47,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 1.007,
+          "p95Ms": 4.537,
+          "maxMs": 4.537,
+          "responseBytes": 13020
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 187.038,
+          "p95Ms": 230.712,
+          "maxMs": 230.712,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 13.532,
+          "p95Ms": 21.102,
+          "maxMs": 21.102,
+          "responseBytes": 13128
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 144.795,
+          "p95Ms": 183.796,
+          "maxMs": 183.796,
+          "responseBytes": 107
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.332,
+          "p95Ms": 0.561,
+          "maxMs": 0.561,
+          "responseBytes": 107
+        }
+      ]
+    },
+    {
+      "totalPlaylists": 100000,
+      "channelCount": 100,
+      "selectedChannelPlaylists": 1000,
+      "totalJsonBytes": 17149500,
+      "selectedChannelJsonBytes": 171035,
+      "sqliteAllChannelsBytes": 21835776,
+      "sqliteSeedMs": 3763.901,
+      "measurements": [
+        {
+          "operation": "full-channel",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.578,
+          "p95Ms": 2.578,
+          "maxMs": 2.578,
+          "responseBytes": 130028
+        },
+        {
+          "operation": "full-channel",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 10.364,
+          "p95Ms": 15.442,
+          "maxMs": 15.442,
+          "responseBytes": 130028
+        },
+        {
+          "operation": "first-100",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.576,
+          "p95Ms": 4.938,
+          "maxMs": 4.938,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "first-100",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.811,
+          "p95Ms": 1.734,
+          "maxMs": 1.734,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.267,
+          "p95Ms": 2.718,
+          "maxMs": 2.718,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "last-100-offset",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.832,
+          "p95Ms": 1.551,
+          "maxMs": 1.551,
+          "responseBytes": 13028
+        },
+        {
+          "operation": "single-playlist",
+          "store": "json",
+          "samples": 15,
+          "p50Ms": 1.081,
+          "p95Ms": 2.091,
+          "maxMs": 2.091,
+          "responseBytes": 107
+        },
+        {
+          "operation": "single-playlist",
+          "store": "sqlite",
+          "samples": 15,
+          "p50Ms": 0.226,
+          "p95Ms": 0.395,
+          "maxMs": 0.395,
+          "responseBytes": 107
+        }
+      ]
+    }
+  ]
+}

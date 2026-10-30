@@ -1,6 +1,6 @@
 /* Import MODULES */
-import * as atob from "atob";
-import * as btoa from "btoa";
+import atob from "atob";
+import btoa from "btoa";
 import { dBug, debLine } from "../utilities/dBug";
 
 const debCrypt = new dBug("agents:oosConnect");

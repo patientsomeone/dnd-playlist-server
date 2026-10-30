@@ -2,6 +2,9 @@
 
 # Ignore any file or folder by .i flag
 *.i.*
+.env
+.env.*
+!.env.example
 
 # Ignore .lock files
 *.lock
@@ -20,8 +23,12 @@ outputs/
 *input*.json
 *output*.json
 dist/
+coverage/
+playwright-report/
+test-results/
 public/json/*.json
 public/locks/*.lock
+data/*.sqlite*
 
 ### OS Files ###
 # Ignore Mac .DS_Store files

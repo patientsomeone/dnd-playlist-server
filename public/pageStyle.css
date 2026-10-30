@@ -8,6 +8,15 @@ body {
     font-family: Tahoma, Verdana, Arial, sans-serif;
 }
 
+#catalogStatus {
+    max-width: 36rem;
+    min-height: 1.5em;
+}
+
+#catalogStatus[role="alert"] {
+    color: #c56c6c;
+}
+
 #listParent sub {
     display: block;
     width: 100%;

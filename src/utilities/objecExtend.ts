@@ -10,7 +10,7 @@ const testModule = false;
 /**
  * First listed argument is default
  */
-export const objectExtend = (...args): anyObject => {
+export const objectExtend = (...args: any[]): anyObject => {
     const deb = debg.set("utilities:objectExtend");
     /* Set first argument as default */
     let defArg = args[0];
@@ -32,7 +32,7 @@ export const objectExtend = (...args): anyObject => {
                     if (Array.isArray(thisArg[key])) {
                         deb("Array Identified");
                         deb(thisArg[key]);
-                        thisArg[key].isArray = true;
+                        Object.assign(thisArg[key], {isArray: true});
                     }
 
                     /* If an object is passed */

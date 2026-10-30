@@ -1,6 +1,5 @@
-/* eslint-disable camelcase */
+
 /* MODULES */
-import {GoogleApis, youtube_v3} from "googleapis";
 
 /* UTILITIES */
 import {AsyncUtil} from "./asyncUtil";
@@ -14,6 +13,7 @@ import {dateStamp} from "./dateStamp";
 import {fetchEnv} from "./fetchEnv";
 import {err, log} from "./log";
 import {toTitleCase} from "./textManipulators";
+import {uniquePlaylistEntries} from "../shared/uniquePlaylists";
 
 export type playlistData = {
     snippet: {title: string;};
@@ -37,10 +37,10 @@ type allLinks = {
 type playlistArray = playlistData[];
 
 export const processPlaylists = async (allPlaylists: playlistArray, playlistProcessor: (playlist: playlistData) => Promise<processedLinks | false>): Promise<allLinks> => {
-    const processedLinks = {};
+    const processedLinks: allLinks = {};
     let checkedLists = 0;
 
-    for await (const playlist of allPlaylists) {
+    for (const playlist of allPlaylists) {
         checkedLists += 1;
         let processed = null;
         try {
@@ -57,7 +57,8 @@ export const processPlaylists = async (allPlaylists: playlistArray, playlistProc
     }
 
     log(`Checked ${checkedLists} playlists`);
-    log(`Identified ${Object.keys(processedLinks).length} playlists`);
+    const uniqueLinks = Object.fromEntries(uniquePlaylistEntries(Object.entries(processedLinks)));
+    log(`Identified ${Object.keys(uniqueLinks).length} playlists`);
 
-    return processedLinks;
+    return uniqueLinks;
 };

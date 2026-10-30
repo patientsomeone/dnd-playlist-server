@@ -1,0 +1,26 @@
+{
+    "!!! Intro !!!": {
+        "id": "PL_fixture_intro",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_intro"
+    },
+    "Tavern": {
+        "id": "PL_fixture_tavern",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_tavern"
+    },
+    "Forest / Day": {
+        "id": "PL_fixture_forest",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_forest"
+    },
+    "Boss Battle": {
+        "id": "PL_fixture_boss",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_boss"
+    },
+    "Emotional Music": {
+        "id": "PL_fixture_emotional",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_emotional"
+    },
+    "Normal Explore": {
+        "id": "PL_fixture_explore",
+        "link": "https://www.youtube.com/playlist?list=PL_fixture_explore"
+    }
+}

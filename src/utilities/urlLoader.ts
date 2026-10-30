@@ -10,7 +10,6 @@ import {CookieJar} from "tough-cookie";
 import {IDebugger} from "debug";
 
 const dBugger = new dBug("utilities:urlLoader");
-const testModule = true;
 
 interface urlResponse {
     data: string;
@@ -30,7 +29,10 @@ export class LoadUrl {
         this.jar = new CookieJar();
         const jar = this.jar;
 
-        this.axios = wrapper(axios.create({jar}));
+        // The wrapper's ESM Axios declarations and our CJS declarations describe
+        // the same runtime client. Keep the interop assertion at this boundary.
+        const wrapClient = wrapper as <T extends AxiosInstance>(client: T) => T;
+        this.axios = wrapClient(axios.create({jar} as axiosJar));
         
     }
     public static single = async (url: string): Promise<AxiosResponse> => {
@@ -40,11 +42,7 @@ export class LoadUrl {
             method: "get"
         };
 
-        try {
-            return await loader.getUrl(config);
-        } catch (err) {
-            console.error(err);
-        }
+        return loader.getUrl(config);
     };
     private initialized = false;
     private axios: AxiosInstance;
@@ -93,6 +91,7 @@ const test = () => {
 
 };
 
-if (testModule) {
+// Run the demo only when explicitly invoked, never when importing the utility.
+if (require.main === module) {
     test();
 }

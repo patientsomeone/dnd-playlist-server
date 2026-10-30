@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* MODULES */
-import {GoogleApis, youtube_v3} from "googleapis";
+import {youtube, youtube_v3} from "@googleapis/youtube";
 
 /* UTILITIES */
 import {AsyncUtil} from "../utilities/asyncUtil";
@@ -31,17 +31,13 @@ type listInput = {playlists: playlists;};
             count: number;
         };} = {};
         
-        const google = new GoogleApis({
-            auth: youtubeApiKey
-        });
+        const service = youtube({version: "v3", auth: youtubeApiKey});
 
-        const service = google.youtube("v3");
-
-        const countVideos = async(videos: youtube_v3.Schema$PlaylistItem[]) => {
+        const countVideos = (videos: youtube_v3.Schema$PlaylistItem[]) => {
             let count = 0;
 
-            for await (const video of videos) {
-                if (video.contentDetails.hasOwnProperty("videoPublishedAt")) {
+            for (const video of videos) {
+                if (video.contentDetails && Object.prototype.hasOwnProperty.call(video.contentDetails, "videoPublishedAt")) {
                     count += 1;
                 }
             }
@@ -59,9 +55,9 @@ type listInput = {playlists: playlists;};
                 pageToken
             });
             const data = response.data;
-            const videos = data.items;
+            const videos = data.items || [];
             const nextPage = data.hasOwnProperty("nextPageToken") ? data.nextPageToken : false;
-            const count = await countVideos(videos);
+            const count = countVideos(videos);
 
             if (!!nextPage) {
                 const nextCount = await getListDetails(listId, nextPage);
@@ -75,6 +71,7 @@ type listInput = {playlists: playlists;};
 
         const fetchCount = async (link: string) => {
             const listId = (new URLSearchParams(link.split("?")[1])).get("list");
+            if (!listId) throw new Error("Playlist link is missing its list ID");
             const count = await getListDetails(listId);
 
 
@@ -96,7 +93,7 @@ type listInput = {playlists: playlists;};
         //     }
         // };
 
-        for await (const list of Object.keys(listData)) {
+        for (const list of Object.keys(listData)) {
             const data = await fetchCount(listData[list]);
             const updatedObj = {
                 link: listData[list],

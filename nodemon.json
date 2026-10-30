@@ -1,5 +1,13 @@
 {
-    "watch": [".src"],
-    "ext": "ts, tsx",
-    "exec": "ts-node ./.src/index.ts"
+    "watch": [
+        "src",
+        "tsconfig.base.json",
+        "tsconfig.server.json"
+    ],
+    "ignore": [
+        "src/agents/createList.ts",
+        "src/client/**"
+    ],
+    "ext": "ts,json",
+    "exec": "ts-node --project tsconfig.server.json src/routes/app.ts"
 }

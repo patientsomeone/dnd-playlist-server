@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 /* Import UTILITIES */
 import {dBug, debLine} from "../utilities/dBug";
 import {log, logLine} from "../utilities/log";
@@ -14,7 +14,7 @@ import {anyObject, anyStandard} from "../.types";
 
 export interface IfsReturns {
     filePath: string;
-    error: string;
+    error: string | null;
     data: string;
 }
 
@@ -125,10 +125,10 @@ export class jsonUtils {
         const deb = this.deb.set("jsonUtils:set");
         deb(`Setting JSON at ${jsonPath}`);
         deb(value);
-        
+
         this.editor.set(jsonPath, value);
     };
-    
+
     /** Append to existing array in JSON file
     * jsonPath: Object Path as string
     ** e.g. ("parent.child")
@@ -153,7 +153,7 @@ const test = () => {
     const data = testUtil.read();
 
     // log(testUtil.get("2012348091"));
-    
+
     // logLine("Setting Data");
     // testUtil.set("2012348091.NewValue", "test");
 

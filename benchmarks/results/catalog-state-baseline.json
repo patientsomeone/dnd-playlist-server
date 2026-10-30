@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-30T05:17:02.009Z",
+  "node": "v20.18.3",
+  "platform": "win32",
+  "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz",
+  "logicalCpus": 12,
+  "note": "Warm full-channel storage reads/serialization; queued calls on one connection, not HTTP capacity. Max RSS is the process lifetime high-water mark.",
+  "results": [
+    {
+      "playlists": 1000,
+      "samples": 5,
+      "replaceMs": 12.531,
+      "stateReadP50Ms": 0.156,
+      "stateDuringWriteMs": 9.432,
+      "stateResponseBytes": 127,
+      "fullReadSerializeP50Ms": 5.801,
+      "fullReadSerializeP95Ms": 7.217,
+      "fourQueuedReadsMs": 34.488,
+      "responseBytes": 99728,
+      "rssBeforeMiB": 43.656,
+      "rssAfterMiB": 52.047,
+      "processMaxRssMiB": 52.047
+    },
+    {
+      "playlists": 10000,
+      "samples": 5,
+      "replaceMs": 94.873,
+      "stateReadP50Ms": 0.132,
+      "stateDuringWriteMs": 1.217,
+      "stateResponseBytes": 127,
+      "fullReadSerializeP50Ms": 68.562,
+      "fullReadSerializeP95Ms": 100.745,
+      "fourQueuedReadsMs": 213.895,
+      "responseBytes": 1017008,
+      "rssBeforeMiB": 52.367,
+      "rssAfterMiB": 83.691,
+      "processMaxRssMiB": 83.691
+    },
+    {
+      "playlists": 100000,
+      "samples": 5,
+      "replaceMs": 1206.426,
+      "stateReadP50Ms": 0.135,
+      "stateDuringWriteMs": 1.107,
+      "stateResponseBytes": 127,
+      "fullReadSerializeP50Ms": 566.459,
+      "fullReadSerializeP95Ms": 625.417,
+      "fourQueuedReadsMs": 2351.42,
+      "responseBytes": 10369808,
+      "rssBeforeMiB": 83.922,
+      "rssAfterMiB": 315.938,
+      "processMaxRssMiB": 343.211
+    }
+  ]
+}

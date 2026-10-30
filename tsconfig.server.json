@@ -1,0 +1,25 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "lib": [
+            "es2020"
+        ],
+        "types": [
+            "node"
+        ],
+        "rootDir": "src",
+        "outDir": "dist/server",
+        "noEmitOnError": true
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/client",
+        "src/agents/createList.ts",
+        "src/logs",
+        "**/*.spec.ts"
+    ]
+}

@@ -1,25 +1,32 @@
 {
+    "extends": "./tsconfig.base.json",
     "compileOnSave": false,
     "compilerOptions": {
-        "resolveJsonModule": false,
-        "target": "es2020",
-        "jsx": "react",
         "module": "nodenext",
-        "outDir": "dist",
-        "esModuleInterop": true,
-        "sourceMap": true,
-        "types": ["youtube"],
-        "moduleResolution": "nodenext"
+        "moduleResolution": "nodenext",
+        "jsx": "react-jsx",
+        "allowArbitraryExtensions": true,
+        "lib": [
+            "es2020",
+            "dom",
+            "dom.iterable"
+        ],
+        "types": [
+            "node",
+            "youtube"
+        ],
+        "rootDir": ".",
+        "noEmit": true
     },
     "include": [
-        "./src/**/*.ts*"
+        "src/**/*.ts",
+        "client/src/**/*.ts",
+        "client/src/**/*.tsx"
     ],
     "exclude": [
-        "client",
-        "dist",
         "node_modules",
+        "dist",
         "**/*.spec.ts",
-        "*.json",
-        "./src/logs/*"
+        "src/logs"
     ]
 }

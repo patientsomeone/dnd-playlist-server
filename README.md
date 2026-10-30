@@ -1,92 +1,72 @@
-# TS GIT Boilerplate
+# D&D Playlist Organizer
 
-Boilerplate for Typescript development with GIT Gulp Commands
+A shared, alphabetically organized YouTube playlist catalog for a worldwide D&D group. Express serves the legacy player at `/`, a SQLite metadata cache, and the playlist API. The React player is mounted at `/react` and `/react/`, using the shared catalog/IndexedDB flow and an independent YouTube player. The legacy root remains available during acceptance testing.
 
-## Getting started
+## Setup
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Use **Node 24.22.1** and **npm 11.19.1**, pinned by `.nvmrc`, `engines`, and `packageManager`. Newer Node 24.x / npm 11.x releases are allowed. Other Node majors are intentionally outside this project's tested runtime. Selecting a runtime is a manual step; installation does not change the machine's global Node selection.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+With nvm-windows, select the project runtime in your terminal:
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/robinsolutions/ts-git-boilerplate.git
-git branch -M main
-git push -uf origin main
+```sh
+nvm install 24.22.1
+nvm use 24.22.1
+node --version
+npm --version
+npm ci
+npm run test:browser:install
 ```
 
-## Integrate with your tools
+Create an ignored `.i.env` at the repository root with your own values. Host-provided environment variables take precedence; `.i.env` then takes precedence over an optional `.env`. Loading is centralized in `src/utilities/environment.ts`; secrets are never browser configuration.
 
-- [ ] [Set up project integrations](https://gitlab.com/robinsolutions/ts-git-boilerplate/-/settings/integrations)
+| Variable | Purpose |
+| --- | --- |
+| `YT_API_KEY` | Server-side YouTube API key, required for refreshes |
+| `YT_LIST_OWNER` | Default YouTube channel ID |
+| `PORT` | HTTP listener; defaults to `8000` |
+| `DO_ENV` | Existing truthy production/logging flag; supplied by DigitalOcean as `${APP_URL}` |
+| `PLAYLIST_CACHE_DB_PATH` | Optional SQLite file path; default `data/playlist-cache.sqlite` |
 
-## Collaborate with your team
+Run `npm run dev`, then open `http://localhost:8000`. It checks all source type projects, builds each browser target once, then runs Express through nodemon with both browser watchers. The build works in PowerShell, Git Bash, and Linux without a Bash wrapper. The browser page requires reloading after a bundle change; this is not React HMR.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Commands
 
-## Test and Deploy
+| Command | Purpose |
+| --- | --- |
+| `npm run test:all` | Lint, source/test/browser type checks, coverage-gated Jest, Chromium |
+| `npm run check` | The same checks without Chromium |
+| `npm run build` | Run the independent server, legacy, and React client builds |
+| `npm run build:server` | Compile only server/shared code into `dist/server` |
+| `npm run build:legacy` | Build the checked legacy bundle at its existing public URL |
+| `npm run build:client` | Build the React player into `dist/client` |
+| `npm start` | Run `dist/server/routes/app.js` |
+| `npm run test:build` | Disposable real-build/watch checks for output/cache isolation and failure handling |
+| `npm run test:client` | Chromium against the actual built Express React/legacy routes, with fixture API responses |
+| `npm run test:start` | Built-server startup and HTTP smoke with fixture environment/temp cache |
+| `npm run test:runtime` | Built-code interop with real Axios/cookies, YouTube SDK and native SQLite; loopback only |
+| `npm run test:watch` | Jest watch mode |
+| `npm run lint:fix` | Automatic fixes using the current ESLint policy |
+| `npm run bench:sqlite` | Actual-store desktop benchmark at 1K/10K/100K playlists |
 
-Use the built-in continuous integration in GitLab.
+After changes, run `npm run test:all`, `npm run build`, `npm run test:start`, `npm run test:client`, `npm run test:runtime`, and `npm run test:build`. Chromium installation on Linux CI uses `npm run test:browser:install -- --with-deps`. Routine checks use fixtures and do not consume YouTube quota. See [test coverage and limits](tests/README.md) and [performance methodology](benchmarks/README.md).
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+`public/createList.js` and its source map are generated from `src/agents/createList.ts`; edit the TypeScript source. `dist/server` and `dist/client` are generated and independently disposable. The React player is mounted at `/react` and `/react/`; see [catalog/player behavior, checks and acceptance limits](docs/react-client.md). See [build layout and watchers](docs/builds.md). Retired Gulp/Git helper scripts are no longer npm commands; use Git directly for branch/commit/push operations.
 
-***
+## Cache and API
 
-# Editing this README
+- `GET /listCount` returns the last committed catalog; `GET /refreshPlaylists` requests a refresh when the coded **12-hour** freshness interval has expired.
+- `GET /cacheState` returns only channel timestamp/freshness/refresh-lease metadata, with no catalog scan or YouTube request.
+- Browser IndexedDB displays saved catalogs immediately and revalidates in the background. Catalog updates do not reload or seek the player.
+- Server refreshes replace channel snapshots transactionally and use expiring SQLite leases. Matching per-channel legacy JSON can import once; unrelated JSON and old `.lock` files are not used by the active cache.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+SQLite files are server-side, private, and separate from build output. On DigitalOcean App Platform they remain an ephemeral cache and may be regenerated after replacement. Accounts/settings will need a durable storage design. See [server cache](docs/sqlite-cache.md) and [browser cache](docs/browser-cache.md).
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Deployment and rollback
 
-## Name
-Choose a self-explaining name for your project.
+The supplied DigitalOcean spec builds with `npm run build`, starts with `npm start`, uses HTTP port 8080, and deploys pushes to **`Production`**. Runtime pins now select Node 24; verify the actual selected Node/npm versions in the next staging/deployment logs. Local upgrade work has not been deployed. See [recorded settings and release boundary](docs/deployment.md).
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Before release, review the complete change set against the current remote `Production` head and keep the last known working revision available. Roll back by redeploying that revision through DigitalOcean, including its matching manifest/lockfile/runtime. Cache data is rebuildable; preserve any valuable local snapshot separately before replacing instances. Never use the retired script that pushed `master` after compilation failures.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Dependency policy
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+The [upgrade record](docs/dependency-audit.md) lists selected versions, checks, and remaining findings. TypeScript stays on **6.0.x** because the current typed-lint toolchain does not support 7.x; Node types stay on 24 to match the runtime. Strict checking is enabled for application source and both test projects; [the typing guide](docs/typing.md) explains YouTube response/player types and compile-only regression checks. Explicit `any` at generic integration boundaries remains allowed. ESLint's flat config owns formatting and promise checks, with React Hooks checks enabled.

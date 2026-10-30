@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-10-30T04:43:09.398Z",
+  "node": "v20.18.3",
+  "platform": "win32",
+  "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz",
+  "logicalCpus": 12,
+  "note": "Warm full-channel storage reads/serialization; queued calls on one connection, not HTTP capacity. Max RSS is the process lifetime high-water mark.",
+  "results": [
+    {
+      "playlists": 1000,
+      "samples": 5,
+      "replaceMs": 10.072,
+      "fullReadSerializeP50Ms": 5.02,
+      "fullReadSerializeP95Ms": 5.124,
+      "fourQueuedReadsMs": 19.608,
+      "responseBytes": 99728,
+      "rssBeforeMiB": 43.574,
+      "rssAfterMiB": 51.52,
+      "processMaxRssMiB": 51.523
+    },
+    {
+      "playlists": 10000,
+      "samples": 5,
+      "replaceMs": 91.499,
+      "fullReadSerializeP50Ms": 56.14,
+      "fullReadSerializeP95Ms": 59.512,
+      "fourQueuedReadsMs": 207.336,
+      "responseBytes": 1017008,
+      "rssBeforeMiB": 51.734,
+      "rssAfterMiB": 83.598,
+      "processMaxRssMiB": 83.598
+    },
+    {
+      "playlists": 100000,
+      "samples": 5,
+      "replaceMs": 1271.343,
+      "fullReadSerializeP50Ms": 587.452,
+      "fullReadSerializeP95Ms": 661.969,
+      "fourQueuedReadsMs": 2448.681,
+      "responseBytes": 10369808,
+      "rssBeforeMiB": 83.77,
+      "rssAfterMiB": 318.563,
+      "processMaxRssMiB": 343.711
+    }
+  ]
+}

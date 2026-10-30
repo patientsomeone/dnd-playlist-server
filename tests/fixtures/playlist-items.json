@@ -1,0 +1,7 @@
+{
+    "items": [
+        {"contentDetails": {"videoId": "published-1", "videoPublishedAt": "2024-01-01T00:00:00Z"}},
+        {"contentDetails": {"videoId": "private-or-deleted"}},
+        {"contentDetails": {"videoId": "published-2", "videoPublishedAt": "2024-02-01T00:00:00Z"}}
+    ]
+}

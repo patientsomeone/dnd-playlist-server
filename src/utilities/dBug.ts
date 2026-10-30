@@ -69,11 +69,9 @@ export class dBug {
      * Calls dbug with generated prefix
      */
     public call = (msg?: anyStandard): debug.IDebugger => {
-        if (!msg) {
-            return debug(this.prefixedBugger);
-        } else {
-            debug(this.prefixedBugger)(msg);
-        }
+        const logger = debug(this.prefixedBugger);
+        if (msg) logger(msg);
+        return logger;
     };
 
     public enabled = (): boolean => {

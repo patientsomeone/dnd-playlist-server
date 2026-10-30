@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "lib": ["es2020", "dom", "dom.iterable"],
+        "types": ["youtube"],
+        "rootDir": ".",
+        "noEmit": true
+    },
+    "include": ["src/agents/createList.ts", "src/client/**/*.ts", "src/shared/**/*.ts"]
+}

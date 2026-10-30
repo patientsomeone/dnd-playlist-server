@@ -24,7 +24,7 @@ export class AsyncUtil {
      * -- triggerNext: Function which will trigger next item to be processed.
      * -- counterLog: Function to trigger status counter with message
      */
-    public static eachOfSeries(iteratee: any[] | object, iterator: (individualItem: string | number | boolean | {[key: string]: any;}, key: number | string, triggerNext: (stop?: any) => void | IasyncCallback, counterLog: (msg: string | false) => void) => void): Promise<void | IasyncCallback> {
+    public static eachOfSeries<T>(iteratee: T[] | Record<string, T>, iterator: (individualItem: T, key: number | string, triggerNext: async.ErrorCallback, counterLog: (msg: string | false) => void) => void): Promise<void> {
         const countData = this.initCounter(iteratee);
         const timeStart = Date.now();
 
@@ -39,16 +39,9 @@ export class AsyncUtil {
                 };
                 countData.trackedCount += 1;
                 iterator(individualItem, key, triggerNext, triggerCounter);
-            }, (data: IasyncCallback) => {
-                deEaOfSer("Each of Series completion", data);
-                if (!!data && data.hasOwnProperty("err") && data.err) {
-                    deEaOfSer("Each of Series rejecting");
-                    log(data.err);
-                    reject();
-                } else {
-                    deEaOfSer("Each of Series resolving");
-                    resolve(!!data && data.value);
-                }
+            }, (error) => {
+                if (error) reject(error);
+                else resolve();
             });
         });
     }
@@ -63,7 +56,7 @@ export class AsyncUtil {
      * -- triggerNext: Function which will trigger next item to be processed.
      * -- counterLog: Function to trigger status counter with message
      */
-    public static eachOfLimit(iteratee: any[] | object, threads: number, iterator: (individualItem: string | number | boolean | {[key: string]: any;}, key: number | string, triggerNext: () => void | IasyncCallback, counterLog: (msg: string | false) => void) => void): Promise<void | IasyncCallback> {
+    public static eachOfLimit<T>(iteratee: T[] | Record<string, T>, threads: number, iterator: (individualItem: T, key: number | string, triggerNext: async.ErrorCallback, counterLog: (msg: string | false) => void) => void): Promise<void> {
         const countData = this.initCounter(iteratee);
         const timeStart = Date.now();
         return new Promise((resolve, reject) => {
@@ -82,16 +75,9 @@ export class AsyncUtil {
                 deEaOfSer(`EachOfSeries Status: ${Math.ceil(((countData.trackedCount) / countData.totalCount) * 100)}% | COMPLETE | ${countData.trackedCount} / ${countData.totalCount}`);
 
                 iterator(individualItem, key, triggerNext, triggerCounter);
-            }, (data: {err: string; value: any;}) => {
-                deEaOfSer("Each of Limit completion", data);
-                if (!!data && data.hasOwnProperty("err") && !!data.err) {
-                    deEaOfSer("Each of Limit rejecting");
-                    log(data.err);
-                    reject();
-                } else {
-                    deEaOfSer("Each of Limit resolving");
-                    resolve(!!data && data.value);
-                }
+            }, (error) => {
+                if (error) reject(error);
+                else resolve();
             });
         });
     }
@@ -112,7 +98,7 @@ export class AsyncUtil {
         // logLine(`${msg}${((key) / total)}% | COMPLETE | ${key} / ${total}`);
     }
 
-    private static initCounter(iteratee) {
+    private static initCounter(iteratee: object) {
         const countProperties = {
             totalCount: 0,
             trackedCount: 0
@@ -125,11 +111,11 @@ export class AsyncUtil {
 
         if (typeof iteratee !== "object") {
             logLine("Counter Fail");
-            logLine(`Iteratee: ${iteratee as string} is not an object`);
+            logLine(`Iteratee: ${String(iteratee)} is not an object`);
             logLine("End Counter Fail");
         } else if (iteratee === null) {
             logLine("Counter Fail");
-            logLine(`Iteratee: ${iteratee as string} is null`);
+            logLine(`Iteratee: ${String(iteratee)} is null`);
             logLine("End Counter Fail");
         } else {
             countProperties.totalCount = Object.keys(iteratee).length;

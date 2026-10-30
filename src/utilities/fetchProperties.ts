@@ -32,8 +32,8 @@ export class Properties {
         const debFetch = dBugger.set("Properties:fetch");
 
         try {
-            await AsyncUtil.eachOfSeries(this.defaultProperties, (individualProperty, key: string, triggerNext: () => void) => {
-                const saniKey = key.split(".").join("\\.");
+            await AsyncUtil.eachOfSeries(this.defaultProperties, (individualProperty, key, triggerNext) => {
+                const saniKey = String(key).split(".").join("\\.");
                 const property = this.json.get(saniKey);
 
                 this.properties[key] = typeof property === "string" ? property : objectExtend(individualProperty, property);

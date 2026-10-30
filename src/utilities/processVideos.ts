@@ -1,6 +1,5 @@
-/* eslint-disable camelcase */
+
 /* MODULES */
-import {GoogleApis, youtube_v3} from "googleapis";
 
 /* UTILITIES */
 import {AsyncUtil} from "./asyncUtil";
@@ -16,10 +15,12 @@ import {log} from "./log";
 import {toTitleCase} from "./textManipulators";
 
 
+// This unfinished processor retains its asynchronous public contract for callers.
+// eslint-disable-next-line @typescript-eslint/require-await
 export const processVideos = async (playlistId: string) => {
     const processedLinks = {};
-    let checkedLists = 0;
-    let foundLists = 0;
+    const checkedLists = 0;
+    const foundLists = 0;
 
     // TODO: Migrate hard coded logic into passthrough methodology
 

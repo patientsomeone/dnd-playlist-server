@@ -22,8 +22,11 @@ export const currentTime = (timeZone?: string): string => {
  * Convert human readable values into milliseconds for some reason...
  * @param inputObject Values to be converted
  */
+type DurationUnit = "day" | "hour" | "minute" | "second";
+type TimeUnit = DurationUnit | "millisecond";
+
 export const convert = (inputObject: {/* month?: number,  */day?: number; hour?: number; minute?: number; second?: number;}): number => {
-    const convert = {
+    const convert: Record<DurationUnit, {previous?: DurationUnit; ofPrevious: number;}> = {
         // month: {
         //     previous: "day",
         //     ofPrevious: 30
@@ -46,20 +49,21 @@ export const convert = (inputObject: {/* month?: number,  */day?: number; hour?:
     };
     let result = 0;
 
-    const toMs = (num: number, inputType: string): number => {
+    const toMs = (num: number, inputType: DurationUnit): number => {
         const toLarger = convert[inputType].ofPrevious * num;
 
-        if (convert[inputType].hasOwnProperty("previous")) {
-            const nextConversion = convert[inputType].previous as /* "month" |  */"day" | "hour" | "minute" | "second";
+        const nextConversion = convert[inputType].previous;
+        if (nextConversion) {
             return toMs(toLarger, nextConversion);
         } else {
             return toLarger;
         }
     };
 
-    for (const key in inputObject) {
+    for (const key of Object.keys(inputObject) as DurationUnit[]) {
         if (inputObject.hasOwnProperty(key)) {
-            result += toMs(inputObject[key], key);
+            const value = inputObject[key];
+            if (value !== undefined) result += toMs(value, key);
         }
     }
 
@@ -79,7 +83,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
     const total = end - start || 0;
     // let elap = total;
     // let ms = elap;
-    const convert = {
+    const convert: Record<DurationUnit, {previous: TimeUnit; ofPrevious: number;}> = {
         // millisecond: 1,
         second: {
             previous: "millisecond",
@@ -120,7 +124,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
     //     }
     // }
 
-    for (const key in convert) {
+    for (const key of Object.keys(convert) as DurationUnit[]) {
         if (convert.hasOwnProperty(key)) {
             if (convert[key].hasOwnProperty("previous") && (returnTime[convert[key].previous] > convert[key].ofPrevious)) {
                 const previousTime = returnTime[convert[key].previous];
@@ -144,7 +148,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
             //     // returnTime = [elap, lastUnit];
             //     break;
             // }
-            
+
             // returnTime = [Math.floor(ms), lastUnit].concat(returnTime);
         }
     }
@@ -153,7 +157,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
             short: (): string => {
                 const shortFormArray = [];
 
-                for (const key in returnTime) {
+                for (const key of Object.keys(returnTime) as TimeUnit[]) {
                     if (returnTime.hasOwnProperty(key)) {
                         const convertShort = (num: number): string => {
                             const numStr = num.toString();
@@ -182,9 +186,9 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
                     millisecond: "ms"
                 };
 
-                for (const key in returnTime) {
+                for (const key of Object.keys(returnTime) as TimeUnit[]) {
                     if (returnTime.hasOwnProperty(key) && returnTime[key] > 0) {
-                        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+
                         longFormArray.push(returnTime[key] + medConverter[key]);
                     }
                 }
@@ -193,7 +197,7 @@ export const elapsed = (start: number, end: number, outputFormat?: "short" | "me
             long: (): string => {
                 const longFormArray = [];
 
-                for (const key in returnTime) {
+                for (const key of Object.keys(returnTime) as TimeUnit[]) {
                     if (returnTime.hasOwnProperty(key) && returnTime[key] > 0) {
                         longFormArray.push(returnTime[key], key + (returnTime[key] === 1 ? "" : "s"));
                     }

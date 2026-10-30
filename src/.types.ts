@@ -11,33 +11,14 @@ export type anyObject = {
 
 export type stringObject = {
     [key: string]: string;
-}
+};
 
 export type anyArray = anyStandard[];
 
-export type playlistResponseData = {
-    [key: string]: {
-        id: string;
-        link: string;
-    }
-};
-
-export type individualPlaylist = {
-    id: string;
-    link: string;
-    count: number;
-}
-
-export type playlistProcessed = {
-    [key: string]: individualPlaylist;
-};
+export type {individualPlaylist, playlistProcessed, playlistResponseData, listData} from "./shared/playlistTypes";
 
 export type playlistQueries = {
-    channelId: string; 
+    channelId: string;
     singlePlaylist?: boolean;
     test?: string;
-};
-
-export type listData = {
-    listEndpoint?: string;
 };

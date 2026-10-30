@@ -5,7 +5,7 @@ import { FsUtils } from "../utilities/fsUtils";
 import { err, log, logLine } from "../utilities/log";
 import { objectExtend } from "../utilities/objecExtend";
 import { srcPath } from "../utilities/srcPath";
-import {config} from "dotenv";
+import "./environment";
 
 const debg = new dBug("utilities:fetchEnv");
 
@@ -13,24 +13,14 @@ type Env = {
     [key: string]: string;
 };
 
-config({path: "./.i.env"});
-
 const env = process.env;
 
-export const fetchEnv = async (key: string): Promise<string> => {
-    const requestedEnv = env.hasOwnProperty(key) && key;
-    
-    return await (async () => {
-        try {
-            if (!requestedEnv) {
-                // log(`Environment Key ${key} not found`);
-                return Promise.reject(`Environment Key ${key} not found`);
-            }
-            return env[key];
-        } catch (error) {
-            throw(error);
-        }
-    })();
+export const fetchEnv = (key: string): Promise<string> => {
+    const value = env[key];
+    if (!Object.prototype.hasOwnProperty.call(env, key) || value === undefined) {
+        return Promise.reject(new Error(`Environment Key ${key} not found`));
+    }
+    return Promise.resolve(value);
 };
 
 const test = async (): Promise<void> => {

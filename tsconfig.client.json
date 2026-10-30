@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
+        "allowArbitraryExtensions": true,
+        "lib": ["es2020", "dom", "dom.iterable"],
+        "types": ["youtube", "react", "react-dom"],
+        "rootDir": ".",
+        "noEmit": true
+    },
+    "include": ["client/src/**/*.ts", "client/src/**/*.tsx", "src/client/**/*.ts", "src/shared/**/*.ts"]
+}

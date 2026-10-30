@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [react-prep, Production, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24.22.1]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run test:browser:install -- --with-deps
+      - run: npm run lint
+      - run: npm run typeTest
+      - run: npm run test:types
+      - run: npm run test:browser:types
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npm run test:start
+      - run: npm run test:client
+      - run: npm run test:runtime
+      - run: npm run test:build
+      - run: npm run test:browser
+      - run: npm run bench:cache -- --sizes=1000 --samples=5
+      - run: npm run bench:sqlite -- --sizes=1000 --samples=3
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-reports-node-${{ matrix.node }}
+          path: |
+            coverage/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

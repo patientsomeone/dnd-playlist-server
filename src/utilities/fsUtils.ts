@@ -85,7 +85,7 @@ export class FsUtils {
                     debRead(this.workingData);
 
                     const readStream = fs.createReadStream(this.workingData.filePath);
-                    const parser = JSONStream.parse();
+                    const parser = JSONStream.parse(undefined);
 
                     readStream.pipe(parser);
 
@@ -95,12 +95,6 @@ export class FsUtils {
                     //     log(`value: ${data.value}`);
                     // });
                     
-                    parser.on("end", async () => {
-                        await Promise.resolve();
-                    });
-
-
-
                     fs.readFile(this.workingData.filePath, "utf-8", (error, data) => {
                         if (!error) {
                             debRead(debLine("FILE READ SUCCESS"));
@@ -258,18 +252,12 @@ export class FsUtils {
             debCreate(debLine("CURRENT WORKING DATA"));
             debCreate(this.workingData);
 
-            return new Promise((resolve, reject) => {
-                if (!this.wStream) {
-                    (async () => {
-                        try {
-                            await this.writeStream.initialize();
-                        } catch (error) {
-                            throw(error);
-                        }
-                    })();
-                }
+            if (!this.wStream) await this.writeStream.initialize();
+            const stream = this.wStream;
+            if (!stream) throw new Error("Unable to initialize file write stream");
 
-                this.wStream.write(input, "utf-8", (error) => {
+            return new Promise((resolve, reject) => {
+                stream.write(input, "utf-8", (error) => {
                     if (!error) {
                         this.workingData.error = error;
                         debCreate("File write complete");
@@ -314,12 +302,12 @@ export class FsUtils {
     private workingData: IfsReturns;
     private deb: dBug;
 
-    private wStream: fs.WriteStream;
+    private wStream?: fs.WriteStream;
     constructor(filePath: string) {
         this.workingData = {
             filePath,
             error: null,
-            data: null
+            data: ""
         };
         this.deb = new dBug("utilities:fsUtils");
     }

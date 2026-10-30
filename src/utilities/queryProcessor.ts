@@ -1,35 +1,18 @@
-import {playlistQueries, stringObject} from "../.types";
+import {playlistQueries} from "../.types";
 import {fetchEnv} from "./fetchEnv";
-import {log} from "./log";
+import {InvalidPlaylistQuery, validateChannelId} from "./sqlitePlaylistCache";
 
-export const queryProcessor = async (queryObject: stringObject): Promise<playlistQueries> => {
-    const defaultQuery = {
-        channelId: async () => {
-            return await fetchEnv("YT_LIST_OWNER");
-        },
-        singlePlaylist: async () => {
-            return Promise.resolve(false);
+export const queryProcessor = async (query: Record<string, any>): Promise<playlistQueries> => {
+    const explicitChannel = Object.prototype.hasOwnProperty.call(query, "channelId");
+    const channelId = explicitChannel ? query.channelId : await fetchEnv("YT_LIST_OWNER");
+    validateChannelId(channelId);
+    let singlePlaylist = false;
+    if (Object.prototype.hasOwnProperty.call(query, "singlePlaylist")) {
+        const value = query.singlePlaylist;
+        if (typeof value !== "string" || !/^(true|false)$/i.test(value)) {
+            throw new InvalidPlaylistQuery("singlePlaylist must be true or false");
         }
-    };
-    
-    const workingQuery = {} as playlistQueries;
-    
-    for await (const key of Object.keys(defaultQuery)) {
-        if (queryObject.hasOwnProperty(key)) {
-            // Convert Boolean
-            if (queryObject[key].toLocaleLowerCase() === "true") {
-                workingQuery[key] = true;
-            } else if (queryObject[key].toLocaleLowerCase() === "false") {
-                    workingQuery[key] = false;
-            } else {
-                workingQuery[key] = queryObject[key];
-            }
-        } else {
-            workingQuery[key] = await defaultQuery[key]();
-        }
+        singlePlaylist = value.toLowerCase() === "true";
     }
-
-    log(workingQuery);
-    
-    return workingQuery;
+    return {channelId, singlePlaylist};
 };
