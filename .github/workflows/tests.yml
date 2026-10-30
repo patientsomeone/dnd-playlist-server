@@ -38,7 +38,9 @@ jobs:
         run: npm run test:client
         timeout-minutes: 3
       - run: npm run test:runtime
-      - run: npm run test:build
+      - name: Build and watcher isolation
+        run: npm run test:build
+        timeout-minutes: 3
       - run: npm run test:browser
       - run: npm run bench:cache -- --sizes=1000 --samples=5
       - run: npm run bench:sqlite -- --sizes=1000 --samples=3

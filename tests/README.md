@@ -11,7 +11,8 @@ YouTube credentials or consume quota.
 | `npm run test:watch` | Jest watch mode |
 | `npm run test:coverage` | Jest plus terminal, HTML, LCOV, and JSON reports |
 | `npm run test:browser:install` | One-time Chromium download into node_modules cache |
-| `npm run test:browser` | Build an isolated in-memory bundle and run Playwright |
+| `npm run test:browser` | Build an isolated in-memory bundle and run routine Playwright cases, excluding scale workloads |
+| `npm run test:browser:scale` | Opt-in 100,000-playlist browser scale case; excluded from routine CI |
 | `npm run test:types` | Type-check Jest tests |
 | `npm run test:browser:types` | Type-check browser tests and Playwright config |
 | `npm run lint` / `npm run lint:fix` | Check/fix TS and TSX source/tests |
@@ -33,6 +34,14 @@ has a 60-second limit, and the runner has a 120-second limit. Failure screenshot
 and traces are retained in `test-results/built-client/`; stage messages identify
 progress in CI. The CI step also has a separate three-minute limit, so a stalled
 browser smoke cannot consume the entire job timeout.
+CI also reports browser failures as GitHub annotations, alongside the retained
+trace, so the failing action is visible without downloading authenticated logs.
+
+`test:build` stops its complete fixture watcher process tree (an isolated process
+group on Linux), waits for the output pipes to close, verifies the fixture API is
+down, and stops its programmatic esbuild service. Cleanup has a ten-second limit;
+CI gives the build/watch step three minutes. The live dev server is outside that
+fixture process tree.
 
 For a new checkout:
 
@@ -92,7 +101,7 @@ Jest discovers `tests/**/*.test.ts`; Playwright discovers
 ## Reports and limits
 
 The current desktop run has **167 passing Jest tests** in twelve suites and
-**69 passing Chromium tests**. Three Jest TODOs remain in legacy utility coverage;
+**68 passing routine Chromium tests plus one passing opt-in scale case**. Three Jest TODOs remain in legacy utility coverage;
 there are no browser fixmes. Pending tests are not passing tests.
 
 Jest coverage covers selected server/cache/processing modules, shared parsing,

@@ -4,7 +4,7 @@ import {writeFile} from "node:fs/promises";
 import {resolve, dirname} from "node:path";
 import {cpus} from "node:os";
 
-test("React bounds a 100,000-playlist catalog, searches and pages without another payload", async ({context, page}, testInfo) => {
+test("React bounds a 100,000-playlist catalog, searches and pages without another payload", {tag: "@scale"}, async ({context, page}, testInfo) => {
     test.setTimeout(60000);
     await mockCatalogNetwork(context);
     const playlists: Record<string, {id: string; link: string; count: number;}> = {};

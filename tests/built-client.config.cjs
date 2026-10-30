@@ -12,7 +12,7 @@ module.exports = {
     workers: 1,
     retries: 0,
     forbidOnly: !!process.env.CI,
-    reporter: "list",
+    reporter: process.env.CI ? [["list"], ["github"]] : "list",
     use: {
         browserName: "chromium",
         headless: true,

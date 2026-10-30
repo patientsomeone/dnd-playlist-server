@@ -18,6 +18,37 @@ async function until(check, description) {
     }
 }
 
+async function stopWatcher(child, closed) {
+    // POSIX descendants can outlive their parent and keep its piped output open.
+    // This group belongs only to the disposable test fixture, never the live dev server.
+    const signalGroup = (signal) => {
+        try { process.kill(-child.pid, signal); }
+        catch (error) { if (error.code !== "ESRCH") throw error; }
+    };
+    let force;
+    let deadline;
+    try {
+        if (process.platform === "win32") {
+            if (child.exitCode === null && child.signalCode === null) {
+                const result = spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+                    stdio: "ignore", windowsHide: true, timeout: 10000
+                });
+                if (result.error) throw result.error;
+            }
+        } else {
+            signalGroup("SIGTERM");
+            force = setTimeout(() => signalGroup("SIGKILL"), 3000);
+        }
+        await Promise.race([closed, new Promise((_, reject) => {
+            deadline = setTimeout(() => reject(new Error("Watcher process tree did not close within 10 seconds")), 10000);
+        })]);
+    } finally {
+        clearTimeout(force);
+        clearTimeout(deadline);
+        if (process.platform !== "win32") signalGroup("SIGKILL");
+    }
+}
+
 async function watchSmoke(fixture) {
     const listener = createServer().listen(0, "127.0.0.1");
     await once(listener, "listening");
@@ -25,10 +56,11 @@ async function watchSmoke(fixture) {
     await new Promise((resolve) => listener.close(resolve));
     const child = spawn(process.execPath, [path.join(fixture, "bin", "dev.cjs")], {
         cwd: fixture, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+        detached: process.platform !== "win32",
         env: {...process.env, PORT: String(port), YT_LIST_OWNER: "UC_fixture", YT_API_KEY: "fixture-key", DO_ENV: "test",
             PLAYLIST_CACHE_DB_PATH: path.join(fixture, "data", "watch.sqlite")}
     });
-    const exited = once(child, "exit");
+    const closed = once(child, "close");
     let output = "";
     child.stdout.on("data", (chunk) => {output += chunk;});
     child.stderr.on("data", (chunk) => {output += chunk;});
@@ -53,13 +85,10 @@ async function watchSmoke(fixture) {
         assert.equal(response.status, 200);
         assert.equal((await response.json()).channelId, "UC_fixture");
     } finally {
-        if (child.exitCode === null && child.signalCode === null) {
-            if (process.platform === "win32") {
-                spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {stdio: "ignore", windowsHide: true});
-            } else child.kill("SIGTERM");
-        }
-        await exited;
+        await stopWatcher(child, closed);
     }
+    await assert.rejects(fetch(`http://127.0.0.1:${port}/cacheState`, {signal: AbortSignal.timeout(1000)}),
+        "The fixture API must stop with its watcher");
 }
 
 async function main() {
@@ -135,8 +164,8 @@ async function main() {
         await assert.rejects(fs.access(server), {code: "ENOENT"});
         assert.deepEqual(await Promise.all([client, legacy].map(digest)), browserHashes);
         await preserved();
-        console.log("Build isolation passed: independent outputs, preserved cache files, browser boundary, failure propagation, and dev watches.");
     } finally {
+        require("esbuild").stop();
         // Unlink the dependency junction before recursively deleting only this fixture.
         await fs.unlink(modules).catch((error) => {if (error.code !== "ENOENT") throw error;});
         const target = path.resolve(fixture);
@@ -145,6 +174,7 @@ async function main() {
         }
         await fs.rm(target, {recursive: true, force: true, maxRetries: 3});
     }
+    console.log("Build isolation passed: independent outputs, preserved cache files, browser boundary, failure propagation, dev watches, and process cleanup.");
 }
 
 main().catch((error) => {console.error(error); process.exitCode = 1;});
