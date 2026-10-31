@@ -202,6 +202,9 @@ for (const colorScheme of ["light", "dark"] as const) {
             const color = await travel.evaluate((element) => getComputedStyle(element).color);
             colors.push(color);
             await expect(page.locator("#frameParent h2")).toHaveCSS("color", color);
+            await expect(page.locator("#frameParent .playback-toggle")).toHaveCSS("color", color);
+            await expect(page.locator("#frameParent .playback-toggle")).toHaveAttribute("data-icon", state === "paused" ? "play" : "pause");
+            await expect(travel.locator(".playback-badge")).toHaveText(label);
             await expect(travel).toHaveCSS("border-color", color);
             if (state === "paused") await testInfo.attach("active-playlist-" + colorScheme + ".png", {body: await page.screenshot({fullPage: true}), contentType: "image/png"});
         }

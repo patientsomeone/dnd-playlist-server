@@ -2,11 +2,20 @@ import {useLayoutEffect, useMemo, useRef} from "react";
 import type {playlistProcessed} from "../../../src/shared/playlistTypes";
 import {playbackLabels, type PlaybackView} from "../player/PlaylistPlayer";
 import {uniquePlaylistEntries} from "../../../src/shared/uniquePlaylists";
+import {IconButton} from "./IconButton";
 
 type Props = {
     playlists: playlistProcessed; playback: PlaybackView; onSelect: (id: string) => void;
     query: string; page: number; onPageChange: (page: number) => void;
+    secondaryPlayback?: PlaybackView;
+    mode?: "single" | "added" | "swapped";
+    favorites?: ReadonlySet<string>;
+    onAdd?: (id: string) => void;
+    onRemove?: (id: string) => void;
+    onSwap?: (id: string) => void;
+    onFavorite?: (id: string) => void;
 };
+const NO_FAVORITES: ReadonlySet<string> = new Set();
 const PAGE_SIZE = 100;
 const LETTERS = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 const PLAYBACK_ACTIONS: Record<PlaybackView["state"], string> = {
@@ -26,22 +35,34 @@ function revealPlaylist(list: HTMLDListElement | null, id: string): void {
     target?.scrollIntoView({block: "start"});
 }
 
-export default function PlayLister({playlists, playback, onSelect, query, page, onPageChange}: Props) {
+export default function PlayLister({playlists, playback, secondaryPlayback, mode = "single", favorites = NO_FAVORITES, onSelect, onAdd, onRemove, onSwap, onFavorite, query, page, onPageChange}: Props) {
     // Enforce identity here too, even if a caller supplies an unnormalized catalog.
-    const entries = useMemo(() => uniquePlaylistEntries(Object.entries(playlists)).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0), [playlists]);
+    const entries = useMemo(() => uniquePlaylistEntries(Object.entries(playlists)).sort(([left, a], [right, b]) =>
+        Number(favorites.has(b.id)) - Number(favorites.has(a.id)) || (left < right ? -1 : left > right ? 1 : 0)), [playlists, favorites]);
     const matching = useMemo(() => entries.filter(([name]) => name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())), [entries, query]);
     const pages = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
     const current = Math.min(page, pages - 1);
     const list = useRef<HTMLDListElement>(null);
     const pendingJump = useRef<string | undefined>(undefined);
+    const pendingFavorite = useRef<string | undefined>(undefined);
     const starts = useMemo(() => {
         const letters = new Map<string, number>();
         matching.forEach(([name], index) => {
             const letter = initialLetter(name);
-            if (!letters.has(letter)) letters.set(letter, index);
+            const existing = letters.get(letter);
+            if (existing === undefined || (favorites.has(matching[existing][1].id) && !favorites.has(matching[index][1].id))) letters.set(letter, index);
         });
         return letters;
-    }, [matching]);
+    }, [matching, favorites]);
+
+    useLayoutEffect(() => {
+        const id = pendingFavorite.current;
+        if (!id) return;
+        pendingFavorite.current = undefined;
+        const button = Array.from(list.current?.querySelectorAll<HTMLButtonElement>("button[data-favorite-id]") || []).find((element) => element.dataset.favoriteId === id);
+        if (button) button.focus({preventScroll: true});
+        else list.current?.querySelector<HTMLAnchorElement>("a[data-playlist-id]")?.focus({preventScroll: true});
+    }, [entries, current]);
 
     useLayoutEffect(() => {
         const id = pendingJump.current;
@@ -62,22 +83,38 @@ export default function PlayLister({playlists, playback, onSelect, query, page, 
             {query && matching.length === 0 && <p>No matching playlists.</p>}
             <dl id="listParent" ref={list}>
                 {matching.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE).map(([name, playlist]) => {
-                    const active = playlist.id === playback.id;
+                    const primary = playlist.id === playback.id;
+                    const secondary = playlist.id === secondaryPlayback?.id;
+                    const view = primary ? playback : secondary ? secondaryPlayback : undefined;
+                    const active = !!view;
+                    const switchPlayback = active && mode === "swapped" && !!secondaryPlayback?.id;
+                    const action = switchPlayback ? "Activate to switch playback between the loaded playlists." : view ? PLAYBACK_ACTIONS[view.state] : "Activate to play this playlist.";
                     const descriptionId = "playlist-description-" + encodeURIComponent(playlist.id);
                     return (
-                        <dt key={playlist.id}>
+                        <dt key={playlist.id} className="playlist-row">
                             <a href={"https://www.youtube.com/playlist?list=" + encodeURIComponent(playlist.id)}
-                                data-playlist-id={playlist.id} data-playback-state={active ? playback.state : undefined}
-                                className={active ? "active " + playback.state : undefined}
-                                aria-current={active ? "true" : undefined}
+                                data-playlist-id={playlist.id} data-playback-state={view?.state} data-player-role={primary ? "main" : secondary ? "secondary" : undefined}
+                                className={view ? "active " + view.state + (secondary ? " secondary-active" : "") : undefined}
+                                aria-current={primary ? "true" : undefined}
                                 aria-describedby={descriptionId}
                                 aria-label={name}
                                 onClick={(event) => { event.preventDefault(); onSelect(playlist.id); }}>
                                 <span>{name}</span>
-                                {active && <span className="playback-badge">{playbackLabels[playback.state]}</span>}
+                                {view && <span className="playback-badge">{secondary ? "Secondary · " : ""}{playbackLabels[view.state]}</span>}
                             </a>
+                            <div className="playlist-actions" role="group" aria-label={"Actions for " + name}>
+                                <IconButton icon={active ? "remove" : "add"} label={active ? "Remove " + name + " from the player" : "Add " + name + " to the secondary player"}
+                                    indicator={!active && secondaryPlayback?.id ? "swap" : undefined}
+                                    title={!active && secondaryPlayback?.id ? "Replace the secondary player with " + name : undefined}
+                                    disabled={active ? !onRemove : !onAdd} aria-pressed={active}
+                                    onClick={() => active ? onRemove?.(playlist.id) : onAdd?.(playlist.id)}/>
+                                <IconButton icon="swap" label={"Swap to " + name} disabled={!onSwap || primary} onClick={() => onSwap?.(playlist.id)}/>
+                                <IconButton icon="favorite" className="favorite-toggle" label={(favorites.has(playlist.id) ? "Unfavorite " : "Favorite ") + name}
+                                    aria-pressed={favorites.has(playlist.id)} data-favorite-id={playlist.id} disabled={!onFavorite}
+                                    onClick={() => { pendingFavorite.current = playlist.id; onFavorite?.(playlist.id); }}/>
+                            </div>
                             <span id={descriptionId} className="visually-hidden">
-                                {active ? playbackLabels[playback.state] + ". " + PLAYBACK_ACTIONS[playback.state] : "Activate to play this playlist."}
+                                {view ? (secondary ? "Secondary player. " : "") + playbackLabels[view.state] + ". " + action : action}
                             </span>
                         </dt>
                     );

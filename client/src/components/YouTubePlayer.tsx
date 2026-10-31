@@ -1,21 +1,27 @@
-import {useEffect, useImperativeHandle, useRef, type ReactNode, type Ref} from "react";
+import {useEffect, useImperativeHandle, useRef, type ReactNode, type Ref, type CSSProperties} from "react";
 import {PlaylistPlayer, playbackLabels, type PlaylistSelection, type PlaybackView} from "../player/PlaylistPlayer";
 
-export type PlaybackControls = Pick<PlaylistPlayer, "toggle">;
+export type PlaybackControls = Pick<PlaylistPlayer, "toggle" | "pause" | "resume" | "clear" | "getAudio">;
 type Props = {
     ref?: Ref<PlaybackControls>;
     selection?: PlaylistSelection;
     view: PlaybackView;
     headingAction?: ReactNode;
+    secondary?: boolean;
+    hidden?: boolean;
+    style?: CSSProperties;
+    slot?: number;
     onPlaybackChange: (view: PlaybackView) => void;
     onInteraction: () => void;
     resolveSelection: (id: string) => Promise<Omit<PlaylistSelection, "request"> | undefined>;
 };
 
-export function YouTubePlayer({ref, selection, view, headingAction, onPlaybackChange, onInteraction, resolveSelection}: Props) {
+export function YouTubePlayer({ref, selection, view, headingAction, secondary = false, hidden = false, style, slot, onPlaybackChange, onInteraction, resolveSelection}: Props) {
     const host = useRef<HTMLDivElement>(null);
     const controller = useRef<PlaylistPlayer | undefined>(undefined);
-    useImperativeHandle(ref, () => ({toggle: (id) => controller.current?.toggle(id) || false}), []);
+    useImperativeHandle(ref, () => ({toggle: (id) => controller.current?.toggle(id) || false,
+        pause: () => controller.current?.pause() || false, resume: () => controller.current?.resume() || false,
+        clear: () => controller.current?.clear(), getAudio: () => controller.current?.getAudio()}), []);
 
     useEffect(() => {
         if (!host.current) return;
@@ -36,11 +42,12 @@ export function YouTubePlayer({ref, selection, view, headingAction, onPlaybackCh
 
     const label = playbackLabels[view.state];
     return (
-        <section id="frameParent" aria-label="Video player" onPointerDown={onInteraction} onKeyDown={onInteraction}>
-            <div className="player-toolbar" onPointerDown={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
-                <h2 className={view.state} aria-live="polite">{label}{view.name ? ": " + view.name : ""}</h2>
+        <section className={"player-slot" + (secondary ? " secondary" : "")} data-player-slot={slot} hidden={hidden} style={style}
+            aria-label={secondary ? "Secondary video player" : "Main video player"} onPointerDown={onInteraction} onKeyDown={onInteraction}>
+            {secondary && selection && <div className="player-toolbar" onPointerDown={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
+                <h2 className={view.state} aria-live="polite">Secondary · {label}{view.name ? ": " + view.name : ""}</h2>
                 {headingAction}
-            </div>
+            </div>}
             {view.message && <p role={view.state === "error" ? "alert" : "status"}>{view.message}</p>}
             <div className="player-stage">
                 <div className="player-host" ref={host}/>

@@ -134,3 +134,12 @@ The browser suite includes a 100K synthetic-catalog scenario with search, 100-ro
 The [first saved React baseline](results/react-catalog-baseline.json) measured 907 ms to the initial visible rows, 63 ms to change pages and 70 ms to search on the recorded desktop/Node/Chromium environment. These include automation and mocked response delivery, not deployed HTTP/network capacity. They do not measure browser peak memory or establish a regression budget. Full response transfer/parsing still grows with catalog size; API pagination/search is future work.
 
 The current inline search deliberately waits 300 ms after edits before filtering. Its attached `searchMs` includes that debounce, so compare against the original immediate-filter sample with that UI delay in mind. Expanding the search bar is outside the timed search interval.
+
+The [dual-player/favorites sample](results/react-dual-playlists.json) includes the
+three action icons per row. At 100K lists it recorded 2,093 ms initial display,
+139 ms paging, 403 ms debounced search, and 664 ms for favoriting the search result,
+reopening search and clearing back to the pinned 100-row page. The test also
+verifies that the alphabet jump skips a pinned favorite to the ordinary sorted
+group, no player starts, and only one full catalog is fetched. This is a single
+local automation sample with a broader workload, not a like-for-like regression
+budget or production capacity result.

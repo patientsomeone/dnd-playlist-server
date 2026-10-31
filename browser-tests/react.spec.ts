@@ -12,6 +12,8 @@ test("the list view rejects duplicate IDs even when raw data bypasses the catalo
         "Other City": {id: "PL_other_city", link: "other", count: 12}
     }, {state: "playing", id: "PL_city", name: "City"}));
     await expect(page.locator("#listParent dt a")).toHaveText(["CityPlaying", "Other City"]);
+    await expect(page.locator("#listParent .playback-badge")).toHaveCount(1);
+    await expect(page.locator("#listParent .playback-badge")).toHaveText("Playing");
     await expect(page.locator("#listParent [aria-current]")).toHaveCount(1);
     await expect(page.getByRole("link", {name: "City", exact: true})).toHaveAccessibleDescription("Playing. Activate to pause playback.");
     await expect(page.getByRole("link", {name: "Other City", exact: true})).toHaveAccessibleDescription("Activate to play this playlist.");

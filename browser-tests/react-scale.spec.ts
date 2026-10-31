@@ -30,11 +30,20 @@ test("React bounds a 100,000-playlist catalog, searches and pages without anothe
     await page.keyboard.press("Escape");
     await expect(page.getByRole("link", {name: "Playlist 099999", exact: true})).toBeVisible();
     const searchMs = performance.now() - searchStart;
+    const favoriteStart = performance.now();
+    await page.getByRole("button", {name: "Favorite Playlist 099999", exact: true}).click();
+    await page.getByRole("button", {name: "Search playlists", exact: true}).click();
+    await page.getByRole("button", {name: "Clear search", exact: true}).click();
+    await expect(page.locator("#listParent dt a")).toHaveCount(100);
+    await expect(page.locator("#listParent dt a").first()).toHaveText("Playlist 099999");
+    const favoriteAndClearMs = performance.now() - favoriteStart;
+    await page.getByRole("button", {name: "Jump to P", exact: true}).click();
+    await expect(page.getByRole("link", {name: "Playlist 000000", exact: true})).toBeFocused();
     expect(payloads).toBe(1);
     await expect(page.locator("#reactYouTubeApi")).toHaveCount(0);
     const result = {
         recordedAt: new Date().toISOString(), node: process.version, cpu: cpus()[0]?.model,
-        playlists: 100000, renderedPageSize: 100, initialMs, pageMs, searchMs, payloads,
+        playlists: 100000, renderedPageSize: 100, initialMs, pageMs, searchMs, favoriteAndClearMs, payloads,
         userAgent: await page.evaluate(() => navigator.userAgent), note: "Synthetic mocked API, includes browser automation and the 300 ms search debounce; not an HTTP capacity measurement."
     };
     const body = JSON.stringify(result, null, 2) + "\n";
