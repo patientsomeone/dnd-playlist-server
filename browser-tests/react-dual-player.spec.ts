@@ -17,7 +17,7 @@ async function ready(page: Page, index: number, state = 1) {
     await page.evaluate(({index, state}) => (window as any).__playerInstances[index].__events.onStateChange({data: state}), {index, state});
 }
 
-test("Add starts a secondary stream and Swap preserves both iframe instances and pause points", async ({page}) => {
+test("Add starts a secondary stream and Hot Swap preserves both iframe instances and pause points", async ({page}) => {
     await page.goto("/react");
     await expect(second(page)).toHaveCount(0);
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
@@ -29,13 +29,13 @@ test("Add starts a secondary stream and Swap preserves both iframe instances and
     expect(await page.evaluate(() => (window as any).__playerInstances[0].__calls)).toEqual(firstCalls);
     await expect(page.getByRole("link", {name: "Boss Battle", exact: true})).toHaveAccessibleDescription(/^Secondary player\. Playing/);
     await page.evaluate(() => { (window as any).__originalFrames = Array.from(document.querySelectorAll("#frameParent iframe")); });
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await expect(page.locator(".player-deck > .player-toolbar h2")).toHaveText("Playing: Boss Battle");
     await expect(first(page).getByRole("heading")).toHaveText("Secondary · Paused: Travel / Campfire");
     const top = await second(page).boundingBox();
     const lower = await first(page).boundingBox();
     expect(top?.y).toBeLessThan(lower?.y ?? 0);
-    await page.getByRole("button", {name: "Swap to Travel / Campfire", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Travel / Campfire", exact: true}).click();
     await expect(page.locator(".player-deck > .player-toolbar h2")).toHaveText("Playing: Travel / Campfire");
     expect(await page.evaluate(() => {
         const players = (window as any).__playerInstances;
@@ -68,13 +68,13 @@ test("secondary controls pause/resume independently and a sole playing secondary
         .toBe(await page.locator(".player-deck > .player-toolbar h2").evaluate((element) => getComputedStyle(element).color));
 });
 
-test("Swap to a new playlist parks the main and replaces only the secondary", async ({page}) => {
+test("Hot Swap to a new playlist parks the main and replaces only the secondary", async ({page}) => {
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
     await ready(page, 1);
-    await page.getByRole("button", {name: "Swap to !!! Intro !!!", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to !!! Intro !!!", exact: true}).click();
     await expect(page.locator(".player-deck > .player-toolbar h2")).toHaveText("Buffering: !!! Intro !!!");
     await expect(first(page).getByRole("heading")).toHaveText("Secondary · Paused: Travel / Campfire");
     expect(await page.evaluate(() => (window as any).__playerCreations)).toBe(2);
@@ -98,7 +98,7 @@ test("a swapped-out player still awaiting readiness cues its playlist paused", a
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => (window as any).__playerCreations || 0)).toBe(1);
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await ready(page, 1);
     await page.evaluate(() => {
         const player = (window as any).__playerInstances[0];
@@ -271,7 +271,7 @@ test("Add replaces the secondary, Remove clears it, and removing the main promot
     await expect(page.locator(".player-deck > .player-toolbar h2")).toHaveText("Playing: Travel / Campfire");
 });
 
-test("Remove before readiness prevents late playback, including after a Swap", async ({page}) => {
+test("Remove before readiness prevents late playback, including after a Hot Swap", async ({page}) => {
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
@@ -285,7 +285,7 @@ test("Remove before readiness prevents late playback, including after a Swap", a
     });
     await expect(second(page)).toHaveCount(0);
     expect(await page.evaluate(() => (window as any).__playerInstances[1].__calls.map((call: any) => call.method))).toEqual(["destroy"]);
-    await page.getByRole("button", {name: "Swap to !!! Intro !!!", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to !!! Intro !!!", exact: true}).click();
     await ready(page, 2);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
     await expect(page.getByRole("button", {name: "Remove Travel / Campfire from the player", exact: true})).toHaveCount(0);
@@ -307,7 +307,7 @@ test("worded state tags show current activity while rows reverse exclusive swaps
     await expect(travel).toHaveText(/Paused$/);
     await travel.click();
     await expect(travel).toHaveText(/Playing$/);
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await ready(page, 1);
     const boss = page.getByRole("link", {name: "Boss Battle", exact: true}).locator(".playback-badge");
     await expect(travel).toHaveText("Secondary · Paused");
@@ -322,12 +322,12 @@ test("worded state tags show current activity while rows reverse exclusive swaps
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect(travel).toHaveText(/Playing$/);
     await expect(boss).toHaveText(/Paused$/);
-    // Clicking the current row in Swap mode reverses the pair as well.
+    // Clicking the current row in Hot Swap mode reverses the pair as well.
     await travel.click();
     await expect(travel).toHaveText(/Paused$/);
     await expect(boss).toHaveText(/Playing$/);
     expect(await page.evaluate(() => (window as any).__playerInstances.map((player: any) => player.__calls.filter((call: any) => call.method === "loadPlaylist").length))).toEqual([1, 1]);
-    // Native iframe resume must also honor Swap mode, not start a simultaneous stream.
+    // Native iframe resume must also honor Hot Swap mode, not start a simultaneous stream.
     await page.evaluate(() => (window as any).__playerInstances[0].__events.onStateChange({data: 1}));
     await expect(boss).toHaveText(/Paused$/);
     await expect(travel).toHaveText(/Playing$/);
@@ -337,7 +337,7 @@ test("replacement Add shows its swap indicator and returns the deck to independe
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await ready(page, 1);
     const add = page.getByRole("button", {name: "Add !!! Intro !!! to the secondary player", exact: true});
     await expect(add).toHaveAttribute("data-icon", "add");
@@ -394,12 +394,12 @@ test("audio API failure cannot prevent a secondary playlist from loading", async
     await expect(second(page).getByRole("heading")).toHaveText("Secondary · Buffering: !!! Intro !!!");
 });
 
-test("a delayed PLAYING event from the parked player cannot reverse an explicit Swap", async ({page}) => {
+test("a delayed PLAYING event from the parked player cannot reverse an explicit Hot Swap", async ({page}) => {
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.evaluate(() => { (window as any).__delayPauseEvents = true; });
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await ready(page, 1);
     await page.evaluate(() => (window as any).__playerInstances[0].__events.onStateChange({data: 1}));
     await expect(page.locator(".player-deck > .player-toolbar h2")).toHaveText("Playing: Boss Battle");
@@ -407,16 +407,16 @@ test("a delayed PLAYING event from the parked player cannot reverse an explicit 
     expect(await page.evaluate(() => (window as any).__playerInstances[1].__calls.some((call: any) => call.method === "pauseVideo"))).toBe(false);
 });
 
-test("Swap mode headers retain play/pause plus a separate Swap while list rows reverse the pair", async ({page}) => {
+test("Hot Swap mode headers retain play/pause plus a separate Hot Swap while list rows reverse the pair", async ({page}) => {
     await page.goto("/react");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
-    await page.getByRole("button", {name: "Swap to Boss Battle", exact: true}).click();
+    await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
     await ready(page, 1);
     const toolbar = page.locator(".player-deck > .player-toolbar");
     await expect(toolbar.locator(".playback-toggle")).toHaveAttribute("data-icon", "pause");
     await expect(first(page).locator(".playback-toggle")).toHaveAttribute("data-icon", "play");
-    await expect(first(page).getByRole("button", {name: "Make Travel / Campfire the main player", exact: true})).toHaveAttribute("data-icon", "swap");
+    await expect(first(page).getByRole("button", {name: "Hot Swap to Travel / Campfire", exact: true})).toHaveAttribute("data-icon", "swap");
     await toolbar.getByRole("button", {name: "Pause Boss Battle", exact: true}).click();
     await expect(toolbar.getByRole("heading")).toHaveText("Paused: Boss Battle");
     await expect(first(page).getByRole("heading")).toHaveText("Secondary · Paused: Travel / Campfire");
@@ -427,7 +427,7 @@ test("Swap mode headers retain play/pause plus a separate Swap while list rows r
     await expect(second(page).getByRole("heading")).toHaveText("Secondary · Paused: Boss Battle");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect(toolbar.getByRole("heading")).toHaveText("Playing: Boss Battle");
-    await toolbar.getByRole("button", {name: "Swap players", exact: true}).click();
+    await toolbar.getByRole("button", {name: "Hot Swap players", exact: true}).click();
     await expect(toolbar.getByRole("heading")).toHaveText("Playing: Travel / Campfire");
     expect(await page.evaluate(() => (window as any).__playerInstances.map((player: any) => player.__calls.filter((call: any) => call.method === "loadPlaylist").length))).toEqual([1, 1]);
 });

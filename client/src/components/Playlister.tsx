@@ -108,7 +108,7 @@ export default function PlayLister({playlists, playback, secondaryPlayback, mode
                                     title={!active && secondaryPlayback?.id ? "Replace the secondary player with " + name : undefined}
                                     disabled={active ? !onRemove : !onAdd} aria-pressed={active}
                                     onClick={() => active ? onRemove?.(playlist.id) : onAdd?.(playlist.id)}/>
-                                <IconButton icon="swap" label={"Swap to " + name} disabled={!onSwap || primary} onClick={() => onSwap?.(playlist.id)}/>
+                                <IconButton icon="swap" label={"Hot Swap to " + name} disabled={!onSwap || primary} onClick={() => onSwap?.(playlist.id)}/>
                                 <IconButton icon="favorite" className="favorite-toggle" label={(favorites.has(playlist.id) ? "Unfavorite " : "Favorite ") + name}
                                     aria-pressed={favorites.has(playlist.id)} data-favorite-id={playlist.id} disabled={!onFavorite}
                                     onClick={() => { pendingFavorite.current = playlist.id; onFavorite?.(playlist.id); }}/>

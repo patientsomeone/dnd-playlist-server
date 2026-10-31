@@ -34,8 +34,8 @@ export function ReactLists() {
             <IconButton icon={paused ? "play" : "pause"} label={(view.state === "error" ? "Retry " : paused ? "Resume " : "Pause ") + name}
                 className={"playback-toggle " + view.state + (slot !== primary ? " secondary-active" : "")}
                 disabled={!deck.view.selections[slot]} onClick={() => deck.togglePlayer(slot)}/>
-            {slot === primary ? hasSecondary && <IconButton icon="swap" label="Swap players" onClick={deck.swapPlayers}/> :
-                <IconButton icon="swap" label={"Make " + name + " the main player"} onClick={deck.swapPlayers}/>}
+            {slot === primary ? hasSecondary && <IconButton icon="swap" label="Hot Swap players" onClick={deck.swapPlayers}/> :
+                <IconButton icon="swap" label={"Hot Swap to " + name} onClick={deck.swapPlayers}/>}
         </div>;
     };
     const messages = {
