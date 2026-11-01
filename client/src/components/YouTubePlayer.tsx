@@ -8,6 +8,7 @@ type Props = {
     view: PlaybackView;
     headingAction?: ReactNode;
     secondary?: boolean;
+    secondaryLabel?: "Secondary" | "Hot Swapped";
     hidden?: boolean;
     style?: CSSProperties;
     slot?: number;
@@ -16,7 +17,7 @@ type Props = {
     resolveSelection: (id: string) => Promise<Omit<PlaylistSelection, "request"> | undefined>;
 };
 
-export function YouTubePlayer({ref, selection, view, headingAction, secondary = false, hidden = false, style, slot, onPlaybackChange, onInteraction, resolveSelection}: Props) {
+export function YouTubePlayer({ref, selection, view, headingAction, secondary = false, secondaryLabel = "Secondary", hidden = false, style, slot, onPlaybackChange, onInteraction, resolveSelection}: Props) {
     const host = useRef<HTMLDivElement>(null);
     const controller = useRef<PlaylistPlayer | undefined>(undefined);
     useImperativeHandle(ref, () => ({toggle: (id) => controller.current?.toggle(id) || false,
@@ -43,9 +44,9 @@ export function YouTubePlayer({ref, selection, view, headingAction, secondary = 
     const label = playbackLabels[view.state];
     return (
         <section className={"player-slot" + (secondary ? " secondary" : "")} data-player-slot={slot} hidden={hidden} style={style}
-            aria-label={secondary ? "Secondary video player" : "Main video player"} onPointerDown={onInteraction} onKeyDown={onInteraction}>
+            aria-label={secondary ? secondaryLabel + " video player" : "Main video player"} onPointerDown={onInteraction} onKeyDown={onInteraction}>
             {secondary && selection && <div className="player-toolbar" onPointerDown={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
-                <h2 className={view.state} aria-live="polite">Secondary · {label}{view.name ? ": " + view.name : ""}</h2>
+                <h2 className={view.state} aria-live="polite">{secondaryLabel} · {label}{view.name ? ": " + view.name : ""}</h2>
                 {headingAction}
             </div>}
             {view.message && <p role={view.state === "error" ? "alert" : "status"}>{view.message}</p>}

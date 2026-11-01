@@ -61,6 +61,7 @@ export function ReactLists() {
                             {([0, 1] as const).map((slot) => (slot === 0 || deck.view.selections[slot]) && <YouTubePlayer key={scope + ":" + slot}
                                 ref={deck.refs[slot]} slot={slot} selection={deck.view.selections[slot]} view={deck.view.playback[slot]}
                                 onPlaybackChange={deck.updates[slot]} secondary={slot !== primary} hidden={slot !== primary && !deck.view.selections[slot]}
+                                secondaryLabel={deck.view.mode === "swapped" ? "Hot Swapped" : "Secondary"}
                                 style={{order: slot === primary ? 0 : 1}} headingAction={controls(slot)}
                                 onInteraction={check} resolveSelection={resolveSelection}/>)}
                         </div>

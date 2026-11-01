@@ -190,14 +190,18 @@ test("Add replaces only the parked slot, switches back to independent mode and c
     expect(state.players[0].toggle).toHaveBeenCalledWith("rain");
 });
 
-test("native playback in Swap mode pauses the other stream and promotes the resumed one", async () => {
+test("native playback can run both hot-swapped streams while row selection still swaps them", async () => {
     const state = setup();
     await state.deck.select("explore");
     await state.deck.swap("combat");
     state.playing(1, "combat");
     state.playing(0, "explore");
-    expect(state.view().primary).toBe(0);
+    expect(state.view().primary).toBe(1);
+    expect(state.players[1].pause).not.toHaveBeenCalled();
+    expect(state.view().playback.map((value) => value.state)).toEqual(["playing", "playing"]);
+    await state.deck.select("explore");
     expect(state.players[1].pause).toHaveBeenCalledTimes(1);
+    expect(state.view().primary).toBe(0);
 });
 
 test("header transport toggles its own player in Swap mode while a row still reverses the pair", async () => {
@@ -211,11 +215,13 @@ test("header transport toggles its own player in Swap mode while a row still rev
     expect(state.players[0].resume).not.toHaveBeenCalled();
     expect(state.view().primary).toBe(1);
     await state.deck.togglePlayer(0);
-    expect(state.players[1].pause).toHaveBeenCalledTimes(1);
+    expect(state.players[1].pause).not.toHaveBeenCalled();
     expect(state.players[0].toggle).toHaveBeenCalledWith("explore");
-    expect(state.view().primary).toBe(0);
-    await state.deck.select("explore");
-    expect(state.players[1].resume).toHaveBeenCalledTimes(1);
     expect(state.view().primary).toBe(1);
+    expect(state.view().mode).toBe("swapped");
+    await state.deck.select("explore");
+    expect(state.players[1].pause).toHaveBeenCalledTimes(1);
+    expect(state.players[0].resume).toHaveBeenCalledTimes(1);
+    expect(state.view().primary).toBe(0);
     expect(state.resolveSelection).toHaveBeenCalledTimes(2);
 });

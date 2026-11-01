@@ -48,12 +48,6 @@ export class PlaylistDeck {
         const other = primary === 0 ? 1 : 0;
         if (views[other].state === "playing" && ["idle", "paused", "error"].includes(views[primary].state)) primary = other;
         this.view = {...this.view, playback: views, primary};
-        // Native iframe controls must respect exclusive Swap mode too.
-        const opposite = slot === 0 ? 1 : 0;
-        if (this.view.mode === "swapped" && playback.state === "playing" && this.view.selections[opposite]) {
-            this.view = {...this.view, primary: slot};
-            if (["playing", "buffering", "loading"].includes(this.view.playback[opposite].state)) this.options.controls(opposite)?.pause();
-        }
         this.emit();
     }
 
@@ -130,11 +124,6 @@ export class PlaylistDeck {
         if (!id) return;
         this.touch();
         // Header transport controls target this player; list rows can switch the pair.
-        if (this.view.mode === "swapped" && ["paused", "idle", "error"].includes(this.view.playback[slot].state)) {
-            this.view = {...this.view, primary: slot};
-            const other = slot === 0 ? 1 : 0;
-            if (["playing", "buffering", "loading"].includes(this.view.playback[other].state)) this.options.controls(other)?.pause();
-        }
         if (this.options.controls(slot)?.toggle(id)) return this.emit();
         await this.load(id, slot, false);
     }
