@@ -8,7 +8,7 @@ test("alphabet jumps switch pages and focus rows without loading or interrupting
     const extra = Object.fromEntries(Array.from({length: 250}, (_, index) => ["A Camp " + String(index).padStart(3, "0"), {id: "PL_a_" + index, link: "fixture", count: 1}]));
     let payloads = 0;
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: {...catalog(), ...extra, Zither: {id: "PL_z", link: "fixture", count: 1}}}); });
-    await page.goto("/react");
+    await page.goto("/");
     const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
     await expect(rail.getByRole("button", {name: "Jump to Q", exact: true})).toBeDisabled();
     await rail.getByRole("button", {name: "Jump to T", exact: true}).click();
@@ -40,7 +40,7 @@ test("alphabet jumps switch pages and focus rows without loading or interrupting
 test("alphabet availability follows filtering, accents, and refreshed catalogs", async ({page}) => {
     const data = {...catalog(), "Énigma": {id: "PL_enigma", link: "fixture", count: 1}};
     await page.route("**/listCount*", (route) => route.fulfill({json: data}));
-    await page.goto("/react");
+    await page.goto("/");
     const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
     await rail.getByRole("button", {name: "Jump to E", exact: true}).click();
     await expect(page.getByRole("link", {name: "Énigma", exact: true})).toBeFocused();
@@ -69,7 +69,7 @@ test("alphabet rail stays beside mobile rows after scrolling without covering th
     await page.emulateMedia({colorScheme: "light"});
     const rows = Object.fromEntries([..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].flatMap((letter) => Array.from({length: 3}, (_, index) => [letter + " playlist " + index, {id: "PL_" + letter + index, link: "fixture", count: 1}])));
     await page.route("**/listCount*", (route) => route.fulfill({json: {...rows, lastUpdate: defaultTime}}));
-    await page.goto("/react");
+    await page.goto("/");
     const rail = page.getByRole("navigation", {name: "Playlist alphabet"});
     await rail.getByRole("button", {name: "Jump to Z", exact: true}).click();
     const target = page.getByRole("link", {name: "Z playlist 0", exact: true});

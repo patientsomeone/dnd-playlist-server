@@ -18,7 +18,7 @@ async function ready(page: Page, index: number, state = 1) {
 }
 
 test("Add starts a secondary stream and Hot Swap preserves both iframe instances and pause points", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await expect(second(page)).toHaveCount(0);
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
@@ -49,7 +49,7 @@ test("Add starts a secondary stream and Hot Swap preserves both iframe instances
 });
 
 test("secondary controls pause/resume independently and a sole playing secondary moves to the top", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
@@ -71,7 +71,7 @@ test("secondary controls pause/resume independently and a sole playing secondary
 });
 
 test("Hot Swap to a new playlist parks the main and replaces only the secondary", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
@@ -84,7 +84,7 @@ test("Hot Swap to a new playlist parks the main and replaces only the secondary"
 });
 
 test("pausing while buffering updates immediately and ignores delayed buffering until pause is acknowledged", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await startQueuedPlayer(page);
     await page.evaluate(() => { (window as any).__delayPauseEvents = true; });
     const travel = page.getByRole("link", {name: "Travel / Campfire", exact: true});
@@ -97,7 +97,7 @@ test("pausing while buffering updates immediately and ignores delayed buffering 
 });
 
 test("a swapped-out player still awaiting readiness cues its playlist paused", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => (window as any).__playerCreations || 0)).toBe(1);
     await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
@@ -112,7 +112,7 @@ test("a swapped-out player still awaiting readiness cues its playlist paused", a
 });
 
 test("favorites stay pinned across reloads and channel scopes without starting either player", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     const favorite = page.getByRole("button", {name: "Favorite Travel / Campfire", exact: true});
     await favorite.click();
     await expect(page.locator("#listParent dt a")).toHaveText(["Travel / Campfire", "!!! Intro !!!", "Boss Battle"]);
@@ -120,9 +120,9 @@ test("favorites stay pinned across reloads and channel scopes without starting e
     await page.reload();
     await expect(page.locator("#listParent dt a")).toHaveText(["Travel / Campfire", "!!! Intro !!!", "Boss Battle"]);
     expect(await page.evaluate(() => (window as any).__playerCreations || 0)).toBe(0);
-    await page.goto("/react?channelId=UC_other");
+    await page.goto("/?channelId=UC_other");
     await expect(page.locator("#listParent dt a")).toHaveText(["!!! Intro !!!", "Boss Battle", "Travel / Campfire"]);
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.getByRole("button", {name: "Unfavorite Travel / Campfire", exact: true})).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", {name: "Unfavorite Travel / Campfire", exact: true}).click();
     await page.reload();
@@ -130,7 +130,7 @@ test("favorites stay pinned across reloads and channel scopes without starting e
 });
 
 test("playlist renames retain favorites by ID and favorite buttons remain separate from playback", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("button", {name: "Favorite Travel / Campfire", exact: true}).click();
     const original = catalog();
     const renamed = {...original, "Campfire Renamed": original["Travel / Campfire"], lastUpdate: defaultTime + 1};
@@ -148,7 +148,7 @@ test("favorites work in memory when IndexedDB is blocked", async ({page}) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.addInitScript(() => Object.defineProperty(window, "indexedDB", {get: () => { throw new Error("Storage denied"); }}));
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("button", {name: "Favorite Boss Battle", exact: true}).click();
     await expect(page.locator("#listParent dt a").first()).toHaveText("Boss Battle");
     await expect(page.getByRole("button", {name: "Unfavorite Boss Battle", exact: true})).toHaveAttribute("aria-pressed", "true");
@@ -173,7 +173,7 @@ test("a delayed favorites read preserves a newer click and drains its write", as
     const now = Date.now();
     await page.clock.install({time: now});
     await page.clock.pauseAt(now + 60000);
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("button", {name: "Favorite Travel / Campfire", exact: true}).click();
     await page.evaluate(() => (window as any).__releaseFavorites());
     await expect(page.getByRole("button", {name: "Unfavorite Travel / Campfire", exact: true})).toHaveAttribute("aria-pressed", "true");
@@ -216,7 +216,7 @@ for (const viewport of [{width: 1440, height: 900}, {width: 390, height: 844}]) 
     test(`two players and icon controls fit ${viewport.width}px with green playback styling`, async ({page}, testInfo) => {
         await page.setViewportSize(viewport);
         await page.emulateMedia({colorScheme: "dark"});
-        await page.goto("/react");
+        await page.goto("/");
         await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
         await ready(page, 0);
         const add = page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true});
@@ -241,13 +241,12 @@ for (const viewport of [{width: 1440, height: 900}, {width: 390, height: 844}]) 
             return size.width === 44 && size.height === 44;
         }))).toBe(true);
         await expect(page.getByRole("button", {name: "Remove Boss Battle from the player", exact: true})).toHaveAttribute("title", "Remove Boss Battle from the player");
-        await page.screenshot({path: `.i.dual-${viewport.width}.png`, fullPage: true});
         await testInfo.attach("dual-players.png", {body: await page.screenshot({fullPage: true}), contentType: "image/png"});
     });
 }
 
 test("Add replaces the secondary, Remove clears it, and removing the main promotes the survivor", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
@@ -274,7 +273,7 @@ test("Add replaces the secondary, Remove clears it, and removing the main promot
 });
 
 test("Remove before readiness prevents late playback, including after a Hot Swap", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
@@ -299,7 +298,7 @@ test("Remove before readiness prevents late playback, including after a Hot Swap
 });
 
 test("worded state tags show current activity while rows reverse exclusive swaps", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0, 3);
     const travel = page.getByRole("link", {name: "Travel / Campfire", exact: true}).locator(".playback-badge");
@@ -339,7 +338,7 @@ test("worded state tags show current activity while rows reverse exclusive swaps
 });
 
 test("replacement Add shows its swap indicator and returns the deck to independent playback", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();
@@ -366,7 +365,7 @@ test("replacement Add shows its swap indicator and returns the deck to independe
 });
 
 test("Add copies main volume and mute before playback, including zero and reused secondary slots", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.evaluate(() => { (window as any).__playerInstances[0].__volume = 34; });
@@ -389,7 +388,7 @@ test("Add copies main volume and mute before playback, including zero and reused
 });
 
 test("audio API failure cannot prevent a secondary playlist from loading", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.getByRole("button", {name: "Add Boss Battle to the secondary player", exact: true}).click();
@@ -402,7 +401,7 @@ test("audio API failure cannot prevent a secondary playlist from loading", async
 });
 
 test("a delayed PLAYING event from the parked player cannot reverse an explicit Hot Swap", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.evaluate(() => { (window as any).__delayPauseEvents = true; });
@@ -415,7 +414,7 @@ test("a delayed PLAYING event from the parked player cannot reverse an explicit 
 });
 
 test("Hot Swap mode headers retain play/pause plus a separate Hot Swap while list rows reverse the pair", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await ready(page, 0);
     await page.locator("#listParent").getByRole("button", {name: "Hot Swap to Boss Battle", exact: true}).click();

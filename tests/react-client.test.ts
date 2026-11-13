@@ -20,7 +20,9 @@ describe("scoped React client routing", () => {
         await writeFile(join(directory, "private.sqlite"), "fixture private data");
         await writeFile(join(directory, "assets", ".env"), "fixture private config");
         const app = express();
-        app.use("/react", createReactClientRouter(directory));
+        const client = createReactClientRouter(directory);
+        app.get("/", client);
+        app.use("/react", client);
         app.get("/cacheState", (_request, response) => { response.json({fixture: true}); });
         app.use((_request, response) => { response.status(404).type("text").send("outer fallback"); });
         server = createServer(app);
@@ -37,7 +39,7 @@ describe("scoped React client routing", () => {
         await rm(target, {recursive: true, force: true});
     });
 
-    test.each(["/react", "/react/", "/react?channelId=UC_fixture"])("serves the client HTML directly at %s", async (path) => {
+    test.each(["/", "/?channelId=UC_fixture", "/react", "/react/", "/react?channelId=UC_fixture"])("serves the client HTML directly at %s", async (path) => {
         const response = await fetch(origin + path);
         expect(response.status).toBe(200);
         expect(response.redirected).toBe(false);
@@ -62,8 +64,8 @@ describe("scoped React client routing", () => {
         expect(await response.text()).toBe("This is not the page you are looking for...");
     });
 
-    test("supports HEAD without sending an HTML body", async () => {
-        const response = await fetch(origin + "/react", {method: "HEAD"});
+    test.each(["/", "/react"])("supports HEAD without sending an HTML body at %s", async (path) => {
+        const response = await fetch(origin + path, {method: "HEAD"});
         expect(response.status).toBe(200);
         expect(response.headers.get("cache-control")).toBe("no-store");
         expect(await response.text()).toBe("");
@@ -76,11 +78,11 @@ describe("scoped React client routing", () => {
         expect(await response.text()).toBe("outer fallback");
     });
 
-    test("returns a controlled unavailable response when the client has not been built", async () => {
+    test.each(["/", "/react"])("returns a controlled unavailable response at %s when the client has not been built", async (path) => {
         await unlink(join(directory, "index.html"));
-        const response = await fetch(origin + "/react");
+        const response = await fetch(origin + path);
         expect(response.status).toBe(503);
         expect(response.headers.get("cache-control")).toBe("no-store");
-        expect(await response.text()).toBe("The playlist preview is temporarily unavailable.");
+        expect(await response.text()).toBe("The playlist app is temporarily unavailable.");
     });
 });

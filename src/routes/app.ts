@@ -37,7 +37,9 @@ app.use("/", (req: Request, res: Response, next) => {
     next();
 });
 
-app.use("/react", createReactClientRouter(srcPath("dist/client")));
+const reactClient = createReactClientRouter(srcPath("dist/client"));
+app.get("/", reactClient);
+app.use("/react", reactClient);
 
 app.use(express.static(srcPath("public")), (req: Request, res: Response, next) => {
     console.log(`Attempting to fetch ${req.path}`);
@@ -53,7 +55,8 @@ const respond = (req: Request, res: Response, data: anyStandard) => {
     return res.status(200).send(data);
 };
 
-app.get("/", (request: Request, response: Response) => {
+app.get("/legacy", (request: Request, response: Response) => {
+    response.set("Cache-Control", "no-store");
     const mainPath = "./public/playlists.html";
     console.log(`Attempting to fetch ${srcPath(mainPath)}`);
     response.sendFile(srcPath(mainPath));
@@ -135,7 +138,7 @@ for (const [route, definition] of Object.entries(reactRoutes)) {
 app.get("/{*unmatched}", (req: Request, res: Response) => {
     console.log("\x1b[31m%s\x1b[0m", `Sending Error for ${req.path}`);
 
-    res.status(404).send("This is not the page you are looking for...");
+    res.status(404).type("text").send("This is not the page you are looking for...");
 });
 
 const port = process.env.PORT || 8000;

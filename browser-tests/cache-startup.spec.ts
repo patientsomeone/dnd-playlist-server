@@ -10,7 +10,7 @@ test("saved React playlists render before a stalled network check and survive an
     await page.route("**/cacheState*", async (route) => { await promise; await route.fulfill({json: cacheState()}); });
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: catalog()}); });
     try {
-        await page.goto("/react");
+        await page.goto("/");
         await expect(page.locator("#listParent dt a")).toHaveCount(3);
         expect(payloads).toBe(0);
         resolve();
@@ -51,7 +51,7 @@ test(`a failed initial database open (${failure}) recovers persistence for the s
     }, failure);
     let payloads = 0;
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: catalog()}); });
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     if (failure === "event") {
         await expect.poll(() => page.evaluate(() => typeof (window as any).__failCacheOpen)).toBe("function");

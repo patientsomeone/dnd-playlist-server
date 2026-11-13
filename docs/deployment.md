@@ -58,11 +58,12 @@ The development server defaults to port 8000. Production's configured HTTP port
 is 8080; keep `process.env.PORT` support and verify the runtime port value instead
 of hard-coding a new development port.
 
-The browser-rendered React preview is mounted at `/react` by this same
-Express service while `/` continues serving the legacy UI. The current `/`
-ingress already routes requests to Express. The client now builds separately into
-`dist/client` with `/react/assets` URLs. Live host routes, assets and reloads were
-verified during the first preview release below.
+The source now serves React at `/`, keeps `/react` and `/react/` as aliases, and
+serves the original player at `/legacy` and `/legacy/`. The current `/` ingress
+already routes these requests to Express. The client builds separately into
+`dist/client` with unchanged `/react/assets` URLs. This home-route cutover is
+locally verified and still requires publishing; the earlier preview deployment
+is recorded below.
 
 ## First preview release: October 30, 2026
 
@@ -117,4 +118,4 @@ tests. The production group site and live YouTube quota are not benchmark target
 
 The separated production build compiles the server into `dist/server`, preserves legacy assets, and builds the client into `dist/client`. `npm start` launches `dist/server/routes/app.js`. Package-root lookup keeps static/environment/cache paths stable at the new depth; see [build commands and verification](builds.md).
 
-React route mounting is live: `/react` and `/react/` serve the client HTML, `/react/assets` serves only its asset directory, and unknown nested URLs return 404. The legacy root and API URLs remain in place. Advancing Git `Production` remains a separate release step; see [preview scope and checks](react-client.md).
+The source serves React at `/`, `/react` and `/react/`; `/react/assets` exposes only its asset directory, and unknown nested URLs return 404. The legacy player is served at `/legacy`; shared API URLs stay at the root. Publishing the home-route cutover and advancing Git `Production` remain separate release steps; see [route scope and checks](react-client.md).

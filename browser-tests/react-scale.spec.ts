@@ -15,7 +15,7 @@ test("React bounds a 100,000-playlist catalog, searches and pages without anothe
     await page.route("**/cacheState*", (route) => route.fulfill({json: cacheState()}));
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: {...playlists, lastUpdate: defaultTime}}); });
     const started = performance.now();
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveCount(100, {timeout: 30000});
     const initialMs = performance.now() - started;
     await expect(page.getByRole("navigation", {name: "Playlist pages"})).toContainText("Page 1 of 1000");

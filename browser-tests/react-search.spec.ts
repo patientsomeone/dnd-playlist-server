@@ -20,7 +20,7 @@ function savedSearch(page: Page, scope = "default") {
 
 test("React search expands below the heading, toggles its active button, and waits 300 ms after the latest edit", async ({page}, testInfo) => {
     await page.emulateMedia({colorScheme: "dark"});
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await savedSearch(page);
     const now = Date.now();
@@ -70,7 +70,7 @@ test("React search expands below the heading, toggles its active button, and wai
 test("React search preserves playback and filters without fetching another catalog", async ({page}) => {
     let payloads = 0;
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: catalog()}); });
-    await page.goto("/react");
+    await page.goto("/");
     await startQueuedPlayer(page);
     await expect(page.locator("#frameParent h2")).toHaveText("Buffering: Travel / Campfire");
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
@@ -91,7 +91,7 @@ test("React search stays reachable after mobile scrolling and resets paging with
     await page.emulateMedia({colorScheme: "light"});
     const rows = Object.fromEntries(Array.from({length: 150}, (_, index) => ["Playlist " + String(index).padStart(3, "0"), {id: "PL_" + index, link: "fixture", count: 1}]));
     await page.route("**/listCount*", (route) => route.fulfill({json: {...rows, lastUpdate: catalog().lastUpdate}}));
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("button", {name: "Next", exact: true}).click();
     await expect(page.getByRole("navigation", {name: "Playlist pages"})).toContainText("Page 2 of 2");
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -111,7 +111,7 @@ test("React search stays reachable after mobile scrolling and resets paging with
 });
 
 test("React restores open and collapsed search text across reloads without mixing channel preferences", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     const trigger = page.getByRole("button", {name: "Search playlists", exact: true});
     await trigger.click();
     await page.getByRole("searchbox").fill("Boss");
@@ -126,7 +126,7 @@ test("React restores open and collapsed search text across reloads without mixin
     await expect(page.locator("#listParent dt a")).toHaveText(["Boss Battle"]);
     await expect(page.getByRole("searchbox")).toHaveCount(0);
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
-    await page.goto("/react?channelId=UC_other");
+    await page.goto("/?channelId=UC_other");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await expect(page.getByRole("searchbox")).toHaveCount(0);
     await trigger.click();
@@ -135,7 +135,7 @@ test("React restores open and collapsed search text across reloads without mixin
     await page.reload();
     await expect(page.getByRole("searchbox")).toHaveValue("Travel");
     await expect(page.locator("#listParent dt a")).toHaveText(["Travel / Campfire"]);
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveText(["Boss Battle"]);
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
 });
@@ -144,7 +144,7 @@ test("React search remains usable in memory when IndexedDB is blocked", async ({
     const errors: string[] = [];
     page.on("pageerror", (error) => { errors.push(error.message); });
     await page.addInitScript(() => Object.defineProperty(window, "indexedDB", {get: () => { throw new Error("Storage disabled"); }}));
-    await page.goto("/react");
+    await page.goto("/");
     const trigger = page.getByRole("button", {name: "Search playlists", exact: true});
     await trigger.click();
     await page.getByRole("searchbox").fill("Boss");
@@ -185,7 +185,7 @@ test("React does not replace new search input with a delayed saved preference", 
     const now = Date.now();
     await page.clock.install({time: now});
     await page.clock.pauseAt(now + 60000);
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     const trigger = page.getByRole("button", {name: "Search playlists", exact: true});
     await trigger.click();

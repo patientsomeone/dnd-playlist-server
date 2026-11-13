@@ -29,7 +29,7 @@ test("React polls a processing refresh without starting a player or duplicating 
     await page.route("**/listCount*", (route) => route.fulfill({json: checks >= 3
         ? {...catalog(defaultTime + 1), New: {id: "PL_new", link: "new", count: 1}} : catalog(1)}));
     await page.route("**/refreshPlaylists*", (route) => { refreshes += 1; return route.fulfill({json: {status: "processing"}}); });
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.getByRole("link", {name: "New", exact: true})).toBeVisible({timeout: 15000});
     expect(refreshes).toBe(1);
     expect(checks).toBe(3);
@@ -46,7 +46,7 @@ for (const source of ["server", "saved"] as const) {
         };
         await page.route("**/listCount*", (route) => route.fulfill({json: duplicates}));
         if (source === "saved") await seedCatalog(page, duplicates);
-        await page.goto("/react");
+        await page.goto("/");
         await expect(page.locator("#listParent dt a")).toHaveText(["City", "Other City"]);
         await start(page, "City");
         await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
@@ -64,7 +64,7 @@ for (const source of ["server", "saved"] as const) {
 }
 
 test("React keeps playlist positions stable through slow selection checks and offline feedback", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     const positions = () => page.locator("#listParent dt a").evaluateAll((anchors) => anchors.map((anchor) => {
         const {y, height} = anchor.getBoundingClientRect();
@@ -89,11 +89,11 @@ test("React keeps playlist positions stable through slow selection checks and of
 });
 
 test("React and legacy tabs share updated catalogs without sharing or changing playback", async ({context, page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     const before = await calls(page);
     const other = await context.newPage();
-    await other.goto("/");
+    await other.goto("/legacy");
     await expect(other.locator("#listParent dt a")).toHaveCount(3);
     await context.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1)}));
     await context.route("**/listCount*", (route) => route.fulfill({json: {...catalog(defaultTime + 1), New: {id: "PL_new", link: "new", count: 1}}}));
@@ -109,7 +109,7 @@ function calls(page: Page) {
 }
 
 test("React active playlist pauses/resumes immediately by mouse and keyboard while metadata is slow", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
     await expect(page.locator("#catalogStatus")).toBeHidden();
@@ -131,7 +131,7 @@ test("React active playlist pauses/resumes immediately by mouse and keyboard whi
 });
 
 test("React toggles buffering, resumes cued/ended/blocked playback, and retries failed controls", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     await page.evaluate(() => {
         (window as any).__playerEvents.onStateChange({data: 1});
@@ -162,7 +162,7 @@ test("React toggles buffering, resumes cued/ended/blocked playback, and retries 
 });
 
 test("React active-row toggles cancel a pending different selection without reloading playback", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
     await expect(page.locator("#catalogStatus")).toBeHidden();
@@ -184,7 +184,7 @@ test("React active-row toggles cancel a pending different selection without relo
 for (const colorScheme of ["light", "dark"] as const) {
     test(`React active playlist follows playback with text and matching colors in ${colorScheme} mode`, async ({page}, testInfo) => {
         await page.emulateMedia({colorScheme});
-        await page.goto("/react");
+        await page.goto("/");
         const links = page.locator("#listParent dt a");
         await expect(links).toHaveText(["!!! Intro !!!", "Boss Battle", "Travel / Campfire"]);
         await expect(page.locator("#listParent [aria-current]")).toHaveCount(0);
@@ -236,7 +236,7 @@ test("React shows saved IndexedDB data before a slow server check, then adopts t
         return route.fulfill({json: {...catalog(defaultTime + 1), New: {id: "PL_new", link: "new", count: 1}}});
     });
     try {
-        await page.goto("/react");
+        await page.goto("/");
         await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toBeVisible();
         expect(payloads).toBe(0);
         resolve();
@@ -247,7 +247,7 @@ test("React shows saved IndexedDB data before a slow server check, then adopts t
 });
 
 test("React persists catalogs and keeps playback selection usable offline", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await expect.poll(async () => (await storedCatalog(page))?.lastUpdate).toBe(defaultTime);
     await page.route("**/cacheState*", (route) => route.abort("failed"));
@@ -261,7 +261,7 @@ test("React works in memory with blocked storage, reports initial errors, and re
     await page.addInitScript(() => Object.defineProperty(window, "indexedDB", {get: () => { throw new Error("Storage disabled"); }}));
     let failed = true;
     await page.route("**/listCount*", (route) => route.fulfill(failed ? {status: 503} : {json: catalog()}));
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.getByRole("alert")).toHaveText("Unable to load playlists. Please retry.");
     failed = false;
     await page.getByRole("button", {name: "Retry", exact: true}).click();
@@ -271,7 +271,7 @@ test("React works in memory with blocked storage, reports initial errors, and re
 
 test("React handles empty catalogs and renders hostile labels only as text", async ({page}) => {
     await page.route("**/listCount*", (route) => route.fulfill({json: {lastUpdate: defaultTime}}));
-    await page.goto("/react");
+    await page.goto("/");
     await expect(page.getByText("No playlists found for this channel.", {exact: true})).toBeVisible();
     await expect(page.locator("#listParent dt a")).toHaveCount(0);
     const label = "<img src=x onerror=alert(1)>";
@@ -285,7 +285,7 @@ test("React handles empty catalogs and renders hostile labels only as text", asy
 });
 
 test("React queues the latest selection and reuses one player and API script", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => (window as any).__playerCreations)).toBe(1);
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
@@ -302,7 +302,7 @@ test("React queues the latest selection and reuses one player and API script", a
 });
 
 test("React randomizes normal playlists, loops, disables shuffle for Boss, and skips unavailable videos", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.evaluate(() => { Math.random = () => 0.6; });
     await start(page);
     expect(await calls(page)).toContainEqual({method: "loadPlaylist", args: [{listType: "playlist", suggestedQuality: "hd720", list: "PL_travel", index: 6}]});
@@ -325,7 +325,7 @@ test("React randomizes normal playlists, loops, disables shuffle for Boss, and s
 
 for (const [state, title] of [[2, "Paused"], [3, "Buffering"]] as const) {
     test(`React ${title.toLowerCase()} metadata updates preserve the player, position, and call history`, async ({page}) => {
-        await page.goto("/react");
+        await page.goto("/");
         await start(page);
         await page.evaluate(() => {
             (window as any).__playerEvents.onStateChange({data: 1});
@@ -346,7 +346,7 @@ for (const [state, title] of [[2, "Paused"], [3, "Buffering"]] as const) {
 }
 
 test("React resolves fresh names/counts before explicit selection without losing keyboard focus", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page, "Boss Battle");
     await page.evaluate(() => { Math.random = () => 0.6; });
     const {promise, resolve} = Promise.withResolvers<void>();
@@ -371,7 +371,7 @@ test("React resolves fresh names/counts before explicit selection without losing
 });
 
 test("React revalidates queued selection at actual player readiness", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => (window as any).__playerCreations)).toBe(1);
     await page.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1)}));
@@ -385,7 +385,7 @@ test("React revalidates queued selection at actual player readiness", async ({pa
 });
 
 test("React leaves current playback alone when a selected playlist has been removed", async ({page}) => {
-    await page.goto("/react");
+    await page.goto("/");
     await start(page);
     const before = await calls(page);
     await page.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1)}));
@@ -403,7 +403,7 @@ test("React retries an API script failure without leaving an unhandled error", a
     page.on("pageerror", (error) => { errors.push(error.message); });
     let requests = 0;
     await page.route("https://www.youtube.com/iframe_api", (route) => ++requests === 1 ? route.abort("failed") : route.fallback());
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect(page.getByRole("alert")).toHaveText("The video player could not load. Select a playlist to retry.");
     await start(page);
@@ -413,7 +413,7 @@ test("React retries an API script failure without leaving an unhandled error", a
 
 test("React retires a player that never becomes ready and ignores its late callback", async ({page}) => {
     await page.clock.install();
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => (window as any).__playerCreations)).toBe(1);
     await page.evaluate(() => { (window as any).__oldEvents = (window as any).__playerEvents; });
@@ -471,7 +471,7 @@ test("React unmount during API loading cannot create a late player", async ({pag
 
 test("React keeps its layout within a mobile viewport and supports keyboard selection", async ({page}, testInfo) => {
     await page.setViewportSize({width: 390, height: 844});
-    await page.goto("/react");
+    await page.goto("/");
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).focus();
     await page.keyboard.press("Enter");
     await ready(page);

@@ -18,11 +18,12 @@ async function main() {
     for (const file of legacy.outputFiles) assets.set("/" + basename(file.path), [file.contents, type(file.path)]);
     for (const file of client.outputFiles) assets.set("/react/assets/" + basename(file.path), [file.contents, type(file.path)]);
     for (const [url, name, mime] of [
-        ["/", "playlists.html", "text/html"], ["/pageStyle.css", "pageStyle.css", "text/css"], ["/favicon.ico", "favicon.ico", "image/x-icon"]
+        ["/legacy", "playlists.html", "text/html"], ["/legacy/", "playlists.html", "text/html"], ["/pageStyle.css", "pageStyle.css", "text/css"], ["/favicon.ico", "favicon.ico", "image/x-icon"]
     ]) assets.set(url, [readFileSync(join(__dirname, "..", "public", name)), mime]);
     for (const file of harness.outputFiles) assets.set("/__react-test/assets/" + basename(file.path), [file.contents, type(file.path)]);
     assets.set("/react-test", ['<div id="root"></div><script type="module" src="/__react-test/assets/stdin.js"></script>', "text/html"]);
     const html = readFileSync(join(__dirname, "..", "client", "index.html"));
+    assets.set("/", [html, "text/html"]);
     assets.set("/react", [html, "text/html"]);
     assets.set("/react/", [html, "text/html"]);
     createServer((request, response) => {

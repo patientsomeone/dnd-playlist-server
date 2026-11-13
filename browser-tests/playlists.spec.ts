@@ -8,7 +8,7 @@ test("renders alphabetic labels and a fresh timestamp without refreshing", async
     page.on("request", (request) => {
         if (request.url().includes("/refreshPlaylists")) refreshes.push(request.url());
     });
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#listParent dt a")).toHaveText(["!!! Intro !!!", "Boss Battle", "Travel / Campfire"]);
     await expect(page.locator("#lastUpdated")).toHaveClass("fresh");
     expect(refreshes).toEqual([]);
@@ -28,7 +28,7 @@ for (const source of ["server", "saved"] as const) {
             await seedCatalog(page, aliases);
             await page.route("**/cacheState*", (route) => route.abort("failed"));
         }
-        await page.goto("/");
+        await page.goto("/legacy");
         await expect(page.locator("#listParent dt a")).toHaveText(["City", "Other City"]);
         await expect(page.getByRole("link", {name: "City", exact: true})).toHaveAttribute("count", "35");
         const ids = await page.locator("#listParent dt a").evaluateAll((links) => links.map((link) => link.id));
@@ -46,7 +46,7 @@ for (const source of ["server", "saved"] as const) {
 test("legacy replaces a renamed playlist by ID without interrupting playback and persists the new name", async ({page}) => {
     const old = {lastUpdate: defaultTime, "City / Downtime": {id: "PL_city", link: "city", count: 44}};
     await page.route("**/listCount*", (route) => route.fulfill({json: old}));
-    await page.goto("/");
+    await page.goto("/legacy");
     await page.evaluate(() => { Math.random = () => 0.5; });
     await startQueuedPlayer(page, "City / Downtime");
     await expect(page.locator("#frameParent h2")).toHaveText("Buffering: City / Downtime");
@@ -75,7 +75,7 @@ test("legacy replaces a renamed playlist by ID without interrupting playback and
 });
 
 test("queues selection until the player is ready and shuffles/loops normal playlists", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await page.evaluate(() => { Math.random = () => 0.6; });
     await page.getByRole("link", {name: "Travel / Campfire", exact: true}).click();
     await expect.poll(() => page.evaluate(() => !!(window as any).__playerEvents)).toBe(true);
@@ -94,7 +94,7 @@ test("queues selection until the player is ready and shuffles/loops normal playl
 });
 
 test("Boss playlists start at zero, loop, and do not enable shuffle", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page, "Boss Battle");
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
     const calls = await page.evaluate(() => (window as any).__playerCalls);
@@ -107,7 +107,7 @@ test("Boss playlists start at zero, loop, and do not enable shuffle", async ({pa
 });
 
 test("updates paused/buffering states and skips unavailable videos", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page);
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 2}));
     await expect(page.locator("#frameParent h2")).toHaveText("Paused: Travel / Campfire");
@@ -121,7 +121,7 @@ test("updates paused/buffering states and skips unavailable videos", async ({pag
 test("analytics and optional player failures do not interrupt selection or state handling", async ({page}) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page);
     await page.evaluate(() => {
         (window as any).gtag = () => { throw new Error("Analytics blocked"); };
@@ -145,7 +145,7 @@ test("serves stale data during a background refresh without changing the player 
         await route.fulfill({json: catalog(defaultTime + 1000)});
     });
     try {
-        await page.goto("/");
+        await page.goto("/legacy");
         await expect(page.locator("#listParent dt a")).toHaveCount(3);
         await expect(page.locator("#catalogStatus")).toBeHidden();
         await expect(page.locator("#frameParent h2")).toHaveText("Ready to Play");
@@ -169,7 +169,7 @@ test("polls cacheState while another refresh owns the lease, then downloads the 
         refreshes += 1;
         return route.fulfill({json: {status: "processing"}});
     });
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.getByRole("link", {name: "New", exact: true})).toBeVisible({timeout: 15000});
     expect(refreshes).toBe(1);
     expect(checks).toBe(3);
@@ -178,7 +178,7 @@ test("polls cacheState while another refresh owns the lease, then downloads the 
 
 test("handles an empty catalog without creating playlist links", async ({page}) => {
     await page.route("**/listCount*", (route) => route.fulfill({json: {lastUpdate: defaultTime}}));
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#lastUpdated")).toHaveClass("fresh");
     await expect(page.locator("#listParent dt a")).toHaveCount(0);
 });
@@ -189,7 +189,7 @@ test("renders labels that sort after lastUpdate and renders markup as plain text
         ...catalog(), zither: {id: "PL_zither", link: "zither", count: 1},
         [label]: {id: "PL_text", link: "javascript:alert(1)", count: 1}
     }}));
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.getByRole("link", {name: "zither", exact: true})).toBeVisible();
     await expect(page.getByRole("link", {name: label, exact: true})).toHaveAttribute("href", "https://www.youtube.com/playlist?list=PL_text");
     await expect(page.locator("#listParent img")).toHaveCount(0);
@@ -202,7 +202,7 @@ for (const failure of ["HTTP", "JSON"]) {
         await page.route("**/listCount*", (route) => failed
             ? route.fulfill(failure === "HTTP" ? {status: 503, body: "Unavailable"} : {status: 200, body: "not JSON"})
             : route.fulfill({json: catalog()}));
-        await page.goto("/");
+        await page.goto("/legacy");
         await expect(page.getByRole("alert")).toBeVisible();
         failed = false;
         await page.getByRole("button", {name: "Retry", exact: true}).click();
@@ -224,7 +224,7 @@ test("renders IndexedDB before a slow cacheState response and applies the newer 
         return route.fulfill({json: {...catalog(defaultTime + 1000), New: {id: "PL_new", link: "new", count: 1}}});
     });
     try {
-        await page.goto("/");
+        await page.goto("/legacy");
         await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toBeVisible();
         expect(payloads).toBe(0);
         finish();
@@ -234,7 +234,7 @@ test("renders IndexedDB before a slow cacheState response and applies the newer 
 });
 
 test("persists a downloaded catalog and reloads it when API requests are unavailable", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await expect.poll(async () => (await storedCatalog(page))?.lastUpdate).toBe(defaultTime);
     await page.route("**/cacheState*", (route) => route.abort("failed"));
@@ -251,14 +251,14 @@ test("works in memory when access to IndexedDB throws", async ({page}) => {
     await page.addInitScript(() => Object.defineProperty(window, "indexedDB", {
         get: () => { throw new Error("Storage disabled"); }
     }));
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await startQueuedPlayer(page);
     await expect(page.locator("#frameParent h2")).toHaveText("Buffering: Travel / Campfire");
 });
 
 test("resolves a selection against refreshed metadata before loading the player", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page);
     await page.evaluate(() => { Math.random = () => 0.6; });
     const {promise: pending, resolve: finish} = Promise.withResolvers<void>();
@@ -286,7 +286,7 @@ test("resolves a selection against refreshed metadata before loading the player"
 
 for (const [state, title] of [[2, "Paused"], [3, "Buffering"]] as const) {
     test("a " + title.toLowerCase() + " event updates only catalog data while playback is active", async ({page}) => {
-        await page.goto("/");
+        await page.goto("/legacy");
         await startQueuedPlayer(page);
         await page.evaluate(() => {
             (window as any).__playerEvents.onStateChange({data: 1});
@@ -307,7 +307,7 @@ for (const [state, title] of [[2, "Paused"], [3, "Buffering"]] as const) {
 }
 
 test("a removed selection leaves current playback alone and asks the user to choose again", async ({page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page);
     const before = await page.evaluate(() => (window as any).__playerCalls);
     await page.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1000)}));
@@ -323,7 +323,7 @@ test("a removed selection leaves current playback alone and asks the user to cho
 test("unchanged versions use metadata checks without downloading the whole catalog on interactions", async ({page}) => {
     let payloads = 0;
     await page.route("**/listCount*", (route) => { payloads += 1; return route.fulfill({json: catalog()}); });
-    await page.goto("/");
+    await page.goto("/legacy");
     await startQueuedPlayer(page);
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 1}));
     await page.evaluate(() => (window as any).__playerEvents.onStateChange({data: 2}));
@@ -337,7 +337,7 @@ test("explicit channels keep separate IndexedDB records from the default channel
     await page.route("**/listCount*", (route) => route.fulfill({json: {
         lastUpdate: defaultTime, Other: {id: "PL_other", link: "other", count: 2}
     }}));
-    await page.goto("/?channelId=UC_other");
+    await page.goto("/legacy?channelId=UC_other");
     await expect(page.getByRole("link", {name: "Other", exact: true})).toBeVisible();
     await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toHaveCount(0);
     await expect.poll(async () => (await storedCatalog(page, "channel:UC_other"))?.channelId).toBe("UC_other");
@@ -345,10 +345,10 @@ test("explicit channels keep separate IndexedDB records from the default channel
 });
 
 test("another tab picks up a committed browser cache update without creating a player", async ({context, page}) => {
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     const second = await context.newPage();
-    await second.goto("/");
+    await second.goto("/legacy");
     await expect(second.locator("#listParent dt a")).toHaveCount(3);
     await context.route("**/cacheState*", (route) => route.fulfill({json: cacheState(defaultTime + 1000)}));
     await context.route("**/listCount*", (route) => route.fulfill({json: {
@@ -363,7 +363,7 @@ test("another tab picks up a committed browser cache update without creating a p
 
 test("recovers from a malformed IndexedDB catalog", async ({page}) => {
     await seedCatalog(page, {lastUpdate: defaultTime + 1000, Invalid: {id: "PL_bad", link: "bad", count: "not a count"}});
-    await page.goto("/");
+    await page.goto("/legacy");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await expect.poll(async () => (await storedCatalog(page))?.lastUpdate).toBe(defaultTime);
     expect((await storedCatalog(page)).playlists.Invalid).toBeUndefined();
@@ -377,7 +377,7 @@ test("an older in-flight response cannot overwrite a newer IndexedDB catalog fro
         await route.fulfill({json: catalog()});
     });
     try {
-        await page.goto("/");
+        await page.goto("/legacy");
         await expect(page.getByRole("link", {name: "Travel / Campfire", exact: true})).toBeVisible();
         const writer = await context.newPage();
         await seedCatalog(writer, {lastUpdate: defaultTime + 1000, Winner: {id: "PL_winner", link: "winner", count: 1}});

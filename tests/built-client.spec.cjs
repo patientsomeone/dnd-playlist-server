@@ -23,7 +23,7 @@ test("built React and legacy clients preserve cached catalogs and playback", asy
     const errors = [];
     page.on("pageerror", (error) => {errors.push(error.message);});
     console.log("Built client: loading React and seeding IndexedDB aliases");
-    await page.goto(origin + "/react");
+    await page.goto(origin + "/");
     await expect(page.getByRole("link", {name: "Travel", exact: true})).toBeVisible();
     // Reproduce a hard reload with unchanged server metadata and aliases left in IndexedDB.
     const seedAliases = () => page.evaluate(({lastUpdate, playlists}) => new Promise((resolve, reject) => {
@@ -40,7 +40,7 @@ test("built React and legacy clients preserve cached catalogs and playback", asy
     }), {lastUpdate, playlists: Object.fromEntries(Object.entries(catalog).filter(([name]) => name !== "lastUpdate"))});
     await seedAliases();
     console.log("Built client: verifying cached React reloads");
-    for (const path of ["/react", "/react/"]) {
+    for (const path of ["/", "/react", "/react/"]) {
         const response = await page.goto(origin + path);
         assert.equal(response.status(), 200);
         await expect(page.getByRole("heading", {name: "Ready to Play", exact: true})).toBeVisible();
@@ -62,6 +62,7 @@ test("built React and legacy clients preserve cached catalogs and playback", asy
     await expect(page.locator("#catalogStatus")).toBeHidden();
     await page.unroute("**/cacheState*", delayCheck);
     console.log("Built client: verifying React playback and catalog updates");
+    await page.goto(origin + "/");
     await page.getByRole("link", {name: "Travel", exact: true}).click();
     await expect.poll(() => page.evaluate(() => !!window.__playerEvents)).toBe(true);
     await page.evaluate(() => window.__playerEvents.onReady({target: window.__playerInstances[0]}));
@@ -81,8 +82,9 @@ test("built React and legacy clients preserve cached catalogs and playback", asy
     await expect(page.locator("#catalogStatus")).toBeHidden();
     await seedAliases();
     console.log("Built client: verifying legacy playback and reloads");
-    await page.goto(origin + "/");
-    await expect(page).toHaveURL(origin + "/");
+    await page.goto(origin + "/legacy");
+    await expect(page).toHaveURL(origin + "/legacy");
+    await expect(page.locator("#listOrganizer")).toBeVisible();
     await expect(page.getByRole("heading", {name: "Dip's Organized Playlists", exact: true})).toBeVisible();
     await expect(page.getByRole("link", {name: "Travel", exact: true})).toBeVisible();
     await expect(page.locator("#catalogStatus")).toBeHidden();
@@ -99,6 +101,9 @@ test("built React and legacy clients preserve cached catalogs and playback", asy
     await expect(page.locator("#listParent dt a")).toHaveCount(2);
     await expect(page.getByRole("link", {name: "Travel (old)", exact: true})).toHaveCount(0);
     assert.equal(await page.evaluate(() => window.player), undefined);
+    await page.goto(origin + "/legacy/");
+    await expect(page.locator("#listOrganizer")).toBeVisible();
+    await expect(page.getByRole("link", {name: "Travel", exact: true})).toBeVisible();
     assert.deepEqual(errors, []);
     console.log("Built browser smoke: React and legacy reloads, duplicate IndexedDB aliases, mocked playback/catalog updates, and real routes/assets passed (API fixtures only).");
 });

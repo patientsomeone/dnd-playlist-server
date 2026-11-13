@@ -45,4 +45,4 @@ The player options and `loadPlaylist` calls now compile against the published si
 
 Strict checking exposed real behavior problems that now have regression coverage: async iteration propagates error-first callback failures, the lazy file writer awaits initialization, and `LoadUrl.single` rejects failures instead of returning an undeclared `undefined`. Generic duration keys and nullable/cache error paths are typed without changing the 12-hour policy or the legacy duration formatting boundaries.
 
-The server/client builds are separate and the preview is [mounted at `/react`](react-client.md). The catalog hook and private typed YouTube player are now implemented and browser-tested, including StrictMode cleanup and late callback fencing. Real-media acceptance is next; no legacy route cutover was performed.
+The server/client builds are separate. The [React home page](react-client.md) is served at `/`, with `/react` aliases and `/legacy` for the original player. The catalog hook and private typed YouTube player are implemented and browser-tested, including StrictMode cleanup and late callback fencing. Live-media acceptance remains separate from automated checks.

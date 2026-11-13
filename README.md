@@ -1,6 +1,6 @@
 # D&D Playlist Organizer
 
-A shared, alphabetically organized YouTube playlist catalog for a worldwide D&D group. Express serves the legacy player at `/`, a SQLite metadata cache, and the playlist API. The React player is mounted at `/react` and `/react/`, using the shared catalog/IndexedDB flow and an independent YouTube player. The legacy root remains available during acceptance testing.
+A shared, alphabetically organized YouTube playlist catalog for a worldwide D&D group. Express serves the React player at `/`, the original player at `/legacy` and `/legacy/`, a SQLite metadata cache, and the playlist API. `/react` and `/react/` remain aliases for the React page, with assets scoped to `/react/assets`. Both players share the catalog/IndexedDB flow.
 
 ## Setup
 
@@ -50,7 +50,7 @@ Run `npm run dev`, then open `http://localhost:8000`. It checks all source type 
 
 After changes, run `npm run test:all`, `npm run build`, `npm run test:start`, `npm run test:client`, `npm run test:runtime`, and `npm run test:build`. Chromium installation on Linux CI uses `npm run test:browser:install -- --with-deps`. Routine checks use fixtures and do not consume YouTube quota. See [test coverage and limits](tests/README.md) and [performance methodology](benchmarks/README.md).
 
-`public/createList.js` and its source map are generated from `src/agents/createList.ts`; edit the TypeScript source. `dist/server` and `dist/client` are generated and independently disposable. The React player is mounted at `/react` and `/react/`; see [catalog/player behavior, checks and acceptance limits](docs/react-client.md). See [build layout and watchers](docs/builds.md). Retired Gulp/Git helper scripts are no longer npm commands; use Git directly for branch/commit/push operations.
+`public/createList.js` and its source map are generated from `src/agents/createList.ts`; edit the TypeScript source. `dist/server` and `dist/client` are generated and independently disposable. The React home page and legacy fallback are documented in [catalog/player behavior, checks and acceptance limits](docs/react-client.md). See [build layout and watchers](docs/builds.md). Retired Gulp/Git helper scripts are no longer npm commands; use Git directly for branch/commit/push operations.
 
 ## Cache and API
 

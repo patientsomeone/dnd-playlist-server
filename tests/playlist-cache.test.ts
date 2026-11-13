@@ -291,7 +291,7 @@ describe("SQLite-backed playlist API", () => {
     });
 
     test("serves legacy assets, 404s, and CORS without refreshing", async () => {
-        const page = await fetch(baseUrl);
+        const page = await fetch(baseUrl + "/legacy");
         expect(page.status).toBe(200);
         expect(await page.text()).toContain("/createList.js");
         expect((await fetch(baseUrl + "/createList.js")).status).toBe(200);

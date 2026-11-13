@@ -43,8 +43,8 @@ Dev output uses React's development build; production client output is minified 
 
 The standard 167 Jest tests / 69 Chromium tests and coverage gates pass. Built-entry startup runs from an unrelated directory with fixture credentials and an isolated database, then verifies the page, legacy bundle, metadata endpoint, and 404. Real runtime interop and a 1K actual-store benchmark smoke pass at the new output path. The GitHub Actions workflow repeats these checks on Ubuntu, including build isolation.
 
-## Mounted preview and next conversion work
+## Browser routes
 
-Express now serves `dist/client/index.html` at `/react` and `/react/`, with only the assets directory mounted under `/react/assets`. Unknown nested paths and missing assets retain 404s; the legacy root and shared API are preserved. See [route contracts and browser verification](react-client.md).
+Express serves `dist/client/index.html` at `/`, `/react` and `/react/`, with only the assets directory mounted under `/react/assets`. The exact home route keeps shared API paths reachable. `/legacy` and `/legacy/` serve the original HTML with its existing root asset URLs. Unknown nested paths and missing assets retain 404s. See [route contracts and browser verification](react-client.md).
 
-React now uses the shared catalog/IndexedDB hook and private YouTube player lifecycle, with explicit states, search and 100-row pages. Automated lifecycle/parity checks pass; real-media/manual acceptance and remote CI/host validation are next. No legacy cutover or deployment was performed.
+React uses the shared catalog/IndexedDB hook and private YouTube player lifecycle, with explicit states, search and 100-row pages. Local home/legacy route and playback checks cover the cutover; publishing it and verifying the live host remain separate release steps.

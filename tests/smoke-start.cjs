@@ -46,10 +46,23 @@ async function main() {
         const origin = `http://127.0.0.1:${port}`;
         const html = await fetch(origin, {signal: AbortSignal.timeout(5000)});
         assert.equal(html.status, 200);
-        assert.match(await html.text(), /Dip's Organized Playlists/);
+        const homeHtml = await html.text();
+        assert.match(homeHtml, /Dip's Organized Playlists/);
+        assert.match(homeHtml, /src="\/react\/assets\/main.js"/);
+        assert.doesNotMatch(homeHtml, /src="\/createList.js"/);
+        assert.equal(html.headers.get("cache-control"), "no-store");
+        for (const path of ["/legacy", "/legacy/", "/legacy?channelId=UC_fixture"]) {
+            const legacy = await fetch(origin + path, {signal: AbortSignal.timeout(5000)});
+            assert.equal(legacy.status, 200);
+            assert.equal(legacy.redirected, false);
+            assert.equal(legacy.headers.get("cache-control"), "no-store");
+            const legacyHtml = await legacy.text();
+            assert.match(legacyHtml, /src="\/createList.js"/);
+            assert.doesNotMatch(legacyHtml, /src="\/react\/assets\/main.js"/);
+        }
         const bundle = await fetch(`${origin}/createList.js`, {signal: AbortSignal.timeout(5000)});
         assert.equal(bundle.status, 200);
-        for (const path of ["/react", "/react/", "/react?channelId=UC_fixture"]) {
+        for (const path of ["/?channelId=UC_fixture", "/react", "/react/", "/react?channelId=UC_fixture"]) {
             const preview = await fetch(origin + path, {signal: AbortSignal.timeout(5000)});
             assert.equal(preview.status, 200);
             assert.equal(preview.redirected, false);
@@ -61,7 +74,7 @@ async function main() {
         assert.match(client.headers.get("content-type"), /javascript/);
         assert.ok((await client.text()).length > 0);
         for (const path of ["/react/assets/missing.js", "/react/unknown", "/react/index.html", "/react/server/routes/app.js",
-            "/react/data/playlist-cache.sqlite", "/react/assets/.env"]) {
+            "/react/data/playlist-cache.sqlite", "/react/assets/.env", "/legacy/unknown", "/legacy/cacheState", "/legacy/.env", "/dist/server/routes/app.js", "/data/playlist-cache.sqlite"]) {
             const response = await fetch(origin + path, {signal: AbortSignal.timeout(5000)});
             assert.equal(response.status, 404);
             assert.match(response.headers.get("content-type"), /text\/plain/);

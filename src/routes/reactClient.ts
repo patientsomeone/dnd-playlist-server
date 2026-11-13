@@ -4,7 +4,7 @@ import {join, resolve} from "node:path";
 export function createReactClientRouter(directory: string): Router {
     const router = Router();
     const client = resolve(directory);
-    const unavailable = "The playlist preview is temporarily unavailable.";
+    const unavailable = "The playlist app is temporarily unavailable.";
 
     router.use("/assets", serveStatic(join(client, "assets"), {
         index: false,

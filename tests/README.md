@@ -139,7 +139,7 @@ TypeScript stays on supported 6.0.x pending typed-lint support for 7.x.
 
 Browser interception follows [Playwright's API-mocking approach](https://playwright.dev/docs/mock).
 
-See [separate build outputs, source boundaries, and watcher verification](../docs/builds.md). The React client is now mounted at `/react` and `/react/`; route/reload tests pass. Shared catalog/player integration is implemented; real-media/manual acceptance and remote CI/host validation are next. See [mounted preview](../docs/react-client.md).
+See [separate build outputs, source boundaries, and watcher verification](../docs/builds.md). The React client is now served at `/`, with `/react` aliases and the original player at `/legacy`; route/reload tests cover both players. Shared catalog/player integration is implemented; real-media/manual acceptance and remote CI/host validation are next. See [mounted preview](../docs/react-client.md).
 
 React routing tests cover HTML/HEAD, scoped assets, private/missing files, unknown nested paths, unchanged root API paths and missing-build 503s. The built-app Chromium smoke complements the in-memory browser fixtures and is included in CI.
 

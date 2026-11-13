@@ -20,7 +20,7 @@ test("the list view rejects duplicate IDs even when raw data bypasses the catalo
     await expect(page.locator("#listParent a[title]")).toHaveCount(0);
 });
 
-for (const path of ["/react", "/react/"]) {
+for (const path of ["/", "/react", "/react/"]) {
     test(`mounts the React client and reloads directly at ${path}`, async ({page}) => {
         const errors: string[] = [];
         const scripts: string[] = [];
@@ -45,8 +45,9 @@ for (const path of ["/react", "/react/"]) {
         expect(errors).toEqual([]);
         await expect(page.getByRole("link", {name: "current player", exact: true})).toHaveCount(0);
         await expect(page.locator("#catalogStatus")).toBeHidden();
-        await page.goto("/");
-        await expect(page).toHaveURL("http://127.0.0.1:4179/");
+        await page.goto("/legacy");
+        await expect(page).toHaveURL("http://127.0.0.1:4179/legacy");
+        await expect(page.locator("#listOrganizer")).toBeVisible();
         await expect(page.getByRole("heading", {name: "Dip's Organized Playlists", exact: true})).toBeVisible();
         await expect(page.locator("#listParent dt a")).toHaveCount(3);
     });
@@ -58,7 +59,7 @@ test("keeps an explicit channel for API reads and reloads", async ({page}) => {
         channels.push(new URL(route.request().url()).searchParams.get("channelId"));
         await route.fulfill({json: catalog()});
     });
-    await page.goto("/react/?channelId=UC_other");
+    await page.goto("/?channelId=UC_other");
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
     await page.reload();
     await expect(page.locator("#listParent dt a")).toHaveCount(3);
